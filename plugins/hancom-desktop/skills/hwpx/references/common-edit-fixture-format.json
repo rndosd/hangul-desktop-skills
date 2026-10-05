@@ -1,0 +1,71 @@
+{
+  "format": {
+    "body_pt": 10.5,
+    "title_pt": 20,
+    "heading_pts": [
+      14,
+      11.5,
+      10.5
+    ],
+    "line_spacing": 140,
+    "body_spacing_pt": {
+      "before": 0,
+      "after": 2
+    },
+    "table_header_fill": "#E8EEF4",
+    "table_line_spacing": 130,
+    "table_header_align": "center",
+    "table_keep_with_next": false,
+    "table_paragraph_after_pt": 2,
+    "table_layout": {
+      "cell_margins_mm": {
+        "left": 1.5,
+        "right": 1.5,
+        "top": 1,
+        "bottom": 1
+      },
+      "vertical_align": "CENTER",
+      "line_wrap": "BREAK",
+      "page_break": "CELL",
+      "repeat_header": true
+    },
+    "heading_numbering": [
+      {
+        "format": "DIGIT",
+        "text": "^1.",
+        "start": 1
+      },
+      {
+        "format": "HANGUL_SYLLABLE",
+        "text": "^2.",
+        "start": 1
+      },
+      {
+        "format": "DIGIT",
+        "text": "^3)",
+        "start": 1
+      }
+    ],
+    "indent_policy": "explicit",
+    "heading_layout": [
+      {
+        "indent_left_mm": 0,
+        "first_line_indent_mm": 0,
+        "spacing_before_pt": 8,
+        "spacing_after_pt": 1
+      },
+      {
+        "indent_left_mm": 3,
+        "first_line_indent_mm": 0,
+        "spacing_before_pt": 5,
+        "spacing_after_pt": 1
+      },
+      {
+        "indent_left_mm": 6,
+        "first_line_indent_mm": 0,
+        "spacing_before_pt": 3,
+        "spacing_after_pt": 1
+      }
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+name: Portable package checks
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r plugins/hancom-desktop/requirements-core.txt
+      - run: python -B tools/verify_release.py
+      - run: python -B tools/run_tests.py
+      - name: PowerShell syntax
+        shell: powershell
+        run: |
+          $failures=@()
+          Get-ChildItem -LiteralPath . -Recurse -Filter *.ps1 | ForEach-Object {
+            $tokens=$null;$errors=$null
+            $null=[System.Management.Automation.Language.Parser]::ParseFile($_.FullName,[ref]$tokens,[ref]$errors)
+            if($errors){$failures+=$errors}
+          }
+          if($failures){$failures | Format-List;exit 1}
+      - name: Isolated install without COM or module registration
+        shell: powershell
+        run: python -B tests/install_smoke.py

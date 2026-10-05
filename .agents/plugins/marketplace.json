@@ -1,0 +1,10 @@
+{
+  "name": "hangul-desktop-skills",
+  "interface": {"displayName": "한글 데스크톱 스킬"},
+  "plugins": [{
+    "name": "hancom-desktop",
+    "source": {"source": "local", "path": "./plugins/hancom-desktop"},
+    "policy": {"installation": "AVAILABLE", "authentication": "ON_INSTALL"},
+    "category": "Productivity"
+  }]
+}

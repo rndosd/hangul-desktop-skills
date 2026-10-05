@@ -1,0 +1,9 @@
+interface:
+  display_name: "HWPX Windows Finalize"
+  short_description: "Validate final HWPX files with Hancom COM on Windows."
+  default_prompt: "Use $hwpx-windows-finalize to validate this final HWPX in Hancom Hangul."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "hwpx"
+      description: "Primary HWPX creation and editing engine."

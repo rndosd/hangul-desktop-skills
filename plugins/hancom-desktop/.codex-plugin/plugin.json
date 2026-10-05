@@ -1,0 +1,6 @@
+{
+  "name": "hancom-desktop",
+  "version": "0.1.0-beta.1",
+  "description": "Windows 한글 HWPX 작성·편집과 실제 출력 검증",
+  "skills": "./skills/"
+}

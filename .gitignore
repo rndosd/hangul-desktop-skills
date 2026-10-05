@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.test-*/
+.verification/
+dist/
+environment.json
+installed-environment.json
+reviewed-security-policy.txt
+reviewed-policy.txt
+registration-*.json
+*.dll
+*.exe
+*.pdf
+*.log
+.env
+*.pem
