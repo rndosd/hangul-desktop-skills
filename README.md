@@ -8,7 +8,7 @@ Codex에서 짧은 요청으로 HWPX 문서를 작성하고, 기존 문서의 �
 
 Windows x64와 정상 설치·활성화된 한컴 한글이 필요합니다. 현재 공식 보안 모듈 설치 경로는 **x86 한글**용입니다. 한글 프로그램과 라이선스는 포함하지 않습니다. Python 3.12 및 검증한 패키지 버전을 사용합니다.
 
-저장소를 내려받아 압축을 풀고 해당 폴더의 **일반 Windows PowerShell**에서 먼저 진단합니다.
+[베타 릴리스](https://github.com/rndosd/hangul-desktop-skills/releases)에서 ZIP을 내려받아 압축을 풀고 해당 폴더의 **일반 Windows PowerShell**에서 먼저 진단합니다. 새 문서 작성에는 Windows의 맑은 고딕이 필요하며 다른 버전은 현재 PC의 글꼴 메타데이터를 읽어 사용하고 실제 한글 출력은 별도로 확인합니다.
 
 ```powershell
 .\Install.ps1 -CheckOnly
@@ -51,7 +51,7 @@ Windows x64와 정상 설치·활성화된 한컴 한글이 필요합니다. 현
 저장소 루트에는 `.agents/plugins/marketplace.json`, 플러그인에는 `plugin.json` 및 `skills/`가 있습니다. Codex CLI가 설치되어 있다면 내려받은 폴더에서 마켓플레이스 소스를 추가합니다.
 
 ```powershell
-codex plugin marketplace add .
+codex plugin marketplace add rndosd/hangul-desktop-skills
 ```
 
 그다음 데스크톱 앱의 플러그인 설치 화면에서 `hancom-desktop`을 설치하고 새 대화에서 사용합니다. 플러그인 설치와 PC 의존성 준비는 별개입니다. 웹에서 플러그인을 불러오는 것만으로 Windows 한글 COM을 실행할 수 없습니다. [공식 플러그인 패키징 안내](https://developers.openai.com/plugins/build/plugins)를 기준으로 구성했습니다. 공개 디렉터리 등록/심사를 마친 제품은 아닙니다.

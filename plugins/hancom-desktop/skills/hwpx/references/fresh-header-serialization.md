@@ -1,6 +1,6 @@
 # 새 문서의 첫 저장 보존 후보
 
-맑은 고딕·기본 함초롬 두 글꼴을 가진 단일 새 문서만 검증 대상으로 한다. python-hwpx6.3.0과 실제 확인한 Malgun TTF 해시/PANOSE가 필요하다. 다른 글꼴 파일·한글 빌드·PC는 별도 검증 대상이다. 파일·설정·DLL 설치는 없다.
+맑은 고딕·기본 함초롬 두 글꼴을 가진 단일 새 문서만 검증 대상으로 한다. python-hwpx6.3.0과 현재 PC의 Malgun SFNT 글꼴 이름/PANOSE를 확인한다. SFNT 테이블/문자열 경계, 맑은 고딕 family 이름, 지원 PANOSE를 검사하고 파일 해시를 기록한다. 이전 PC의 전체 글꼴 해시가 다르다는 이유만으로 생성을 막지 않으며, 다른 해시는 UNVERIFIED_LOCAL_FONT_VERSION으로 표시한다. 이 메타데이터 검사는 실제 글꼴 위치·저장·한글 빌드의 검증을 대체하지 않는다. 지원하지 않는 family/PANOSE/손상된 글꼴은 거부하고 대체 설치하지 않는다. 파일·설정·DLL 설치는 없다.
 
 create_new_document.compose는 HwpxDocument.new 직후 생성 생명주기를 등록한다. 공개 header.element/mark_dirty 어댑터가 맑은 고딕 typeInfo를 설치 글꼴의 OS/2와 공식 예제로 확인하고, 언어별 글꼴 순서/ID/전체 charPr fontRef를 일관되게 준비한다. 문단 현대 분기의 의도 값은 유지하며 새 문단의 호환 분기 여백만 두 배, PERCENT 줄간격의 unit만 HWPUNIT으로 기록한다. 이는 13.0.0.3903의 관찰값이며 과거 엔진 호환성 인증은 아니다.
 

@@ -8,6 +8,7 @@
 | Python 구문, 스킬 frontmatter/진입점 링크, marketplace 경로, 라이선스 보존 | PASS |
 | Windows PowerShell 파일 구문 24개 | PASS |
 | 현재 PC 설정 쌍 경로 선택/누락·혼합 거부 6개 | PASS |
+| 현재 PC SFNT 글꼴 메타데이터·다른 해시·family/PANOSE/경계 거부 9개 | PASS |
 | 공통 작성·표·문구 도구, 사실/입력/덮어쓰기/원자성 가드 16개 | PASS |
 | 단순·혼합·중첩 셀 치환 및 비대상 변형 미발행 3개 | PASS |
 | 격리 CODEX_HOME 설치·재설치 백업·캐시 doctor·손상 manifest 차단 등 8개 | PASS |
@@ -21,3 +22,5 @@
 최초 설치 검사는 샌드박스와 승인된 일반 사용자 맥락 양쪽에서 Python 자식 Windows PowerShell의 Get-FileHash 누락으로 실패했습니다. 직접 Windows PowerShell 호출에는 명령이 존재했습니다. Python 자식이 다른 버전 PowerShell의 모듈 경로를 먼저 상속하는 차이를 관찰했고, 설치 해시를 기존 .NET SHA256 helper로 계산하게 바꾼 후 격리 설치가 통과했습니다. 전역 PSModulePath나 실행 정책 변경은 하지 않았습니다. uv ZIP 해제도 .NET으로 처리하며 실행할 uv.exe를 고정 원본 ZIP 항목의 해시와 대조합니다. 다운로드 경로 자체의 이번 신규 실행 검증은 미완료입니다.
 
 공개 자동 검사로 재현할 수 있는 범위와 native 검증이 필요한 범위는 [지원 제한](known-limits.md)에 나눠 기록했습니다.
+
+최초 [GitHub Actions 실행](https://github.com/rndosd/hangul-desktop-skills/actions/runs/37327071985)은 Windows Server 2025의 다른 Malgun 파일 해시 때문에 새 문서 생성 1개가 실패했습니다. 패키지 검증·6개 경로 검사·나머지 공통 검사 15개는 통과했고 이후 설치 단계는 실행되지 않았습니다. 이 실패 기록을 유지합니다. 현재 PC 글꼴의 family/PANOSE와 SFNT 경계를 검사해 메타데이터를 읽는 방식으로 수정했습니다. 이전 해시와 다른 글꼴은 native 검증 미완료로 표시하며 한글 실제 출력 가드를 제거하지 않습니다. 수정 후 로컬에서는 34개 회귀가 통과했습니다. 별도 Windows 환경의 후속 CI 결과는 GitHub Actions에서 확인할 수 있습니다.

@@ -6,6 +6,7 @@ ROOT=Path(__file__).resolve().parents[1]
 SKILL=ROOT/'plugins/hancom-desktop/skills/hwpx'
 commands=[
     [sys.executable,'-X','utf8','-B',str(ROOT/'tests/test_configuration_pair.py')],
+    [sys.executable,'-X','utf8','-B',str(ROOT/'tests/test_portable_font.py')],
     [sys.executable,'-X','utf8','-B',str(SKILL/'tests/test_common_task_entry.py')],
     [sys.executable,'-X','utf8','-B',str(SKILL/'scripts/candidate_runtime.py'),str(SKILL/'scripts/test_safe_replace.py')],
 ]

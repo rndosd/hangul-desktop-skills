@@ -2,7 +2,7 @@
 
 This is a nominal font metric, never evidence of a Hancom rendered position.
 """
-import hashlib,struct,math
+import hashlib,struct,math,os
 from pathlib import Path
 from functools import lru_cache
 
@@ -17,7 +17,7 @@ FONT_FILES={
 def space_metric(font,bold=False):
     if font not in FONT_FILES:
         raise ValueError('자동 공백 들여쓰기를 측정할 로컬 글꼴 경로가 없습니다. 사용자 지정 heading_layout과 항목 indent_left_mm를 명시하거나 지원 글꼴을 선택하세요.')
-    path=Path('C:/Windows/Fonts')/FONT_FILES[font][1 if bold else 0]
+    path=Path(os.environ.get('WINDIR','C:/Windows'))/'Fonts'/FONT_FILES[font][1 if bold else 0]
     data=path.read_bytes()
     if data[:4] not in (b'\x00\x01\x00\x00',b'OTTO'):raise ValueError('Unsupported SFNT font')
     count=struct.unpack_from('>H',data,4)[0];tables={}

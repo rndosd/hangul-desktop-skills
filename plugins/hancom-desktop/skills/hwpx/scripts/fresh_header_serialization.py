@@ -26,14 +26,32 @@ def register_new(doc):
 def font_metadata(path=None):
     path=Path(path) if path is not None else Path(os.environ.get('WINDIR','C:/Windows'))/'Fonts/malgun.ttf'
     data=path.read_bytes();digest=hashlib.sha256(data).hexdigest()
-    need(digest==QUALIFIED_FONT_SHA,'unqualified Malgun font: preserve source and qualify this font version first')
+    need(len(data)>=12 and data[:4] in (b'\x00\x01\x00\x00',b'OTTO'),'supported SFNT font required')
+    count=struct.unpack_from('>H',data,4)[0]
+    need(count>0 and 12+16*count<=len(data),'invalid font directory bounds')
     tables={}
-    for i in range(struct.unpack_from('>H',data,4)[0]):
-        tag,_,off,length=struct.unpack_from('>4sIII',data,12+16*i);tables[tag.decode()]=(off,length)
-    need('OS/2' in tables and tables['OS/2'][1]>=42,'OS/2 PANOSE data required')
-    panose=list(data[tables['OS/2'][0]+32:tables['OS/2'][0]+42])
+    for i in range(count):
+        tag,_,off,length=struct.unpack_from('>4sIII',data,12+16*i)
+        need(off>=12+16*count and off+length<=len(data) and tag not in tables,'invalid font table bounds or duplicate tag')
+        tables[tag]=(off,length)
+    need(b'OS/2' in tables and tables[b'OS/2'][1]>=42,'OS/2 PANOSE data required')
+    need(b'name' in tables and tables[b'name'][1]>=6,'font family name table required')
+    nameoff,namelen=tables[b'name'];fmt,records,strings=struct.unpack_from('>HHH',data,nameoff)
+    need(fmt in (0,1) and 6+12*records<=namelen and 6+12*records<=strings<=namelen,'invalid font name table bounds')
+    families=set()
+    for i in range(records):
+        platform,encoding,lang,identity,length,offset=struct.unpack_from('>HHHHHH',data,nameoff+6+12*i)
+        need(strings+offset+length<=namelen,'invalid font name string bounds')
+        if identity not in (1,16) or platform not in (0,3):continue
+        try:family=data[nameoff+strings+offset:nameoff+strings+offset+length].decode('utf-16-be')
+        except UnicodeDecodeError:raise ValueError('invalid font family encoding')
+        families.add(''.join(family.lower().split()))
+    need(bool(families.intersection({'malgungothic','맑은고딕'})),'installed font is not Malgun Gothic')
+    panose=list(data[tables[b'OS/2'][0]+32:tables[b'OS/2'][0]+42])
     need(panose==[2,11,5,3,2,0,0,2,0,4],'qualified Malgun PANOSE differs')
-    return dict(path=str(path.resolve()),sha256=digest,bytes=len(data),panose=panose,typeInfo=dict(familyType='FCAT_GOTHIC',**{k:str(v) for k,v in zip(FIELDS,panose[2:])}))
+    return dict(path=str(path.resolve()),sha256=digest,bytes=len(data),panose=panose,
+                source='CURRENT_PC_SFNT',nativeFontQualification='BASELINE_FONT_MATCH' if digest==QUALIFIED_FONT_SHA else 'UNVERIFIED_LOCAL_FONT_VERSION',
+                typeInfo=dict(familyType='FCAT_GOTHIC',**{k:str(v) for k,v in zip(FIELDS,panose[2:])}))
 
 def prepare(doc):
     need(doc in _fresh,'existing documents cannot enter fresh serialization')

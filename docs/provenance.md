@@ -10,6 +10,7 @@
 - 관리 경로의 reparse point 조상 확인, 의존성 버전 및 PDF 준비 상태 정확화.
 - Codex Python 자식 Windows PowerShell의 다른 버전 모듈 경로 상속에서 Get-FileHash가 누락되는 경우를 재현. 설치 해시는 기존 .NET SHA256 helper로 계산하고 uv ZIP도 .NET으로 해제하여 전역 모듈/실행 정책 변경을 피함.
 - 별도 marketplace/manifest, 공개 검사와 설치/백업 검증 추가.
+- 최초 GitHub Windows Server 2025 검사에서 source-PC Malgun 전체 해시 고정으로 새 문서 생성 차단을 재현. 현재 PC SFNT의 family·PANOSE·테이블 경계 검증으로 메타데이터를 읽고, 다른 해시는 native 미검증으로 기록. 글꼴 설치나 가드 전체 해제 없이 이식성 수정.
 
 vendor는 python-hwpx **6.3.0**의 수정 사본입니다. `skills/hwpx/vendor/PATCH.md`에 XML namespace/QName 정규화 변경을 표시했습니다. 이 버전과 python-hwpx-automation **7.0.3**, lxml **6.1.3**, PyMuPDF **1.28.2**를 기준으로 고정합니다. upstream 최신 버전으로 자동 업그레이드하지 않습니다. `source-inventory.json`은 수정 전 코드 해시이며 배포 무결성은 패키지의 `PAYLOAD-SHA256.json`으로 확인합니다. 두 문서는 서로 다른 용도입니다.
 
