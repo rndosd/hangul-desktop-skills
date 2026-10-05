@@ -1,5 +1,7 @@
 # 보안 모듈 선택과 최소 변경
 
+처음 설치한다면 [사용자 설명서](getting-started.md)를 먼저 읽으세요. 이 문서는 DLL 출처·허용 범위·등록값·복구 방법을 자세히 설명합니다. COM은 설치된 한글을 호출하는 연결이고, 보안 모듈은 그 연결에서 사용하는 파일 접근 검사 구성 요소입니다. DLL 등록값이 존재하는 것, COM 객체가 만들어지는 것, 실행 중 `RegisterModule`이 true를 반환하는 것은 서로 다른 상태입니다.
+
 `CodexHancomFilePathChecker`는 이전 PC에서 사용하던 별칭이며 필수 DLL 이름이 아닙니다. 모든 native worker는 현재 PC 설정의 이름으로 `RegisterModule('FilePathCheckDLL', moduleName)`을 호출합니다. COM 객체 생성 성공과 이 호출의 반환값은 별도로 기록합니다. 반환값이 false이면 문서를 열지 않습니다.
 
 ## 기본 설치
