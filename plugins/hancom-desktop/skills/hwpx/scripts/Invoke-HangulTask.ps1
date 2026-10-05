@@ -1,4 +1,4 @@
-param([Parameter(ValueFromRemainingArguments=$true)][string[]]$TaskArguments)
+﻿param([Parameter(ValueFromRemainingArguments=$true)][string[]]$TaskArguments)
 $ErrorActionPreference = 'Stop'
 $taskSkillRoot = Split-Path -Parent $PSScriptRoot
 $taskConfigPath = Join-Path $taskSkillRoot 'environment.json'

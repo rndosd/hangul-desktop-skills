@@ -24,3 +24,5 @@
 공개 자동 검사로 재현할 수 있는 범위와 native 검증이 필요한 범위는 [지원 제한](known-limits.md)에 나눠 기록했습니다.
 
 최초 [GitHub Actions 실행](https://github.com/rndosd/hangul-desktop-skills/actions/runs/37327071985)은 Windows Server 2025의 다른 Malgun 파일 해시 때문에 새 문서 생성 1개가 실패했습니다. 패키지 검증·6개 경로 검사·나머지 공통 검사 15개는 통과했고 이후 설치 단계는 실행되지 않았습니다. 이 실패 기록을 유지합니다. 현재 PC 글꼴의 family/PANOSE와 SFNT 경계를 검사해 메타데이터를 읽는 방식으로 수정했습니다. 이전 해시와 다른 글꼴은 native 검증 미완료로 표시하며 한글 실제 출력 가드를 제거하지 않습니다. 수정 후 로컬에서는 34개 회귀가 통과했습니다. 별도 Windows 환경의 후속 CI 결과는 GitHub Actions에서 확인할 수 있습니다.
+
+두 번째 [GitHub Actions 실행](https://github.com/rndosd/hangul-desktop-skills/actions/runs/37327936095)에서는 회귀 34개가 모두 통과했으나 Windows PowerShell 5.1 구문 단계에서 UTF-8 BOM 없는 한국어 launcher를 ANSI로 읽어 실패했습니다. 해당 파일에 BOM을 추가하고 공개 검사에서 비ASCII PowerShell의 BOM을 요구합니다. 구문 검사를 생략하지 않으며 후속 CI로 격리 설치도 확인합니다.

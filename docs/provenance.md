@@ -19,3 +19,5 @@ vendor는 python-hwpx **6.3.0**의 수정 사본입니다. `skills/hwpx/vendor/P
 Python bootstrap은 [Astral uv 0.12.22](https://github.com/astral-sh/uv/releases/tag/0.12.22)의 x64 Windows 파일을 고정 해시로 받습니다. uv/Python을 저장소에 재배포하지 않습니다. uv는 MIT/Apache-2.0, Python은 PSF License로 제공됩니다. pip 설치 패키지의 라이선스는 각 배포판의 메타데이터를 따릅니다. [PyMuPDF는 AGPL 또는 상용 라이선스](https://pymupdf.readthedocs.io/en/latest/about.html#license-and-copyright)이므로 그 라이선스 조건도 확인해야 합니다. 코드 공개 라이선스가 외부 프로그램의 라이선스를 대체하지 않습니다.
 
 `assets/complex-structure/source.hwpx`와 `assets/mixed-runs/source.hwpx`는 이 개발 과정에서 만든 가상 회귀 문서입니다. 실제 업무 정보가 아니며 문서 내용도 검사 입력입니다. 다른 공개 보고서 원본·사진·로고는 배포하지 않습니다.
+
+두 번째 GitHub 검사에서 영어 Windows PowerShell 5.1이 한국어 launcher의 BOM 없는 UTF-8을 ANSI로 읽는 차이를 재현했습니다. Invoke-HangulTask.ps1의 본문은 유지하고 UTF-8 BOM만 추가했으며, 공개 패키지 검사에 비ASCII PowerShell 인코딩 검사를 추가했습니다.

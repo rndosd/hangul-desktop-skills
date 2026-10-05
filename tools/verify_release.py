@@ -27,6 +27,10 @@ def verify():
         if p.suffix == '.py':
             try: ast.parse(p.read_text(encoding='utf-8-sig'), filename=rel)
             except SyntaxError as e: errors.append('Python syntax: '+str(e))
+        if p.suffix.lower() == '.ps1':
+            raw=p.read_bytes()
+            if any(byte >= 128 for byte in raw) and not raw.startswith(b'\xef\xbb\xbf'):
+                errors.append('Non-ASCII PowerShell requires UTF-8 BOM for Windows PowerShell 5.1: '+rel)
         if p.suffix in {'.md','.py','.ps1','.json','.yaml','.txt'} or p.name in {'UPSTREAM-METADATA','PATCH.md'}:
             text=p.read_text(encoding='utf-8-sig')
             if PRIVATE_PATH.search(text) or TOKEN.search(text): errors.append('Private path/credential pattern: '+rel)
