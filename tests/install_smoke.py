@@ -20,7 +20,8 @@ def json_prefix(text):
 
 if __name__=='__main__':
     if os.name!='nt':raise SystemExit('Windows required; not run.')
-    workspace=ROOT/'.verification'/('install-'+uuid.uuid4().hex);workspace.mkdir(parents=True)
+    # Keep nested bundle paths below Windows PowerShell 5.1's path limit.
+    workspace=ROOT/'.verification'/('i-'+uuid.uuid4().hex[:12]);workspace.mkdir(parents=True)
     home=workspace/'한글 test home'
     installer=ROOT/'Install.ps1'
     args=['-CodexRoot',home,'-PythonPath',sys.executable]

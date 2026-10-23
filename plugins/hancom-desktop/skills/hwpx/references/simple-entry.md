@@ -34,24 +34,9 @@ task.json은 `schema: hangul.task.v1`, `operation: table`, `headers`(정확한 �
 
 key는 해당 제목 열의 완전한 기존 셀 값이다. 순번을 추정하지 않는다. cells는 모든 열 순서의 문자열이다. 사용자 메모가 `항목명: 설명`을 제공하면 둘을 모두 넣는다. 삽입 기준의 모든 셀이 한 문단/한 run일 때만 3차원 지도 변환을 자동 처리한다. 복잡한 run을 임의로 평문화하지 않는다. 연산마다 현재 소스 해시와 표/행을 재결합한다. 내부 임시 단계 전체가 보존 검사를 통과한 뒤 최종 파일 하나만 발행한다. dry-run도 임시 문서로 실제 편집/검사를 하되 최종 출력은 만들지 않는다. 상세 지원은 [의미 기반 표 결합](semantic-table-binding.md)과 [혼합 표 구조](mixed-table-structure.md)를 따른다.
 
-## 새 문서
+## 새 업무 문서도 기존 서식에서 시작
 
-```powershell
-& $taskLauncher schema new
-& $taskLauncher new result.hwpx --request task.json --dry-run
-& $taskLauncher new result.hwpx --request task.json
-```
-
-schema new가 실제 지원 입력 예제를 반환한다. 예제를 복사할 때 가상 자리 표시자를 실제 사용자 원자료로 바꾼다. 필수 키는 schema/operation/purpose/audience/kind/title/facts/blocks다. facts는 `id: 정확한 원문 문장` 객체다. 문단의 `facts: [id,...]`는 원문을 그대로 묶어 claims와 evidence를 생성한다. 직접 `text`는 문단 설명·명시한 제안 등에 사용한다. 필수 사실의 재서술이나 새 수치로 바꾸지 않는다. 사실 전부가 결과에 들어가는지 기존 엔진이 검사한다. 중요 미정은 allow_draft와 unknowns의 기존 계약을 따른다.
-
-- heading: type/text/level(1~3). heading에 list를 넣지 않는다.
-- paragraph: type과 text 또는 facts 중 하나. 선택 emphasis/list/reason은 기존 엔진 계약 그대로다.
-- table: type/headers/rows/reason. rows는 전체 셀 문자열 배열의 배열. 선택 widthWeights/aligns/caption. 입력은 실제 columns/row 객체로 컴파일한다.
-- bullets: type/items, 선택 ordered/reason. page_break: type/reason.
-- numbered_headings: 번호를 요청했을 때 true. 한글의 실제 3단계 번호 정의를 사용한다. 직접 text에 번호를 붙이지 않는다.
-- format: 기존 엔진의 정확한 키만 사용한다. `body_pt`, `line_spacing`, `margins_mm`가 맞는 이름이다. `font_size_pt`, `line_spacing_percent`, `margin_mm`는 거부된다. 비우면 기본 서식이다.
-
-목차·항목 수·표 배치는 작성 에이전트가 내용에 맞게 선택한다. 도구는 고정 목차를 만들지 않는다. 더 복잡한 서식·근거 연결·집계는 [새 문서 설계](new-document-design.md), [번호/집계](new-document-v2.md), [서식](new-document-formatting.md)의 기존 자유 설계 경로를 사용한다. 기존 생성기의 검사를 낮추거나 unsupported 키를 조용히 버리지 않는다.
+[서식 선택](template-selection.md)으로 사용자 제공 양식 또는 보관 원본을 복사한다. 원본 기반 채우기·변형으로 내용에 맞는 문서를 만든다. 빈 문서 작성 `new`와 `schema new`는 공통 진입 도구에서 제거했다. `schema table`, `replace`, `table`의 기존 편집·보존 검사는 유지한다.
 
 ## 결과와 수정
 

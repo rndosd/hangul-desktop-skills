@@ -31,19 +31,18 @@
 | 충실도 민감·대형 문서의 문단 텍스트 패치 | `byte_preserving_patch` | [workflows-editing](workflows-editing.md) |
 | 생성/편집 후 레이아웃 확인 | `render_preview` self-check 루프 | [workflows-editing](workflows-editing.md) |
 | 한컴 없이 수식 포함 문서 스크롤 통독 검수 | `render_preview(viewer=true, screenshot="off")` | [workflows-preview](workflows-preview.md) |
-| 자연어 요청으로 새 문서 생성 | `validate_document_plan` → `create_document_from_plan` | [workflows-creation](workflows-creation.md) |
-| Markdown/비-HWPX 원본에서 HWPX 초안 생성 | `document_to_markdown` → `markdown_to_document_plan` → `create_document_from_plan` | [workflows-creation](workflows-creation.md) |
+| 새 업무 문서 작성 | 기존 원본 선택 → 사본 채우기·변형 | [원본 기반 작성](source-template-reuse.md) |
 | 공문·보고서·가정통신문 (유형별 한컴 양식 프로파일 + 공문 구조 hard-gate·결문 메타·맞춤법 정직보고) | `create_document_from_plan` (`metadata.document_type` + `gyeolmun`) | [workflows-authoring](workflows-authoring.md) |
 | 살아있는 목차(한컴이 재계산)·쪽 번호 상호참조 | `add_toc` · `add_cross_reference` · `verify_toc` | [workflows-toc](workflows-toc.md) |
 | 변경추적 redline 저작 (삽입/삭제/치환 + 코멘트, 사람이 한컴서 수락/거부) | `add_tracked_edit` (+ `add_memo_by_anchor`) | [workflows-redline](workflows-redline.md) |
 | 개인정보(PII) 탐지·마스킹 (읽기·추출 기본 마스킹, 쓰기 입력 사전 정제) | `scan_personal_info` · 읽기/추출 `mask` param | [workflows-pii](workflows-pii.md) |
-| 정부보고서·공문형 보고서 (□/○/※ 불릿) | `parse_government_report_text` → document plan 구성·검증 → `create_document_from_plan` | [workflows-creation](workflows-creation.md) |
-| 운영 계획서 제출 후보 | document-plan + `quality_profile="operating_plan"` | [workflows-creation](workflows-creation.md) |
+| 정부보고서·공문형 보고서 (□/○/※ 불릿) | `parse_government_report_text` → document plan 구성·검증 → `create_document_from_plan` | [workflows-creation](source-template-reuse.md) |
+| 운영 계획서 제출 후보 | document-plan + `quality_profile="operating_plan"` | [workflows-creation](source-template-reuse.md) |
 | 운영 계획서 하우스 스타일·섹션칩 변주 | skill이 genre/profile/variable slot 판단 → 기존 document-plan MCP 경로 | [workflows-house-style](workflows-house-style.md) |
-| 제안서·기획안 | proposal document plan → `create_document_from_plan` → `inspect_document_quality` | [workflows-creation](workflows-creation.md) |
+| 제안서·기획안 | proposal document plan → `create_document_from_plan` → `inspect_document_quality` | [workflows-creation](source-template-reuse.md) |
 | 기안문 서식 저작 (별지 제1호 일반기안문 / 제2호 간이기안문) | `compose_official_draft` · `compose_simple_draft` → `validate_document_plan` → `create_document_from_plan` (결재란 칸은 결재자 수만큼만·결문 라벨 미인쇄·선택항목은 `[ ]`+√) | [workflows-authoring](workflows-authoring.md) |
 | 체크박스 양식개체가 실제로 쓰이는 서식(공문서 아님) | `add_check_box` 계열 core API (공문서는 `[ ]` 텍스트 관례) | [workflows-authoring](workflows-authoring.md) |
-| 공문서 작성규정 lint·결재란 | `inspect_official_document_style` | [workflows-creation](workflows-creation.md), [규정](official-document-rules.md) |
+| 공문서 작성규정 lint·결재란 | `inspect_official_document_style` | [workflows-creation](source-template-reuse.md), [규정](official-document-rules.md) |
 | 직인/관인 날인 (발신명의 끝글자에 도장) · 날인 규정 pass/fail 검사 | `place_seal` · `check_seal_compliance` | [workflows-forms](workflows-forms.md) |
 | 출제 md를 학교 시험지 양식에 재조판 (문항 keep-together, 그림은 placeholder) | `compose_exam` · `verify_question_splits` | [workflows-exam](workflows-exam.md) |
 | LaTeX 수식을 네이티브 `<hp:equation>`으로 삽입 (커버리지 밖 typed 거부) | `add_equation` | [workflows-authoring](workflows-authoring.md) |
@@ -65,7 +64,6 @@
 | Windows에서 구형 `.hwp`를 `.hwpx`로 변환한 뒤 처리 | 설치된 `HwpxConverter.exe`를 명령줄로 실행 → 생성 파일 재열기 검증 | [workflows-hwp-conversion-windows](workflows-hwp-conversion-windows.md) |
 | MCP 없음: 텍스트 추출·표 포함 전역 치환 | `scripts/text_extract.py` · `scripts/zip_replace_all.py` | [api](api.md) |
 
-
 ## 참조 인덱스
 
 - [`references/workflows-autonomous.md`](workflows-autonomous.md) — 서버 강제 5-family workflow, decision/재개/needs_review/사전 렌더 영수증 계약.
@@ -73,7 +71,7 @@
 - [`references/workflows-agent-blueprint.md`](workflows-agent-blueprint.md) — typed `.hwpxbp` dump/inspect/repack, portable/source-bound dependency mapping, atomic replay, strict fidelity와 real-Hancom 검증.
 - [`references/workflows-real-hancom-render.md`](workflows-real-hancom-render.md) — 비동기 실한컴 제출·폴링·artifact provenance·취소·degraded 처리.
 - [`references/workflows-editing.md`](workflows-editing.md) — 트랜잭션 편집 루프, 서식 5종, 그림, byte patch, render_preview.
-- [`references/workflows-creation.md`](workflows-creation.md) — document-plan, builder, 정부보고서, 운영계획서, 제안서, 공문서 레시피.
+- [`references/source-template-reuse.md`](source-template-reuse.md) — document-plan, builder, 정부보고서, 운영계획서, 제안서, 공문서 레시피.
 - [`references/workflows-redline.md`](workflows-redline.md) — 변경추적 저작(insert/delete/replace + 코멘트), 사람이 한컴서 수락/거부, verify 영수증. `add_tracked_edit`.
 - [`references/workflows-pii.md`](workflows-pii.md) — 개인정보(PII) 탐지, 읽기·추출 기본 마스킹, 폼필·메일머지 입력 사전 정제 + 가명/비식별. `scan_personal_info` · 읽기/추출 `mask` param.
 - [`references/workflows-reading.md`](workflows-reading.md) — 런서식(굵게·색·크기·글꼴)+각주/미주 본문 충실 읽기. `hwpx_extract_json`(`format_detail`·`doc.notes[]`)·`hwpx_to_markdown` 각주 부록, `document_to_markdown` 로컬 ingest.

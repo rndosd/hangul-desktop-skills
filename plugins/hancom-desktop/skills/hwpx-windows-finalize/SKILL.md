@@ -17,6 +17,7 @@ description: "Verify edited or created HWPX files in installed Hancom Hangul on 
 4. 복합 작성·편집 완료는 [완료 판정](references/acceptance-policy.md)의 `hancom_completion_gate.py prepare → COM → collect → 실제 검토 → check`로 연결한다. 일반 열기만 필요한 요청에 불필요한 저장을 추가하지 않는다.
 5. [파일 보존 검사](references/native-file-roundtrip-audit.md)를 수행한다. PDF가 같아도 활성 서식/전체 정의/개체/내용 차이를 별도로 기록한다. 저장본의 같은 기능 재편집이 필요한 과제는 실제 저장본을 입력으로 시험한다.
 6. PDF 전체 쪽에서 누락·겹침·잘림·고립 제목·표와 글/그림/캡션 간격을 확인한다. 한글 쪽수와 모아찍기 인쇄면 수를 구분한다. [내어쓰기](../hwpx/references/hanging-indent-verification.md)처럼 필요한 기능 검수만 추가한다.
+7. 내용 변경으로 영향을 받은 주변 요소의 정렬·간격·밀림과 배치의 균형을 확인한다. 원본과 크기가 달라도 내용에 맞는 자연스러운 배치면 허용하며, 의도하지 않은 불균형이 남으면 필요한 조정과 실제 출력 재검수 후 완료한다. 열기 성공이나 잘림 없음만으로 완료하지 않는다. 설명이 많은 표는 평상시 읽는 크기에서 글자 밀도·행간·항목 사이 구분·유효 셀 안 여백도 검토한다. 빽빽한 결과는 가독성 미완료로 남기고 내용 축약이나 지원되는 간격 수정 뒤 확인한다.
 
 ## 실패와 보안
 

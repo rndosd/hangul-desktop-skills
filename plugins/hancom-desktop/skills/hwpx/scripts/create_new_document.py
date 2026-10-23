@@ -830,32 +830,8 @@ def create(brief, design, output):
 
 
 def main():
-    parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('command',choices=['intake','prepare','validate','create','audit'])
-    parser.add_argument('--brief',type=Path,required=True)
-    parser.add_argument('--design',type=Path)
-    parser.add_argument('--output',type=Path)
-    parser.add_argument('--prepared-design',type=Path)
-    args=parser.parse_args()
-    brief=json.loads(args.brief.read_text(encoding='utf-8-sig'))
-    design=json.loads(args.design.read_text(encoding='utf-8-sig')) if args.design else None
-    try:
-        if args.command=='intake': result=intake(brief)
-        elif args.command=='prepare':
-            if not args.prepared_design:raise ValueError('prepare에는 --prepared-design 경로가 필요합니다.')
-            prepared=prepare_design(brief,design)
-            with args.prepared_design.open('x',encoding='utf8') as stream:
-                stream.write(json.dumps(prepared,ensure_ascii=False,indent=2))
-            result=dict(ok=True,prepared_design=str(args.prepared_design),preparation=prepared.get('preparation',{}))
-        elif args.command=='validate': result=validate(brief,design)
-        elif args.command=='audit': result=audit_output(args.output,brief,design)
-        else: result=create(brief,design,args.output)
-        print(json.dumps(result,ensure_ascii=False,indent=2))
-        return 0 if result.get('ok',result.get('can_design',result.get('status')=='PASS_STRUCTURE')) else 2
-    except (ValueError,TypeError,KeyError,OSError,zipfile.BadZipFile,ET.ParseError) as exc:
-        print(json.dumps(dict(status='BLOCKED',error=str(exc)),ensure_ascii=False))
-        return 2
-
+    print(json.dumps({'status':'BLOCKED_REMOVED_WORKFLOW','reason':'빈 문서 작성 경로는 제거되었습니다. 사용자 제공 서식 또는 보관 원본의 사본을 채우고 변형하세요.','nextStep':'scripts/select_document_template.py --list 및 references/template-selection.md'},ensure_ascii=False))
+    raise SystemExit(2)
 
 if __name__=='__main__':
     raise SystemExit(main())

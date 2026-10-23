@@ -22,13 +22,9 @@ Plugin setup: use the PC configuration from `${CODEX_HOME}/skills/hwpx/environme
 이 파일이 경로·재시도 정책의 기준이다. 상세 참조의 도구 계약은 유지하되,
 일반 경로 권고 때문에 단순 수정을 복합 workflow로 확대하지 않는다.
 
-## 통합된 새 문서·개인용 양식 경로
+## 기존 서식에서 작성
 
-- 짧은 요청의 새 보고서·계획서는 [보고서 구성·지면 설계](short-prompt-reports.md)를 먼저 적용한다. 사실·제안을 구분하고 실제 한글 전체 쪽 검수를 수행한다.
-
-
-- 빈 문서에서 생성할 때 [새 문서 설계](new-document-design.md)와 [번호·집계 v2 규칙](new-document-v2.md)을 읽고 `scripts/create_new_document.py`의 prepare → validate → create → audit를 사용한다.
-- 번호는 native NUMBER/BULLET 정의로 만든다. 번호 문자·공백 접두어를 본문에 붙이지 않는다. 계층 시작 위치와 줄바꿈 뒤 본문 시작 위치는 구분한다. `autoIndent=1` 구조 검사만으로 실제 이어지는 줄 정렬이 검증됐다고 말하지 않는다. [내어쓰기 검수](hanging-indent-verification.md)를 따른다.
+새 업무 문서도 [서식 선택](template-selection.md) 후 원본 사본을 채우고 변형한다. 빈 문서 생성은 사용하지 않는다. 번호·들여쓰기는 원본 체계를 우선하고 실제 한글에서 확인한다.
 
 ## 자주 쓰는 편집 우선
 

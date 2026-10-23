@@ -40,4 +40,4 @@ delta는 `hwpx-mcp-server` 레포의 `docs/deprecation-5.0.0.md`가 정본이다
 
 - [`api.md`](api.md) — template-formfit 시그니처와 DEPRECATED 표시.
 - [`workflows-forms.md`](workflows-forms.md) — compatibility facade 경계 표.
-- [`workflows-creation.md`](workflows-creation.md) §7 — quality-profile 생성 canonical 경로.
+- [`source-template-reuse.md`](source-template-reuse.md) §7 — quality-profile 생성 canonical 경로.
