@@ -7,7 +7,7 @@ $taskLauncher = Join-Path $taskSkillDir 'scripts/Invoke-HangulTask.ps1'
 & $taskLauncher doctor
 ```
 
-`$taskSkillDir`에 확인한 실제 경로를 넣는다. doctor는 설정·Python·후보 core의 실제 경로/해시를 보고한다. 쓰기 권한, 한글 COM, 보안 모듈은 이 검사만으로 판정하지 않는다. 파일을 찾을 때 작업 폴더 최상위만 보고 스크립트가 없다고 판단하지 말고 `Test-Path -LiteralPath (Join-Path $taskSkillDir 'scripts/Invoke-HangulTask.ps1')`를 사용한다. 실제 권한 오류 없이 읽기 전용이라 단정하지 않는다.
+`$taskSkillDir`에 확인한 실제 경로를 넣는다. 로컬 설정이 없으면 현재 `CODEX_HOME/skills`의 environment.json에서 Python을 읽고 포함된 vendor core를 선택한다. 설정이 없으면 hancom-setup으로 준비한다. doctor는 이 경로·해시를 보고하며 쓰기 권한·COM·보안 모듈은 별도 확인이다. 파일 존재는 `Test-Path -LiteralPath (Join-Path $taskSkillDir 'scripts/Invoke-HangulTask.ps1')`로 확인하고 실제 권한 오류 없이 읽기 전용이라 단정하지 않는다.
 
 ## 단건 문구 치환
 
@@ -36,7 +36,7 @@ key는 해당 제목 열의 완전한 기존 셀 값이다. 순번을 추정하�
 
 ## 새 업무 문서도 기존 서식에서 시작
 
-[서식 선택](template-selection.md)으로 사용자 제공 양식 또는 보관 원본을 복사한다. 원본 기반 채우기·변형으로 내용에 맞는 문서를 만든다. 빈 문서 작성 `new`와 `schema new`는 공통 진입 도구에서 제거했다. `schema table`, `replace`, `table`의 기존 편집·보존 검사는 유지한다.
+[서식 선택](template-selection.md) → [원본 기반 작성](source-template-reuse.md)을 따른다. 빈 문서 작성 `new`와 `schema new`는 제거된 명령이다.
 
 ## 결과와 수정
 

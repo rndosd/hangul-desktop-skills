@@ -19,8 +19,7 @@ Plugin setup: use the PC configuration from `${CODEX_HOME}/skills/hwpx/environme
 [PC별 환경](../../hwpx-windows-finalize/references/desktop-environment.md)을 따른다.
 
 요청에 필요한 최소 경로로 편집하고 변경 위험에 맞춰 검증한다.
-이 파일이 경로·재시도 정책의 기준이다. 상세 참조의 도구 계약은 유지하되,
-일반 경로 권고 때문에 단순 수정을 복합 workflow로 확대하지 않는다.
+공통 경로·재시도 기준은 SKILL.md를 따르고 아래 절은 전문 도구의 인자·지원 경계와 실패 처리를 보충한다. 일반 경로 권고 때문에 단순 수정을 복합 workflow로 확대하지 않는다.
 
 ## 기존 서식에서 작성
 
@@ -63,7 +62,7 @@ Plugin setup: use the PC configuration from `${CODEX_HOME}/skills/hwpx/environme
 | 일반 복합 생성·편집 | 지원되는 start_workflow / continue_workflow | [autonomous](workflows-autonomous.md) |
 | 전문 양식·시험·메일머지·이식 | 전문 도구 유지 | [기능별 참조](task-routing.md) |
 
-경로 우선순위는 이 절이 기준이며 상세 참조는 인자 계약만 보충한다.
+아래는 SKILL.md에서 선택한 경로의 상세 절차다. 각 도구의 지원 범위·인자·보존 계약을 유지한다.
 
 1. 읽기는 MCP의 summary map을 우선한다. health는 세션당 한 번 확인한다.
    편집 전 `scripts/diagnose_edit.py source.hwpx --operation ... --find "대상"`으로
