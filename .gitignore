@@ -12,6 +12,7 @@ registration-*.json
 *.exe
 *.pdf
 !plugins/hancom-desktop/skills/hwpx/assets/document-templates/source-library/*.pdf
+!plugins/hancom-desktop/skills/hwpx/assets/document-templates/full-plans/**/*.pdf
 *.log
 .env
 *.pem
