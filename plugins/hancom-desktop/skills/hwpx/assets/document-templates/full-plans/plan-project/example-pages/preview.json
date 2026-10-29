@@ -1,0 +1,73 @@
+{
+  "status": "PREVIEW_READY",
+  "pdf": {
+    "path": "<local-path>",
+    "sha256": "9d7d9a2e8d980b70e98b28d619d5e922b96426f3986ebb8bce53461baea3c92b",
+    "bytes": 194883
+  },
+  "render": {
+    "engine": "pymupdf",
+    "version": "1.28.2",
+    "scale": 1.5
+  },
+  "reused": false,
+  "visual": "NOT_CHECKED",
+  "pages": [
+    {
+      "page": 1,
+      "image": {
+        "path": "<local-path>",
+        "sha256": "2c3d8b14ccd66c91e5e81318657f9bf826fb1d10af4a50646faede299627a885",
+        "bytes": 40553
+      }
+    },
+    {
+      "page": 2,
+      "image": {
+        "path": "<local-path>",
+        "sha256": "59b7c5433e427cf4a451702a1b01dc69ae826715ae1bdd40e6f8e1e2a2c42e51",
+        "bytes": 134245
+      }
+    },
+    {
+      "page": 3,
+      "image": {
+        "path": "<local-path>",
+        "sha256": "81a40800533e2f7c6007e49ac7f2169f4d8b8001f95d6fd808b5745f82f1aafb",
+        "bytes": 137017
+      }
+    },
+    {
+      "page": 4,
+      "image": {
+        "path": "<local-path>",
+        "sha256": "6faea1fd32a28fc0b05bd8b0591fef2dcd1a9a2c0d2157d7c9379518e83ab125",
+        "bytes": 157419
+      }
+    },
+    {
+      "page": 5,
+      "image": {
+        "path": "<local-path>",
+        "sha256": "643321f536b530e2d0bebc0543e1d04f5659000fba7950f2e1c3a2a78049ec67",
+        "bytes": 101635
+      }
+    },
+    {
+      "page": 6,
+      "image": {
+        "path": "<local-path>",
+        "sha256": "711f341448fe5afd85f45f7087582a62a4e0ca73e2e4f016a0c0eaa68a9eac9b",
+        "bytes": 110858
+      }
+    },
+    {
+      "page": 7,
+      "image": {
+        "path": "<local-path>",
+        "sha256": "f44c15cd4115058c830ec0a5e0b53f5d67a54effc5982ac6eeb7f1db5fad69fb",
+        "bytes": 34972
+      }
+    }
+  ]
+}

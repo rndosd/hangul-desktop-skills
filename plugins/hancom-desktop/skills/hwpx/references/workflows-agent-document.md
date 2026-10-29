@@ -17,6 +17,8 @@
 generic 명령은 raw XML, XPath, package part, 임의 속성을 받지 않는다. 전문 도구가 만드는 도메인
 영수증을 generic 성공으로 대체하지 않는다.
 
+일반 문서의 실행은 공통 `batch --request`를 사용하고 필요한 서식은 `--layout`에 함께 넣는다. 아래 MCP 이름·인자는 같은 공개 API의 계약 설명이다. 구조 조회 결과는 현재 revision을 확인해 그 요청으로 이어 쓴다.
+
 ## 세 도구
 
 1. `get_document_node(filename, path="/", depth, child_limit, expected_revision)`
@@ -131,8 +133,7 @@ copy 결과의 `generatedIdentities`와 반환된 새 path를 사용하고 ID를
   설치 조합이 계약과 맞는지 `mcp_server_health()`의 버전·계약 해시로 확인한다.
 - `verification_failed`, `verificationReport.openSafety.ok != true`, `rolledBack == true`: 산출물을 제출하지 않는다.
 
-로컬 `render_preview`는 근사 검수다. real-Hancom이 요구된 작업은 `render_health` → `render_submit` →
-`render_status`의 일치하는 영수증 없이는 시각 완료로 주장하지 않는다.
+로컬 `render_preview`는 근사 검수다. 실제 한글 검증은 [실행 경로 선택](task-routing.md#실행-경로-선택)에 따라 이 PC의 native runner 또는 구성된 원격 렌더를 사용한다. 전달 파일과 일치하는 실제 실행 영수증 및 전 페이지 검토 없이 시각 완료로 주장하지 않는다.
 
 ## CLI 재현
 

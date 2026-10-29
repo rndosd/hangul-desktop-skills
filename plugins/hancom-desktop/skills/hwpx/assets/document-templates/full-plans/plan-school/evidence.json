@@ -1,0 +1,34 @@
+{
+  "schema": "hwpx.block-evidence.v1",
+  "outcome": "PASS",
+  "block_id": "plan-school",
+  "origin_sha256": "10a2cd1337e373463faa906bd1a84c6fae18fd14debe88ead72939c814f3bd7d",
+  "document_sha256": "235656c75672cd9c9ffff45ad1dec0bd0f178507990562086ad65384402468a5",
+  "pdf_sha256": "f273e44076a768e4a07c4781d3380d0ed8801d91d211947b082647df035c75e3",
+  "preview_sha256": "80ee17739c8cba40f3484cab5954c9f6caa30d35cf79abf8cb9031513cb537d1",
+  "content_state": "neutral_form",
+  "pages": 2,
+  "tested_edits": [
+    {
+      "operation": "single-source-neutralization",
+      "scope": "선택 원본 안의 기존 문단·표를 유지하고 옛 기관·사업·연도·금액을 입력 안내로 정리"
+    },
+    {
+      "operation": "public-fill-and-repeat",
+      "scope": "이름별 입력·반복 문단/표 행·표지/본문/요약 연동을 실제 예시로 시험"
+    }
+  ],
+  "nativeBaseline": {
+    "path": "full-plans/plan-school/baseline-native.json",
+    "sha256": "62e186273341c75520217c3e5e657a53af317c1e171ac5a32dae238563e06adc"
+  },
+  "nativeExample": {
+    "path": "full-plans/plan-school/example-native.json",
+    "sha256": "ed2acef0f65db1eaf2bb01be32b28b6cebf4e249aaf3c67c2864b9f6bd91f5c8"
+  },
+  "sampleProof": {
+    "path": "full-plans/plan-school/fill-evidence.json",
+    "sha256": "80b418c458528bd6e1aa819531b95bc26bd6bd9d3be3b1a2c578f8a9d57bdd59"
+  },
+  "acceptance": "Same-input native output and requested layout repair verified; complete source design retained"
+}

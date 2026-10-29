@@ -139,6 +139,33 @@ class HwpxOxmlTableCell:
         self.table.mark_dirty()
 
     @property
+    def effective_margins(self) -> dict[str, int]:
+        owner = self.element if self.element.get("hasMargin") == "1" else self.table.element
+        name = "cellMargin" if owner is self.element else "inMargin"
+        margin = owner.find(f"{_HP}{name}")
+        if margin is None:
+            raise ValueError("cell margin definition is missing")
+        return {side: int(margin.get(side, "0")) for side in ("left", "right", "top", "bottom")}
+
+    def set_margins(self, **margins: int) -> None:
+        if not margins or set(margins) - {"left", "right", "top", "bottom"}:
+            raise ValueError("explicit cell margin sides required")
+        if any(type(value) is not int or value < 0 for value in margins.values()):
+            raise ValueError("cell margins must be nonnegative HWPUNIT integers")
+        values = dict(self.effective_margins, **margins)
+        if values["left"] + values["right"] >= self.width:
+            raise ValueError("cell margins leave no usable width")
+        margin = self.element.find(f"{_HP}cellMargin")
+        if margin is None:
+            raise ValueError("cell margin element is missing")
+        self.element.set("hasMargin", "1")
+        for side, value in values.items():
+            margin.set(side, str(value))
+        for paragraph in self.paragraphs:
+            _clear_paragraph_layout_cache(paragraph.element)
+        self.table.mark_dirty()
+
+    @property
     def text(self) -> str:
         paragraphs = self.paragraphs
         if paragraphs:

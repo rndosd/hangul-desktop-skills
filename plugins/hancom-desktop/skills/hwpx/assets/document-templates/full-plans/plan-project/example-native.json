@@ -1,0 +1,54 @@
+{
+  "evidenceSchema": "hwpx.hancom-finalize.v2",
+  "sourceSha256Before": "6C1D62A2CBDEACC0A5A5F93D940409F6B5190255C6BD49B563D166EAC214C248",
+  "status": "PASS_FULL",
+  "mode": "SaveAs",
+  "candidatePath": "<local-path>",
+  "finalPath": "<local-path>",
+  "firstOpen": true,
+  "saveAs": true,
+  "reopen": true,
+  "pdfExport": true,
+  "pageCountBefore": 7,
+  "pageCountAfter": 7,
+  "error": null,
+  "checkedAt": "2026-10-28T14:48:21.9469076+09:00",
+  "version": "13, 0, 0, 653",
+  "pdfMethod": "PrintToPDFEx / PrintMethod=0",
+  "comCreated": true,
+  "registerModuleCalled": true,
+  "securityModuleRegistered": true,
+  "registerModuleArguments": [
+    "FilePathCheckDLL",
+    "FilePathCheckerModuleExample"
+  ],
+  "sourceSha256After": "6C1D62A2CBDEACC0A5A5F93D940409F6B5190255C6BD49B563D166EAC214C248",
+  "sourceUnchanged": true,
+  "cleanup": {
+    "forced": false,
+    "remaining": [],
+    "owned": true,
+    "owner": {
+      "hwnd": 791554,
+      "path": "C:\\Program Files (x86)\\Hnc\\Office 2024\\HOffice130\\Bin\\Hwp.exe",
+      "pid": 34184,
+      "startTicks": 639287633021026885
+    },
+    "quit": true
+  },
+  "artifacts": [
+    {
+      "path": "<local-path>",
+      "sha256": "E1C973F40884FA23D1676E60D9A551C4536E156BD9D16E88AC94BAB1B3048D70",
+      "bytes": 48087
+    },
+    {
+      "path": "<local-path>",
+      "sha256": "9D7D9A2E8D980B70E98B28D619D5E922B96426F3986EBB8BCE53461BAEA3C92B",
+      "bytes": 194883
+    }
+  ],
+  "visual": "NOT_REVIEWED",
+  "structuralPreservation": "NOT_CHECKED",
+  "nonTargetPreservation": "NOT_CHECKED"
+}

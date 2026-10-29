@@ -4,15 +4,12 @@
 `tool-contract.generated.json`을 정본으로 삼는다. 이전 공개 릴리스의 이름이나
 버전을 이 문서의 현재 계약으로 사용하지 않는다.
 
-설치본에 적용하지 않은 0.2.0 작업본의 기존 양식 채우기는
-[라벨 양식 채우기](form-filling.md)의 별도 CLI 계약을 따른다. 아래 MCP `fill_by_path`/셀 전체 쓰기에
-새 CLI의 보호 조건이 주입됐다고 가정하지 않는다. 정확한 라벨·반복 개수·기존 문단 슬롯으로
-검토한 계획만 적용하며, native 누름틀/표 구조 변경은 이 신규 경로로 지원하지 않는다.
+실행 입구는 [공통 도구](simple-entry.md)를 사용한다. 아래 API 이름은 기능별 계약 설명이며 별도의 기본 경로를 뜻하지 않는다. [라벨 양식 채우기](form-filling.md)의 제한 편집과 MCP `fill_by_path`/셀 전체 쓰기는 공용 코드를 사용하더라도 서로 다른 연산이다. 정확한 라벨·반복 개수·기존 문단 슬롯으로 검토한 계획을 쓰며 한 연산의 보호·지원 범위를 다른 연산에 확대하지 않는다.
 
 ## 1. 호환 트랜잭션 편집 루프 (`apply_edits`, compatibility facade)
 
 `apply_edits`는 전환기 호환 facade다. 새 이종 편집 흐름은
-`workflows-agent-document.md`의 `apply_document_commands`를 우선한다.
+`workflows-agent-document.md`의 공개 원자 편집 계약을 공통 `batch`로 실행한다.
 특히 본문·표 셀·이미 존재하는 단순 머리글 story를 같은 트랜잭션에서 바꿀 때는
 command-only header canonical path와 `verificationReport.storyPreservation` 계약을 그 문서에서
 확인한다. 새 머리글 생성이나 rich/control story 편집은 이 generic 경로로 우회하지 않는다.

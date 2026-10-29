@@ -1,0 +1,20 @@
+{
+  "outcome": "PASS_SAMPLE",
+  "templateSha256": "235656c75672cd9c9ffff45ad1dec0bd0f178507990562086ad65384402468a5",
+  "sampleSha256": "a0f788f0a0c0273f735f6c2cf6d3482ce664fb07e945287e92f6a540e683ddbc",
+  "pdfSha256": "cf43ba35ebc04a3efe2549b6bc7a9402246ed638b0533edf04350e3dafad0972",
+  "nativeReceipt": {
+    "path": "full-plans/plan-school/example-native.json",
+    "sha256": "ed2acef0f65db1eaf2bb01be32b28b6cebf4e249aaf3c67c2864b9f6bd91f5c8"
+  },
+  "allSuppliedValuesPresentInHwpxAndPdf": true,
+  "visualReview": {
+    "allBaselinePagesViewed": true,
+    "allSamplePagesViewed": true,
+    "scope": "Requested spacing/indentation/page-flow repair; same Sol JSON values"
+  },
+  "examplePages": 3,
+  "limits": [
+    "Variable future content still needs its own output review."
+  ]
+}

@@ -13,7 +13,7 @@ from lxml import etree as ET
 from hwpx import HwpxDocument
 from hwpx.oxml import HwpxOxmlParagraph
 from hwpx.tools.package_validator import validate_editor_open_safety
-from safe_edit import candidates, digest, local, parse, snapshot, source_path
+from safe_edit import candidates_many, digest, local, parse, snapshot, source_path
 from namespace_literal_guard import preserve_namespace_literals
 
 SCHEMA='hwpx.bounded-character-format.v1'
@@ -67,6 +67,10 @@ def apply_format(source,output,plan,*,dry_run=False):
         raise ValueError('invalid/stale format plan')
     if not isinstance(plan['targets'],list) or not 1<=len(plan['targets'])<=20:
         raise ValueError('format plan requires 1..20 explicit paragraphs')
+    for target in plan['targets']:
+        if not isinstance(target,dict) or set(target)!={'part','paragraph_path','expected_text','letter_spacing','ratio','reason'} or not target['reason']:
+            raise ValueError('explicit target, expected text, spacing, ratio and reason required')
+    by_find=candidates_many(source,[target['expected_text'] for target in plan['targets']],before)
     with ZipFile(source) as z:header=parse(z.read('Contents/header.xml'))
     old_styles={n.get('id'):n for n in header.iter() if local(n)=='charPr'}
     expected_header=parse(ET.tostring(header.getroottree()))
@@ -78,12 +82,10 @@ def apply_format(source,output,plan,*,dry_run=False):
         try:
             section_map={s.part_name:s for s in doc.sections}
             for target in plan['targets']:
-                if set(target)!={'part','paragraph_path','expected_text','letter_spacing','ratio','reason'} or not target['reason']:
-                    raise ValueError('explicit target, expected text, spacing, ratio and reason required')
                 key=(target['part'],tuple(target['paragraph_path']))
                 if key in seen:raise ValueError('duplicate format paragraph')
                 seen.add(key)
-                options=[c for c in candidates(source,target['expected_text'],before) if c['part']==target['part'] and tuple(c['paragraph_path'])==key[1]]
+                options=[c for c in by_find[target['expected_text']] if c['part']==target['part'] and tuple(c['paragraph_path'])==key[1]]
                 if len(options)!=1 or not options[0]['supported'] or options[0]['_paragraph_text']!=target['expected_text']:
                     raise ValueError('format target missing/unsupported/mismatched')
                 view=options[0];section=section_map[target['part']];node=section.element

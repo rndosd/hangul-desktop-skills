@@ -1,4 +1,4 @@
-﻿# Pure guard regression; no COM instance is created.
+# Pure guard regression; no COM instance is created.
 . (Join-Path $PSScriptRoot 'Hancom.Cell.Common.ps1')
 Assert-SelectCtrlResult $true 'other'
 Assert-SelectCtrlResult $false '13, 0, 0, 653'

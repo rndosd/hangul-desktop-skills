@@ -1,0 +1,211 @@
+{
+  "schema": "hwpx.block-library.v1",
+  "blocks": [
+    {
+      "id": "plan-school",
+      "label": "학교 교육활동 운영계획",
+      "purposes": [
+        "plan"
+      ],
+      "keywords": [
+        "학교 교육활동 운영계획",
+        "완성형",
+        "계획서"
+      ],
+      "structure": {
+        "pages": 2,
+        "summary": "추진 개요 / 세부 운영 / 준비·지원 / 일정·평가"
+      },
+      "state": "reviewed",
+      "content_state": "neutral_form",
+      "origin": {
+        "file": {
+          "path": "source-library/source-A.hwpx",
+          "sha256": "10a2cd1337e373463faa906bd1a84c6fae18fd14debe88ead72939c814f3bd7d"
+        },
+        "source_id": "source-A",
+        "selection": "동일 원본 내부의 유용 구역을 한 번 정리한 일관된 작업 양식",
+        "attribution": "경남교육청 · 행복마을학교 운영계획",
+        "reuse_conditions": [
+          "원본과 출처 보존, 새 사실은 별도 확인",
+          "로컬 재사용 준비이며 공개 재배포 권리 확인과 별개"
+        ]
+      },
+      "document": {
+        "path": "full-plans/plan-school/template.hwpx",
+        "sha256": "235656c75672cd9c9ffff45ad1dec0bd0f178507990562086ad65384402468a5"
+      },
+      "pdf": {
+        "path": "full-plans/plan-school/template.pdf",
+        "sha256": "f273e44076a768e4a07c4781d3380d0ed8801d91d211947b082647df035c75e3"
+      },
+      "preview": {
+        "path": "full-plans/plan-school/preview.png",
+        "sha256": "80ee17739c8cba40f3484cab5954c9f6caa30d35cf79abf8cb9031513cb537d1"
+      },
+      "fill": {
+        "path": "full-plans/plan-school/manifest.json",
+        "sha256": "0189d344dd33e6d4cd07cb35fce8af660a5a5d79409389176c0674564508b0af"
+      },
+      "verification": {
+        "evidence": {
+          "path": "full-plans/plan-school/evidence.json",
+          "sha256": "741b17d8300fe60c0cdc60e2f73e783576b76e9df3fc4cfebe319d239b2e0d05"
+        },
+        "tested_edits": [
+          {
+            "operation": "single-source-neutralization",
+            "scope": "선택 원본 안의 기존 문단·표를 유지하고 옛 기관·사업·연도·금액을 입력 안내로 정리"
+          },
+          {
+            "operation": "public-fill-and-repeat",
+            "scope": "이름별 입력·반복 문단/표 행·표지/본문/요약 연동을 실제 예시로 시험"
+          }
+        ],
+        "limits": [
+          "준비본과 입력 예시의 검증이며 모든 분량·부분 선택·사용자 양식의 성공 보증이 아님",
+          "새 작성 결과의 실제 출력은 내용과 분량에 따라 확인한다"
+        ]
+      }
+    },
+    {
+      "id": "plan-education",
+      "label": "교육사업 추진계획 · 표지형",
+      "purposes": [
+        "plan"
+      ],
+      "keywords": [
+        "교육사업 추진계획 · 표지형",
+        "완성형",
+        "계획서"
+      ],
+      "structure": {
+        "pages": 3,
+        "summary": "표지 / 추진 개요·여건 / 교육활동 운영 / 교육활동 지원 / 관리·평가"
+      },
+      "state": "reviewed",
+      "content_state": "neutral_form",
+      "origin": {
+        "file": {
+          "path": "source-library/source-B.hwpx",
+          "sha256": "c7fe68b0447a07efdd05832018dc87956339bc1829ca1a4c85b51d196958865b"
+        },
+        "source_id": "source-B",
+        "selection": "동일 원본 내부의 유용 구역을 한 번 정리한 일관된 작업 양식",
+        "attribution": "경남교육청 · 사회적경제 교육 추진계획",
+        "reuse_conditions": [
+          "원본과 출처 보존, 새 사실은 별도 확인",
+          "로컬 재사용 준비이며 공개 재배포 권리 확인과 별개"
+        ]
+      },
+      "document": {
+        "path": "full-plans/plan-education/template.hwpx",
+        "sha256": "4d776ccfb915bf904fef9f96b7d241f77ca280bd888f1b896c6c78bd7aea4040"
+      },
+      "pdf": {
+        "path": "full-plans/plan-education/template.pdf",
+        "sha256": "43429c5d383baaf3a601d024b5741368681361b1f9a9cc25704d8cb223caad5e"
+      },
+      "preview": {
+        "path": "full-plans/plan-education/preview.png",
+        "sha256": "c416277624821303f4d9c5d7af892a8ce158ae97c76ff5ff3d78d81f69e13578"
+      },
+      "fill": {
+        "path": "full-plans/plan-education/manifest.json",
+        "sha256": "842d9f77561e1993df3f3b2ca67048b7453a75fd62d31e8ab882f06bba0be573"
+      },
+      "verification": {
+        "evidence": {
+          "path": "full-plans/plan-education/evidence.json",
+          "sha256": "bfdeb288e47e04193373b1eed6c9f29e550b657b739c8c3639e5a40c9b73188e"
+        },
+        "tested_edits": [
+          {
+            "operation": "single-source-neutralization",
+            "scope": "선택 원본 안의 기존 문단·표를 유지하고 옛 기관·사업·연도·금액을 입력 안내로 정리"
+          },
+          {
+            "operation": "public-fill-and-repeat",
+            "scope": "이름별 입력·반복 문단/표 행·표지/본문/요약 연동을 실제 예시로 시험"
+          }
+        ],
+        "limits": [
+          "준비본과 입력 예시의 검증이며 모든 분량·부분 선택·사용자 양식의 성공 보증이 아님",
+          "새 작성 결과의 실제 출력은 내용과 분량에 따라 확인한다"
+        ]
+      }
+    },
+    {
+      "id": "plan-project",
+      "label": "종합사업 추진계획 · 요약·상세형",
+      "purposes": [
+        "plan"
+      ],
+      "keywords": [
+        "종합사업 추진계획 · 요약·상세형",
+        "완성형",
+        "계획서"
+      ],
+      "structure": {
+        "pages": 5,
+        "summary": "표지 / 사업 요약 / 추진 배경 / 중점 과제 / 사업 개요·일정 / 성과 관리 / 추진 체계"
+      },
+      "state": "reviewed",
+      "content_state": "neutral_form",
+      "origin": {
+        "file": {
+          "path": "source-library/source-C.hwpx",
+          "sha256": "189acd8775c1d2e79a4e46f9ec137e55851613491e358472005f21c716daa4f7"
+        },
+        "source_id": "source-C",
+        "selection": "동일 원본 내부의 유용 구역을 한 번 정리한 일관된 작업 양식",
+        "attribution": "교육부 · 지역인재육성지원사업 추진계획",
+        "reuse_conditions": [
+          "원본과 출처 보존, 새 사실은 별도 확인",
+          "로컬 재사용 준비이며 공개 재배포 권리 확인과 별개"
+        ]
+      },
+      "document": {
+        "path": "full-plans/plan-project/template.hwpx",
+        "sha256": "fbab78cf7a236f9da6950724166228bb8b8027c4feaf76e71819bb7629c42f37"
+      },
+      "pdf": {
+        "path": "full-plans/plan-project/template.pdf",
+        "sha256": "73ab4142273107c64bc466a8273be99e7a7d1714603eac61fa794a19a062bf25"
+      },
+      "preview": {
+        "path": "full-plans/plan-project/preview.png",
+        "sha256": "04f27421ab932d3d610125405e7fb589520fd570b1e95539222856edc420f2e9"
+      },
+      "fill": {
+        "path": "full-plans/plan-project/manifest.json",
+        "sha256": "8343702ac606acef47c1ce396ac39269d9862194cfaa9ae3b64a1695ba9be60f"
+      },
+      "verification": {
+        "evidence": {
+          "path": "full-plans/plan-project/evidence.json",
+          "sha256": "42630a9625d8cd9d01b120f01c8a41885d8464608e49c4e01883719292ffa087"
+        },
+        "tested_edits": [
+          {
+            "operation": "single-source-neutralization",
+            "scope": "선택 원본 안의 기존 문단·표를 유지하고 옛 기관·사업·연도·금액을 입력 안내로 정리"
+          },
+          {
+            "operation": "public-fill-and-repeat",
+            "scope": "이름별 입력·반복 문단/표 행·표지/본문/요약 연동을 실제 예시로 시험"
+          },
+          {
+            "operation": "same-level-title-spacing",
+            "scope": "Five yellow titles; contextual paragraph spacing and floating schedule bottom margin. Fresh fill verified."
+          }
+        ],
+        "limits": [
+          "준비본과 입력 예시의 검증이며 모든 분량·부분 선택·사용자 양식의 성공 보증이 아님",
+          "새 작성 결과의 실제 출력은 내용과 분량에 따라 확인한다",
+          "이 PC에서 원본의 모아찍기 영향이 남아 단순 PDF SaveAs 대신 명시적 PrintToPDFEx 자동인쇄 사용"
+        ]
+      }
+    }
+  ]
+}

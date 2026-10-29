@@ -1,6 +1,6 @@
 # 서버 강제 자율 HWPX workflow
 
-일반적인 복합 문서 작업은 primitive를 직접 조합하지 말고 아래 7개 고수준 도구로 시작한다.
+이 경로는 서버에 작업 상태를 저장하고 중단·재개하는 전문 workflow 계약이 필요한 경우에 사용한다. 일반 로컬 작성·편집의 기본 입구는 [공통 도구](simple-entry.md)이며 이 문서 때문에 같은 작업을 서버 workflow로 다시 시작하지 않는다. 아래는 이 전문 경로를 선택했을 때의 계약이다.
 
 1. `start_workflow`에 typed work order를 제출한다.
 2. `get_workflow`로 현재 영수증을 읽고 `continue_workflow`를 한 durable 경계씩 호출한다.

@@ -1,4 +1,4 @@
-﻿<#
+<#
 Implementation version: 1.0.0 (2026-09-08). Independent PowerShell implementation.
 Selection sequence informed by read-only pyhwpx core.py get_into_nth_table:
 https://github.com/martiniifun/pyhwpx/commit/a83b782673ecf49e18964610edea1d12c23b7f09

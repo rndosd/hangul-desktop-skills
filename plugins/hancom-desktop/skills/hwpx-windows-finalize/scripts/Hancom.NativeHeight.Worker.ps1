@@ -1,4 +1,4 @@
-﻿param([Parameter(Mandatory)][string]$JobPath,[Parameter(Mandatory)][string]$RunDirectory)
+param([Parameter(Mandatory)][string]$JobPath,[Parameter(Mandatory)][string]$RunDirectory)
 . (Join-Path $PSScriptRoot 'Hancom.RowSplit.Common.ps1')
 . (Join-Path $PSScriptRoot 'Hancom.Environment.ps1')
 $job=Get-Content -LiteralPath $JobPath -Raw -Encoding UTF8 | ConvertFrom-Json

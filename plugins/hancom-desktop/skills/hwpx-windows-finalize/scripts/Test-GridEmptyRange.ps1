@@ -1,4 +1,4 @@
-﻿# Pure checks; no COM instance is created.
+# Pure checks; no COM instance is created.
 . (Join-Path $PSScriptRoot 'Hancom.Cell.Common.ps1')
 $start=@{list=5;para=0;pos=0}
 if(!(Assert-GridParagraphRange $start @{list=5;para=0;pos=0} $true)){throw 'Expected zero range'}

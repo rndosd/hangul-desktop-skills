@@ -48,7 +48,7 @@ def dependencies():
  for n in ['verify_hwpx_with_hancom.ps1','Hancom.OwnedExit.ps1','hancom_worker.ps1','Hancom.Environment.ps1','check_native_context.ps1','classify_hancom_failure.py']:
   require((S/n).is_file(),'missing selected candidate script:'+n);files[n]=dict(path=str(S/n),sha256=sha(S/n))
  return dict(config=dict(path=str(config),sha256=sha(config)),files=files,moduleName=sec['moduleName']),ps
-def run(source,mode,output,pdf,run_dir,context,timeout=120,preflight_only=False):
+def run(source,mode,output,pdf,run_dir,context,timeout=120,preflight_only=False,*,composition=None):
  require(context in ['ordinary-shell','host-approved'],'explicit host/user execution context required')
  require(mode in ['OpenOnly','SaveAs'] and type(timeout) is int and 10<=timeout<=300,'invalid native mode/timeout')
  source=Path(source).resolve(strict=True);r=Path(run_dir).absolute()
@@ -59,8 +59,17 @@ def run(source,mode,output,pdf,run_dir,context,timeout=120,preflight_only=False)
  for p,ext in [(dst,'.hwpx'),(pdf_path,'.pdf')]:
   if p:require(p.suffix.lower()==ext and not p.exists() and p.parent.is_dir(),'new artifact in existing parent required');paths.append(p.resolve())
  require(len(set(paths))==len(paths),'paths must be distinct')
- meta,ps=dependencies();env=environment_map(os.environ);r.mkdir();before=sha(source)
+ if composition is not None:
+  from native_composition import validate,inputs,check_inputs
+  require(mode=='SaveAs' and pdf_path is not None,'composition requires SaveAs and PDF')
+  composition=validate(composition,source)
+  require(not {p.resolve() for p in (dst,pdf_path,r)} & {Path(p).resolve() for p in inputs(composition)},'composition output aliases an input')
+ meta,ps=dependencies();env=environment_map(os.environ);r.mkdir();before=composition['base']['sha256'] if composition is not None else sha(source)
  write(r/'request.json',dict(source=str(source),sourceSha256=before,mode=mode,output=str(dst) if dst else None,pdf=str(pdf_path) if pdf_path else None,requestedContext=context,contextIsHostChoiceNotSandboxDetection=True,dependencies=meta))
+ if composition is not None:
+  write(r/'composition.json',composition)
+  composition_sha=sha(r/'composition.json')
+  write(r/'composition-dependencies.json',{n:dict(path=str(S/n),sha256=sha(S/n)) for n in ['native_composition.py','Hancom.Composition.ps1']})
  argv=[str(ps),'-NoProfile','-STA','-File',str(S/'check_native_context.ps1'),'-OutputPath',str(r/'context.json')]
  p=subprocess.run(argv,env=env,capture_output=True,text=True,encoding='utf-8-sig',errors='replace',timeout=30)
  write(r/'preflight-command.json',dict(argv=argv,exitCode=p.returncode,stdout=p.stdout,stderr=p.stderr))
@@ -69,6 +78,7 @@ def run(source,mode,output,pdf,run_dir,context,timeout=120,preflight_only=False)
  elif preflight_only:result=dict(status='PASS_PREFLIGHT_NATIVE_NOT_CALLED',comCreated='NOT_CALLED',securityModuleRegistered='NOT_CALLED')
  else:
   argv=[str(ps),'-NoProfile','-File',str(S/'verify_hwpx_with_hancom.ps1'),'-CandidatePath',str(source),'-Mode',mode,'-RunDirectory',str(r/'native'),'-TimeoutSeconds',str(timeout)]
+  if composition is not None:argv+=['-CompositionPlanPath',str(r/'composition.json'),'-CompositionSha256',composition_sha]
   if dst:argv+=['-OutputPath',str(dst)]
   if pdf_path:argv+=['-PdfPath',str(pdf_path)]
   try:
@@ -79,6 +89,10 @@ def run(source,mode,output,pdf,run_dir,context,timeout=120,preflight_only=False)
   except subprocess.TimeoutExpired as e:result=dict(status='BLOCKED_CONTROLLER_TIMEOUT',comCreated='NOT_RECORDED',securityModuleRegistered='NOT_RECORDED',error='Owned controller timeout; preserve artifacts, inspect remaining process, do not auto-retry or kill Hwp.')
  result.update(sourceUnchanged=sha(source)==before,settingsChanged=False,automaticRetry=False,fullDocumentAcceptance='NOT_CHECKED')
  if not result['sourceUnchanged']:result['status']='FAIL_SOURCE_CHANGED'
+ if composition is not None:
+  checks=check_inputs(composition)
+  result['composition']=dict(planPath=str(r/'composition.json'),planSha256=composition_sha,inputs=checks,sourceBlocks=len(composition['blocks'])+1,fullPreservation='NOT_CHECKED',visual='NOT_CHECKED',formulaRefresh='NOT_REQUESTED')
+  if not all(x['unchanged'] for x in checks):result['status']='FAIL_COMPOSITION_INPUT_CHANGED'
  write(r/'runner-result.json',result);return result
 if __name__=='__main__':
  p=argparse.ArgumentParser();p.add_argument('source');p.add_argument('--mode',choices=['OpenOnly','SaveAs'],default='OpenOnly');p.add_argument('--output');p.add_argument('--pdf');p.add_argument('--run',required=True);p.add_argument('--context',choices=['ordinary-shell','host-approved'],required=True);p.add_argument('--timeout',type=int,default=120);p.add_argument('--preflight-only',action='store_true');v=p.parse_args()

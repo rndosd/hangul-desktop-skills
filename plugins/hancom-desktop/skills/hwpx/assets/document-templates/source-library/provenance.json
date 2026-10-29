@@ -1,0 +1,59 @@
+{
+  "purpose": "완성형 3종의 출처·검증 의존 원본. 선택하거나 채우는 양식이 아님.",
+  "sources": [
+    {
+      "id": "source-A",
+      "label": "경남교육청 · 행복마을학교 운영계획",
+      "groups": [
+        "plan"
+      ],
+      "role": "기존 원본",
+      "status": "active_source",
+      "path": "source-library/source-A.hwpx",
+      "sha256": "10a2cd1337e373463faa906bd1a84c6fae18fd14debe88ead72939c814f3bd7d",
+      "preview": "source-library/source-A.pdf",
+      "readiness": "원본 또는 견본의 선택 가능 상태. 실제 내용 대체 후 검수 필요.",
+      "source_url": "https://www.gne.go.kr/haengbok/user/bbs/BD_selectBbs.do?q_bbsDocNo=20250124113011496&q_bbsSn=1190",
+      "limitations": [
+        "원본 분량에 맞춘 빈 공간이 있어 내용 교체 후 셀 높이·쪽 나눔 조정 필요."
+      ],
+      "checked_scope": "이 원본을 활용한 7쪽 계획서의 실제 편집·재열기·전 쪽 검수 완료."
+    },
+    {
+      "id": "source-B",
+      "label": "경남교육청 · 사회적경제 교육 추진계획",
+      "groups": [
+        "plan"
+      ],
+      "role": "기존 원본",
+      "status": "active_source",
+      "path": "source-library/source-B.hwpx",
+      "sha256": "c7fe68b0447a07efdd05832018dc87956339bc1829ca1a4c85b51d196958865b",
+      "preview": "source-library/source-B.pdf",
+      "readiness": "원본 또는 견본의 선택 가능 상태. 실제 내용 대체 후 검수 필요.",
+      "source_url": "https://www.gne.go.kr/haengbok/user/bbs/BD_selectBbs.do?q_bbsDocNo=20250617145628929&q_bbsSn=1193",
+      "limitations": [
+        "표지 포함 6쪽. 학교 행사에 불필요한 기관 사업 내용은 삭제·대체해야 함."
+      ],
+      "checked_scope": "원본 한글 열기·원본 보존·PDF 변환 확인. 내용 대체 실험 전."
+    },
+    {
+      "id": "source-C",
+      "label": "교육부 · 지역인재육성지원사업 추진계획",
+      "groups": [
+        "plan"
+      ],
+      "role": "기존 원본",
+      "status": "active_source",
+      "path": "source-library/source-C.hwpx",
+      "sha256": "189acd8775c1d2e79a4e46f9ec137e55851613491e358472005f21c716daa4f7",
+      "preview": "source-library/source-C.pdf",
+      "readiness": "원본 또는 견본의 선택 가능 상태. 실제 내용 대체 후 검수 필요.",
+      "source_url": "https://www.moe.go.kr/boardCnts/viewRenew.do?boardID=294&boardSeq=103122&lev=0&m=020402&opType=N&page=1&s=moe&searchType=null&statusYN=W",
+      "limitations": [
+        "현재 한글 PDF는 가로 한 장에 두 쪽씩 배치됨(총 9매). 요약·상세 구조 참고에 좋지만 일반 세로 문서의 기본 틀로 쓰기 전 조판 설정을 확인해야 함. 차례와 쪽 표기도 재작성 때 대조."
+      ],
+      "checked_scope": "원본 한글 열기·원본 보존·PDF 변환 확인. 내용 대체 실험 전."
+    }
+  ]
+}

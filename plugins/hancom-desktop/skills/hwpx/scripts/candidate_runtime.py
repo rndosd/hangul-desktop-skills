@@ -6,14 +6,26 @@ from pathlib import Path
 import sys
 def activate():
  root=Path(__file__).resolve().parents[1]/'vendor'
- if 'hwpx' in sys.modules:
-  actual=Path(sys.modules['hwpx'].__file__).resolve()
-  if not actual.is_relative_to(root):raise RuntimeError('candidate runtime must be selected before importing hwpx')
+ for name in ('hwpx', 'hwpx_automation'):
+  if name in sys.modules:
+   actual=Path(sys.modules[name].__file__).resolve()
+   if not actual.is_relative_to(root):raise RuntimeError('shared runtime must be selected before importing '+name)
  if not (root/'hwpx/opc/xml_utils.py').is_file():raise RuntimeError('candidate dependency missing')
- sys.path.insert(0,str(root))
+ if not (root/'hwpx_automation/office/agent/commands.py').is_file():raise RuntimeError('shared automation dependency missing')
+ if str(root) not in sys.path:sys.path.insert(0,str(root))
  import hwpx
  if not Path(hwpx.__file__).resolve().is_relative_to(root):raise RuntimeError('wrong hwpx dependency selected')
  return Path(hwpx.__file__).resolve()
+
+def identity():
+ import hashlib
+ actual=activate()
+ import hwpx_automation
+ engine=Path(hwpx_automation.__file__).resolve()
+ root=actual.parent.parent
+ if not engine.is_relative_to(root):raise RuntimeError('wrong shared automation dependency selected')
+ files={'parser':actual.parent/'opc/xml_utils.py','run':actual.parent/'oxml/run.py','commands':engine.parent/'office/agent/commands.py'}
+ return {'python':sys.executable,'core':str(actual),'automation':str(engine),'sha256':{k:hashlib.sha256(p.read_bytes()).hexdigest() for k,p in files.items()}}
 
 if __name__=='__main__':
  import runpy,json,hashlib

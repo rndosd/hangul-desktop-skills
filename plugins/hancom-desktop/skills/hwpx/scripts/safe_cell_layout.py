@@ -22,7 +22,7 @@ def snap(n,drop_cache=False,drop_id=False):
  if drop_cache and n.tag==P+'linesegarray':return None
  at=dict(n.attrib)
  if drop_id and n.tag==P+'p':at.pop('id',None)
- return (n.tag,tuple(sorted(at.items())),n.text or '',tuple(x for c in n for x in [snap(c,drop_cache,drop_id)] if x is not None))
+ return (n.tag,tuple(sorted(at.items())),n.text or '',n.tail or '',tuple(x for c in n for x in [snap(c,drop_cache,drop_id)] if x is not None))
 def locate(data,index):
  m=parts(data);found=[]
  for part in sorted(m):
@@ -31,7 +31,7 @@ def locate(data,index):
  require(type(index) is int and 1<=index<=len(found),'table out of range')
  part,r,t=found[index-1];require(not any(a.tag==P+'tbl' for a in t.iterancestors()),'nested target unsupported');return m,part,r,t
 
-def geometry(t):
+def geometry(t,allow_multiple=False):
  require(2<=int(t.get('rowCnt','0'))<=100 and 1<=int(t.get('colCnt','0'))<=12,'table bounds unsupported')
  rows=t.findall(P+'tr');require(len(rows)==int(t.get('rowCnt')),'row inventory invalid');cells={};grid={}
  for ri,row in enumerate(rows):
@@ -40,7 +40,10 @@ def geometry(t):
    a=(int(ad.get('rowAddr')),int(ad.get('colAddr')));s=(int(sp.get('rowSpan')),int(sp.get('colSpan')))
    require(a[0]==ri and s[0]>=1 and s[1]>=1 and a not in cells,'invalid anchor');require(int(sz.get('width'))>0 and int(sz.get('height'))>0,'positive size required')
    for n in c.iter():require(n.tag not in [P+x for x in ['tbl','pic','ctrl','fieldBegin','fieldEnd','equation','rect']],'rich/nested cell unsupported')
-   ps=c.findall('./'+P+'subList/'+P+'p');require(len(ps)==1,'one paragraph per cell required');runs=ps[0].findall(P+'run');require(len(runs)==1 and (len(runs[0])==0 or len(runs[0])==1 and runs[0][0].tag==P+'t' and not len(runs[0][0])),'one plain or native empty run required')
+   ps=paragraphs(c);require(bool(ps) and (allow_multiple or len(ps)==1),'one paragraph per cell required')
+   for p in ps:
+    runs=p.findall(P+'run');require(bool(runs) and (allow_multiple or len(runs)==1),'one run per paragraph required')
+    require(all(len(run)==0 or len(run)==1 and run[0].tag==P+'t' and not len(run[0]) for run in runs),'plain or native empty runs required')
    cells[a]=c
    for y in range(a[0],a[0]+s[0]):
     for x in range(a[1],a[1]+s[1]):require((y,x) not in grid,'overlap');grid[y,x]=a
@@ -49,22 +52,46 @@ def geometry(t):
 def span(c):return tuple(int(c.find(P+'cellSpan').get(k)) for k in ['rowSpan','colSpan'])
 def text(c):return ''.join(c.itertext())
 def paragraph(c):return c.find('./'+P+'subList/'+P+'p')
+def paragraphs(c):return c.findall('./'+P+'subList/'+P+'p')
 def size(c):return tuple(int(c.find(P+'cellSz').get(k)) for k in ['height','width'])
 def bounds(req,t):
  r=req.get('range');require(isinstance(r,list) and len(r)==4 and all(type(v) is int for v in r),'four 1-based integer coordinates required');r0,c0,r1,c1=[v-1 for v in r];require(0<=r0<=r1<int(t.get('rowCnt')) and 0<=c0<=c1<int(t.get('colCnt')),'range outside table');return r0,c0,r1,c1
 
+def alignment_targets(req,t,cells):
+ if req['operation']=='align_many':
+  require('range' not in req and 'alignment' not in req,'align_many uses alignments only')
+  selections=req.get('alignments')
+  require(isinstance(selections,list) and 1<=len(selections)<=100,'alignments must contain 1..100 selections')
+ else:
+  require('alignments' not in req,'align uses range/alignment only')
+  selections=[{'range':req.get('range'),'alignment':req.get('alignment')}]
+ targets={}
+ for selection in selections:
+  require(isinstance(selection,dict) and set(selection)=={'range','alignment'},'each selection needs only range/alignment')
+  alignment=selection['alignment'];require(alignment in ['LEFT','CENTER','RIGHT'],'supported horizontal alignment required')
+  r0,c0,r1,c1=bounds(selection,t)
+  for y in range(r0,r1+1):
+   for x in range(c0,c1+1):
+    a=(y,x);require(a in cells and span(cells[a])==(1,1),'unmerged cells required')
+    require(a not in targets or targets[a]==alignment,'conflicting alignment selections')
+    targets[a]=alignment
+ return targets
+
 def inspect(source,table):
- _,part,_,t=locate(Path(source).read_bytes(),table);cells,_=geometry(t)
+ _,part,_,t=locate(Path(source).read_bytes(),table);cells,_=geometry(t,True)
  return dict(schema=SCHEMA,source_sha256=sha(source),table=table,part=part,cells=[dict(row=a[0]+1,column=a[1]+1,span=list(span(c)),text=text(c),size_hwpunit=list(size(c))) for a,c in cells.items()])
 
 def verify(before,after,req):
  bm,part,br,bt=locate(before,req['table']);am,ap,ar,at=locate(after,req['table']);require(part==ap and set(bm)==set(am),'package inventory changed')
- bc,bg=geometry(bt);ac,ag=geometry(at);r0,c0,r1,c1=bounds(req,bt);op=req['operation'];anchor=(r0,c0)
- targets={(y,x) for y in range(r0,r1+1) for x in range(c0,c1+1)}
+ op=req['operation'];is_align=op in ['align','align_many'];bc,bg=geometry(bt,is_align);ac,ag=geometry(at,is_align)
+ if is_align:
+  alignments=alignment_targets(req,bt,bc);targets=set(alignments)
+ else:
+  r0,c0,r1,c1=bounds(req,bt);anchor=(r0,c0);targets={(y,x) for y in range(r0,r1+1) for x in range(c0,c1+1)}
  require(dict(bt.attrib)==dict(at.attrib),'table attributes changed')
  def outside(n,t):
   if n is t:return ('target-table',)
-  return (n.tag,tuple(sorted(n.attrib.items())),n.text or '',tuple(outside(c,t) for c in n))
+  return (n.tag,tuple(sorted(n.attrib.items())),n.text or '',n.tail or '',tuple(outside(c,t) for c in n))
  require(outside(br,bt)==outside(ar,at),'non-target section changed')
  require([snap(c) for c in bt if c.tag!=P+'tr']==[snap(c) for c in at if c.tag!=P+'tr'],'table properties changed')
  require([dict(r.attrib) for r in bt.findall(P+'tr')]==[dict(r.attrib) for r in at.findall(P+'tr')],'row attributes changed')
@@ -87,29 +114,39 @@ def verify(before,after,req):
     # API creates an empty text leaf; the native renderer may later remove it.
     # Newly synthesized blank cell is serialized as the native childless run.
     require(snap(e,True,True)==snap(ac[a],True,True),'split cell format not preserved')
- elif op=='align':
+ elif is_align:
   hb=xml(bm['Contents/header.xml']);ha=xml(am['Contents/header.xml']);bdefs={p.get('id'):p for p in hb.iter(H+'paraPr')};adefs={p.get('id'):p for p in ha.iter(H+'paraPr')}
   for a in targets:
-   old,new=bc[a],ac[a];e=copy.deepcopy(old);ep=paragraph(e);bp=paragraph(old);np=paragraph(new);ep.set('paraPrIDRef',np.get('paraPrIDRef'))
+   old,new=bc[a],ac[a];e=copy.deepcopy(old);bps=paragraphs(old);nps=paragraphs(new)
+   require(len(bps)==len(nps),'paragraph inventory changed')
+   for ep,bp,np in zip(paragraphs(e),bps,nps):
+    ep.set('paraPrIDRef',np.get('paraPrIDRef'))
+    b=copy.deepcopy(bdefs[bp.get('paraPrIDRef')]);v=copy.deepcopy(adefs[np.get('paraPrIDRef')]);b.attrib.pop('id',None);v.attrib.pop('id',None);b.find(H+'align').set('horizontal',alignments[a]);require(snap(b)==snap(v),'paragraph style changed beyond alignment')
    require(snap(e,True)==snap(new,True),'cell content or format changed beyond alignment')
-   b=copy.deepcopy(bdefs[bp.get('paraPrIDRef')]);v=copy.deepcopy(adefs[np.get('paraPrIDRef')]);b.attrib.pop('id',None);v.attrib.pop('id',None);b.find(H+'align').set('horizontal',req['alignment']);require(snap(b)==snap(v),'paragraph style changed beyond alignment')
   # Only appended paraPr definitions and item count may change in header.
   bp=hb.find('.//'+H+'paraProperties');ap=ha.find('.//'+H+'paraProperties')
   require(all(i in adefs and snap(p)==snap(adefs[i]) for i,p in bdefs.items()),'existing style changed')
-  added=set(adefs)-set(bdefs);used={paragraph(ac[a]).get('paraPrIDRef') for a in targets};require(added<=used,'unrelated added style')
+  added=set(adefs)-set(bdefs);used={p.get('paraPrIDRef') for a in targets for p in paragraphs(ac[a])};require(added<=used,'unrelated added style')
   require(int(ap.get('itemCnt'))==len(adefs),'paraPr inventory mismatch')
   for p in list(ap):
    if p.tag==H+'paraPr' and p.get('id') in added:ap.remove(p)
   ap.set('itemCnt',bp.get('itemCnt'));require(snap(hb)==snap(ha),'non-target header changed')
  for n in bm:
-  if n!=part and not(op=='align' and n=='Contents/header.xml'):require(bm[n]==am[n],'non-target package member changed: '+n)
- ids=[p.get('id') for p in ar.iter(P+'p')];require(len(ids)==len(set(ids)),'paragraph ID collision')
- return dict(nonTargetPackageAndXmlPreserved=True,targetContentPreserved=True,geometryExact=True,stylesPreserved=True,paragraphIdsUnique=True)
+  if n!=part and not(is_align and n=='Contents/header.xml'):require(bm[n]==am[n],'non-target package member changed: '+n)
+ ids=[p.get('id') for p in ar.iter(P+'p')];unique=len(ids)==len(set(ids))
+ if is_align:require(ids==[p.get('id') for p in br.iter(P+'p')],'paragraph IDs changed')
+ else:require(unique,'paragraph ID collision')
+ return dict(nonTargetPackageAndXmlPreserved=True,targetContentPreserved=True,geometryExact=True,stylesPreserved=True,paragraphIdsUnique=unique)
 
 def apply(source,output,request,dry_run=False):
  source=Path(source).resolve();output=Path(output).absolute();req=dict(request);require(version('python-hwpx')=='6.3.0','unverified core version');require(source.suffix.lower()=='.hwpx' and output.suffix.lower()=='.hwpx' and output.parent.is_dir() and not output.exists() and output.resolve()!=source,'new output required')
- allowed={'schema','source_sha256','table','operation','range','alignment'};require(not(set(req)-allowed) and req.get('schema')==SCHEMA and req.get('source_sha256')==sha(source),'invalid/stale request')
- data=source.read_bytes();_,part,root,t=locate(data,req['table']);cells,grid=geometry(t);r0,c0,r1,c1=bounds(req,t);anchors={(y,x) for y in range(r0,r1+1) for x in range(c0,c1+1)};op=req.get('operation')
+ allowed={'schema','source_sha256','table','operation','range','alignment','alignments'};require(not(set(req)-allowed) and req.get('schema')==SCHEMA and req.get('source_sha256')==sha(source),'invalid/stale request')
+ data=source.read_bytes();_,part,root,t=locate(data,req['table']);op=req.get('operation');is_align=op in ['align','align_many'];cells,grid=geometry(t,is_align)
+ if is_align:
+  alignments=alignment_targets(req,t,cells);anchors=set(alignments)
+ else:
+  require('alignments' not in req,'alignments only supported for align_many')
+  r0,c0,r1,c1=bounds(req,t);anchors={(y,x) for y in range(r0,r1+1) for x in range(c0,c1+1)}
  if op=='merge':
   require(r0==r1,'this release supports horizontal cell merges only')
   require(len(anchors)>1 and len(anchors)<=12 and all(a in cells and span(cells[a])==(1,1) for a in anchors),'only 2..12 unmerged cells supported')
@@ -126,7 +163,7 @@ def apply(source,output,request,dry_run=False):
   require(r0==r1,'this release supports horizontal merge reversal only')
   require(grid[r0,c0]==(r0,c0) and span(cells[r0,c0])==(r1-r0+1,c1-c0+1) and len(anchors)>1 and len(anchors)<=12,'exact complete merged range required')
   h,w=size(cells[r0,c0]);require(h%(r1-r0+1)==0 and w%(c1-c0+1)==0,'exact equal split required')
- elif op=='align':require(req.get('alignment') in ['LEFT','CENTER','RIGHT'] and all(a in cells and span(cells[a])==(1,1) for a in anchors),'unmerged cells and supported horizontal alignment required')
+ elif is_align:pass
  else:raise ValueError('unsupported operation')
  with HwpxDocument.open(source) as doc:
   tables=[x for sec in doc.sections for p in sec.paragraphs for x in p.tables];matches=[x for x in tables if x.element.get('id')==t.get('id') and x.paragraph.section.part_name==part];require(len(matches)==1,'public table binding missing/ambiguous');table=matches[0]
@@ -148,8 +185,12 @@ def apply(source,output,request,dry_run=False):
     run.element.remove(run.element[0])
    table.mark_dirty()
   else:
+   formats={}
    for y,x in sorted(anchors):
-    p=table.cell(y,x).paragraphs[0];p.para_pr_id_ref=doc.parts.headers[0].ensure_paragraph_format(base_para_pr_id=p.para_pr_id_ref,alignment=req['alignment'])
+    for p in table.cell(y,x).paragraphs:
+     key=(p.para_pr_id_ref,alignments[y,x])
+     if key not in formats:formats[key]=doc.parts.headers[0].ensure_paragraph_format(base_para_pr_id=key[0],alignment=key[1])
+     p.para_pr_id_ref=formats[key]
    table.mark_dirty()
   result=doc.to_bytes()
  checks=verify(data,result,req)

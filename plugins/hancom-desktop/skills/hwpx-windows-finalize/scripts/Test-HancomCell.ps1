@@ -1,4 +1,4 @@
-﻿[CmdletBinding()]
+[CmdletBinding()]
 param(
  [Parameter(Mandatory)][string]$SimpleFixture,
  [Parameter(Mandatory)][string]$NestedFixture,

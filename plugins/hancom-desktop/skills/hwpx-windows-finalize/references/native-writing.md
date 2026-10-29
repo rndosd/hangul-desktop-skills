@@ -1,5 +1,34 @@
 # 한글 엔진으로 최종 기록 완성
 
+## COM 반복 찾기
+
+`RepeatFind`는 `IgnoreMessage`를 실행 뒤 0으로 되돌린다. [한컴 공식 답변](https://forum.developer.hancom.com/t/repeatfind-ignoremessage/1136)에 따라 매 호출 직전에 `GetDefault`와 찾기 옵션을 다시 설정한다. 루프 밖에서 한 번만 설정하면 문서 끝에서 검색 확인창을 기다릴 수 있다. `IgnoreMessage=1`이면 문서 처음으로 돌아올 수 있으므로 첫 위치의 재등장으로 종료한다. 다음 예시는 이미 소유권과 모듈 등록을 확인한 `$hwp`에서 위치만 읽는다.
+
+```powershell
+$seen=[Collections.Generic.HashSet[string]]::new()
+$find=$hwp.HParameterSet.HFindReplace
+for($i=0;$i -lt 1000;$i++) {
+    $hwp.HAction.GetDefault('RepeatFind',$find.HSet) | Out-Null
+    $find.FindString=$searchText
+    $find.Direction=0
+    $find.IgnoreMessage=1
+    $find.MatchCase=1
+    $find.WholeWordOnly=1
+    $find.UseWildCards=0
+    $find.FindRegExp=0
+    if(!$hwp.HAction.Execute('RepeatFind',$find.HSet)){break}
+    $position=$hwp.GetPosBySet()
+    $key='{0}:{1}:{2}' -f $position.Item('List'),$position.Item('Para'),$position.Item('Pos')
+    if(!$seen.Add($key)){break}
+    $key
+    if($i -eq 999){throw 'FIND_LIMIT_REACHED: inspect the document before continuing.'}
+}
+```
+
+문서 전체에서 일치 항목을 모으는 예시다. 셀 편집 범위나 대상의 유일성을 보증하지 않는다. 찾기 호출과 `GetTextFile`, 선택 변경, 저장의 전후 단계를 각각 기록하면 대기 중인 호출을 구분할 수 있다. 보안 승인창을 무시하는 전역 메시지 설정은 사용하지 않는다.
+
+## 한글이 계산한 표 높이 기록
+
 표 행 추가·병합 뒤 선택 표의 전체 높이를 한글이 계산해 기록하도록 요청한 경우에만 `scripts/native_write.py`를 사용한다. 기존 OpenOnly 기본 경로를 대체하지 않는다. 셀 높이·너비·안 여백·본문/개체 위치 변경이나 버전/글꼴 변환을 자동 허용하지 않는다.
 
 ```powershell

@@ -1,0 +1,38 @@
+{
+  "schema": "hwpx.block-evidence.v1",
+  "outcome": "PASS",
+  "block_id": "plan-project",
+  "origin_sha256": "189acd8775c1d2e79a4e46f9ec137e55851613491e358472005f21c716daa4f7",
+  "document_sha256": "fbab78cf7a236f9da6950724166228bb8b8027c4feaf76e71819bb7629c42f37",
+  "pdf_sha256": "73ab4142273107c64bc466a8273be99e7a7d1714603eac61fa794a19a062bf25",
+  "preview_sha256": "04f27421ab932d3d610125405e7fb589520fd570b1e95539222856edc420f2e9",
+  "content_state": "neutral_form",
+  "pages": 5,
+  "tested_edits": [
+    {
+      "operation": "single-source-neutralization",
+      "scope": "선택 원본 안의 기존 문단·표를 유지하고 옛 기관·사업·연도·금액을 입력 안내로 정리"
+    },
+    {
+      "operation": "public-fill-and-repeat",
+      "scope": "이름별 입력·반복 문단/표 행·표지/본문/요약 연동을 실제 예시로 시험"
+    },
+    {
+      "operation": "same-level-title-spacing",
+      "scope": "Five yellow titles; contextual paragraph spacing and floating schedule bottom margin. Fresh fill verified."
+    }
+  ],
+  "nativeBaseline": {
+    "path": "full-plans/plan-project/baseline-native.json",
+    "sha256": "42c56ec9b018cfb02dc4b761a8cfffd158e10ae868f0f8dbad836f1794646d95"
+  },
+  "nativeExample": {
+    "path": "full-plans/plan-project/example-native.json",
+    "sha256": "4dced0d0f50b81a8c1f240c2d16752fcd9c181d0c4a6f1f097767437d07fabec"
+  },
+  "sampleProof": {
+    "path": "full-plans/plan-project/fill-evidence.json",
+    "sha256": "943dcabb12239f641c1732e11ecbc3c64cc8f841e197299024040b3f96d8bd77"
+  },
+  "acceptance": "Prepared form and fresh fill output reviewed for title spacing; content and original design preserved."
+}

@@ -17,7 +17,10 @@ def header_cells(t):
  return [cell_text(c)for c in cs]
 
 def bind(source,headers,key=None,source_sha256=None):
- source=Path(source);data=source.read_bytes();sha=hashlib.sha256(data).hexdigest()
+ return bind_data(Path(source).read_bytes(),headers,key,source_sha256)
+
+def bind_data(data,headers,key=None,source_sha256=None):
+ sha=hashlib.sha256(data).hexdigest()
  if source_sha256 is not None and sha!=source_sha256:raise ValueError('stale source SHA256')
  if not isinstance(headers,list)or not headers or any(not isinstance(x,str)or not x for x in headers)or len(set(headers))!=len(headers):raise ValueError('unique exact nonempty header signature required')
  if key is not None and (not isinstance(key,dict)or not key or any(k not in headers or not isinstance(v,str)or not v for k,v in key.items())):raise ValueError('complete nonempty values under existing header names required')
@@ -27,7 +30,7 @@ def bind(source,headers,key=None,source_sha256=None):
    ordinal+=1
    if header_cells(table)==headers:matches.append((ordinal,table))
  if len(matches)!=1:raise ValueError('exact header signature is absent or ambiguous: '+str(len(matches)))
- ordinal,table=matches[0];rows,grid=ed.grid(table);v=ed.inspect(source,ordinal);v['headers']=headers;v['rowKey']=key
+ ordinal,table=matches[0];rows,grid=ed.grid(table);v=ed.inspect_data(data,ordinal);v['headers']=headers;v['rowKey']=key
  if key is None:return v
  hits=[]
  for y,row in enumerate(rows[1:],1):

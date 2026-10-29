@@ -58,6 +58,26 @@ COM 불가만으로 모든 산출물을 실패로 취급하지 않되, 관찰하
 
 ### 복합 문서 출력 완료 연결
 
+재저장이 필요한 경우 다음 두 명령을 쓴다. run은 SaveAs·재열기·PDF 출력·차이 수집을 수행하고 검토 대기로 남는다. bundle이 이미 있으면 요청과 원본 해시를 대조하고 기존 증거만 확인한다. 불명확한 실행을 다시 저장하지 않는다.
+
+```powershell
+python -X utf8 -B scripts/finalize_document.py run candidate.hwpx --final final.hwpx --pdf final.pdf --bundle work/native-check --context ordinary-shell
+# 수집된 차이와 모든 페이지를 실제 검토한 뒤 review.json을 작성한다.
+python -X utf8 -B scripts/finalize_document.py check --bundle work/native-check --review work/native-check/review.json
+```
+
+스킬의 environment.json이 지정한 Python으로 실행한다. `host-approved`는 실제 호스트 승인 실행에서만 선택하며 권한 상승 옵션이 아니다. check는 현재 파일·페이지·검토 기록을 다시 결합하며 저장된 성공 표지만 신뢰하지 않는다. wrapper는 이전 편집의 의도 일치 검사를 대신하지 않는다.
+
+전달할 HWPX가 이미 만들어졌고 재저장·재계산이 필요 없다면 그 파일을 그대로 열어 출력한다. 내부 정의를 바꾸는 불필요한 SaveAs를 완료 조건으로 추가하지 않는다.
+
+```powershell
+python -X utf8 -B scripts/run_native_job.py final.hwpx --mode OpenOnly --pdf final.pdf --run work/open-check --context ordinary-shell
+```
+
+이 경로도 원본 대비 의도한 변경·비대상 보존과 정확한 전달 파일에서 출력한 PDF 전체 쪽을 검토하고, 위 별도 검증 기록으로 남긴다. 저장이 필수인 과제의 실패를 OpenOnly 성공으로 대체하지 않는다.
+
+기존 상세 호출과 진단 도구도 유지한다. 이미 시작한 작업은 실제 영수증 경로를 그대로 사용한다.
+
 ```powershell
 python scripts/hancom_completion_gate.py prepare --bundle "new-bundle" --source "candidate.hwpx" --final "new-final.hwpx" --pdf "new-final.pdf" --run "new-run"
 # 위와 같은 입력/출력/run으로 지원되는 실제 COM 명령을 실행한다.

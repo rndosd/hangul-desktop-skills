@@ -379,6 +379,43 @@ class HwpxOxmlRun:
 
     @text.setter
     def text(self, value: str) -> None:
+        value = _sanitize_text(value)
+        if self.text == value:
+            return
+        children = list(self.element)
+        if any(child.tag != f"{_HP}t" or len(child) for child in children):
+            # A whole-run assignment must not move words across inline objects.
+            # Keep the one unambiguous text region in its original position;
+            # multi-region content needs a bounded replace_text operation.
+            if any(child.tag == f"{_HP}t" and len(child) for child in children):
+                raise ValueError("mixed text controls require scoped replace_text")
+            groups, current = [], []
+            for child in children:
+                if child.tag == f"{_HP}t":
+                    current.append(child)
+                elif current:
+                    groups.append(current)
+                    current = []
+            if current:
+                groups.append(current)
+            active = [group for group in groups if any((n.text or '').strip() for n in group)]
+            if not active and len(groups) == 1:
+                active = groups
+            if len(active) != 1:
+                raise ValueError("text on multiple sides of inline objects requires scoped replace_text")
+            target = active[0]
+            index = groups.index(target)
+            prefix = ''.join(n.text or '' for group in groups[:index] for n in group)
+            suffix = ''.join(n.text or '' for group in groups[index+1:] for n in group)
+            if (len(value) < len(prefix) + len(suffix)
+                    or not value.startswith(prefix) or not value.endswith(suffix)):
+                raise ValueError("changing whitespace around inline objects requires scoped replace_text")
+            target[0].text = value[len(prefix):len(value)-len(suffix) if suffix else None]
+            for node in target[1:]:
+                node.text = ''
+            _clear_paragraph_layout_cache(self.paragraph.element)
+            self.paragraph.section.mark_dirty()
+            return
         primary = self._ensure_plain_text_node()
         changed = (primary.text or "") != value
         primary.text = _sanitize_text(value)

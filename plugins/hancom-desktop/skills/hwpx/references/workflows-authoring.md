@@ -1,6 +1,6 @@
 # 문서 작성 (공문·보고서·가정통신문) — workflows-authoring
 
-**언제:** "공문/보고서/가정통신문 만들어줘" 같은 자유 요청에서 **성격에 맞는 완성 HWPX**를 제로베이스로 생성할 때. (양식 채움은 workflows-forms, 시험지 재조판은 workflows-exam.)
+**현재 상태: 신규 생성 기능의 보류 기록.** 기본 문서 작성은 [사용자 원본·등록 양식 활용](template-selection.md)을 따른다. 아래 생성기·프로파일 API는 삭제하지 않고 기능 참고로 보존하며, 일반적인 새 문서 요청이나 양식 편집 실패 때 자동으로 선택하지 않는다. 사용자가 신규 생성 방식을 다시 검토하려는 경우에만 아래 내용을 참고한다. 선택한 양식 안의 문단·표 확장은 [원본 기반 작성](source-template-reuse.md#새로-추가하는-부분의-서식)을 따른다.
 
 **핵심 도구:** `create_document_from_plan(filename, document_plan, verify_render=False)`.
 
@@ -9,7 +9,7 @@
 ## 작성 루프
 
 1. **유형 판단(에이전트):** 공문 / 보고서 / 가정통신문 중 하나 → `metadata.document_type`.
-2. **내용 구성:** `blocks[]` = `{type: heading, level: 1~3, text}` · `{type: paragraph, text}` · `{type: bullets, items}` · `{type: table, columns, rows}`. 공문·보고서의 하위 위계는 **항목기호 1.→가.→1)→가)** 를 본문 텍스트로 쓴다(Word식 다단 heading 아님 — 한국 공문 정통 방식).
+2. **내용 구성:** `blocks[]` = `{type: heading, level: 1~3, text}` · `{type: paragraph, text}` · `{type: bullets, items}` · `{type: table, columns, rows}`. 항목 기호와 들여쓰기는 [업무 문서 기준](document-basics.md)의 native 번호 체계를 따른다. 원본을 참고했다면 적용한 부분과 새 구성을 구분한다.
 3. **공문이면 두문/결문을 반드시 채운다:**
    - 두문: `blocks` 첫머리에 `{type: paragraph, text: "수신  <수신자>"}` (필요시 "(경유)").
    - 본문 마지막: `…  끝.` (붙임이 있으면 붙임 뒤).

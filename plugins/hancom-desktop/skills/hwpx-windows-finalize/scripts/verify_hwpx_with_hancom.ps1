@@ -13,6 +13,8 @@ param(
     [string]$PdfPath,
 
     [string]$RunDirectory,
+    [string]$CompositionPlanPath,
+    [string]$CompositionSha256,
 
     [ValidateRange(10, 300)]
     [int]$TimeoutSeconds = 45
@@ -38,6 +40,50 @@ function Write-Receipt([System.Collections.IDictionary]$Receipt, [string]$Destin
     return $json
 }
 
+function Get-HancomSourceSha256([string]$Path) {
+    $stream=[IO.File]::OpenRead($Path)
+    $algorithm=[Security.Cryptography.SHA256]::Create()
+    try { return ([BitConverter]::ToString($algorithm.ComputeHash($stream))).Replace('-','') }
+    finally { $stream.Dispose();$algorithm.Dispose() }
+}
+
+function Get-HancomInterruptedReceipt([string]$ProgressPath,[string]$Reason) {
+    $last=$null;$invalidRows=0
+    if (Test-Path -LiteralPath $ProgressPath) {
+        foreach($line in [IO.File]::ReadLines($ProgressPath)) {
+            try { $row=$line|ConvertFrom-Json -ErrorAction Stop; if($row.stage){$last=$row} }
+            catch { $invalidRows++ }
+        }
+    }
+    $result=[ordered]@{status='BLOCKED_COM';mode=$Mode;candidatePath=$candidate;finalPath=if($Mode -eq 'SaveAs'){[IO.Path]::GetFullPath($OutputPath)}else{$candidate};firstOpen=$null;saveAs=$null;reopen=$null;pageCountBefore=$null;pageCountAfter=$null}
+    if($last.receipt){foreach($property in $last.receipt.PSObject.Properties){$result[$property.Name]=$property.Value}}
+    $result.status='BLOCKED_COM'
+    $result.error=$Reason
+    $result.checkedAt=(Get-Date).ToString('o')
+    $result.interrupted=$true
+    $result.inFlightOutcome='UNKNOWN_DO_NOT_RETRY'
+    $result.progress=@{path=$ProgressPath;lastStage=$last.stage;elapsedMs=$last.elapsedMs;utc=$last.utc;invalidRows=$invalidRows}
+    $result.comCreated=$last.comCreated
+    $result.registerModuleCalled=$last.registerModuleCalled
+    $result.securityModuleRegistered=$last.securityModuleRegistered
+    $result.registerModuleArguments=$last.registerModuleArguments
+    $result.observationErrors=@()
+    $result.cleanup=@{quit=$last.normalQuit;owned=($null -ne $last.owner);owner=$last.owner;forced=$false;remaining=$null;normalExitWait=$null}
+    if($last.normalQuit -and $last.owner){$result.cleanup.normalExitWait=Wait-HancomOwnedExit -Owner $last.owner -LimitMs 10000}
+    try {$result.cleanup.remaining=@(Get-Process Hwp -ErrorAction SilentlyContinue|ForEach-Object{$_.Id})}catch{$result.observationErrors+=@{operation='remaining-processes';error=$_.Exception.Message}}
+    $result.sourceUnchanged=$null
+    try {$result.sourceUnchanged=((Get-HancomSourceSha256 $candidate) -eq $sourceHashBefore)}catch{$result.observationErrors+=@{operation='source-hash';path=$candidate;error=$_.Exception.Message}}
+    $result.artifacts=@()
+    foreach($path in @($OutputPath,$PdfPath)) {
+        try {
+            if($path -and (Test-Path -LiteralPath $path -PathType Leaf)) {
+                $result.artifacts+=@{path=[IO.Path]::GetFullPath($path);bytes=(Get-Item -LiteralPath $path).Length;completion='UNVERIFIED'}
+            }
+        }catch{$result.observationErrors+=@{operation='artifact-observation';path=$path;error=$_.Exception.Message}}
+    }
+    return $result
+}
+
 $candidate = (Resolve-Path -LiteralPath $CandidatePath -ErrorAction Stop).Path
 if ($RunDirectory) {
     $run = [IO.Path]::GetFullPath($RunDirectory)
@@ -57,12 +103,18 @@ foreach($path in @($ReceiptPath,$OutputPath,$PdfPath)) {
 # from the registry view used by Hwp.exe.
 $worker = Join-Path $PSScriptRoot 'hancom_worker.ps1'
 $temporaryReceipt = Join-Path ([System.IO.Path]::GetTempPath()) ('hwpx-com-' + [guid]::NewGuid().ToString('N') + '.json')
+$progressPath=if($PdfPath){[IO.Path]::GetFullPath($PdfPath)+'.progress.jsonl'}elseif($ReceiptPath){[IO.Path]::GetFullPath($ReceiptPath)+'.progress.jsonl'}else{$temporaryReceipt+'.progress.jsonl'}
+$cancellationPath=$progressPath+'.cancel'
+if((Test-Path -LiteralPath $progressPath) -or (Test-Path -LiteralPath $cancellationPath)){throw 'Progress or cancellation path already exists; no COM call issued.'}
+$sourceHashBefore=Get-HancomSourceSha256 $candidate
 $arguments = @(
     '-NoProfile', '-STA',
     '-File', (Quote-ProcessArgument $worker),
     '-CandidatePath', (Quote-ProcessArgument $candidate),
     '-Mode', $Mode,
-    '-ReceiptPath', (Quote-ProcessArgument $temporaryReceipt)
+    '-ReceiptPath', (Quote-ProcessArgument $temporaryReceipt),
+    '-ProgressPath', (Quote-ProcessArgument $progressPath),
+    '-CancellationPath', (Quote-ProcessArgument $cancellationPath)
 )
 
 if ($Mode -eq 'SaveAs') {
@@ -70,6 +122,10 @@ if ($Mode -eq 'SaveAs') {
     $arguments += @('-OutputPath', (Quote-ProcessArgument ([System.IO.Path]::GetFullPath($OutputPath))))
 }
 
+if ($CompositionPlanPath) {
+    if ($Mode -ne 'SaveAs' -or !$CompositionSha256) { throw 'Composition requires SaveAs and a plan hash.' }
+    $arguments += @('-CompositionPlanPath',(Quote-ProcessArgument ([IO.Path]::GetFullPath($CompositionPlanPath))),'-CompositionSha256',$CompositionSha256)
+}
 $process = $null
 if (-not [string]::IsNullOrWhiteSpace($PdfPath)) {
     $arguments += @('-PdfPath', (Quote-ProcessArgument ([System.IO.Path]::GetFullPath($PdfPath))))
@@ -83,34 +139,18 @@ try {
     $launch=@{FilePath=(Join-Path $env:WINDIR 'System32/WindowsPowerShell/v1.0/powershell.exe');ArgumentList=($arguments -join ' ');WindowStyle='Hidden';PassThru=$true}
     if($RunDirectory){$launch.RedirectStandardOutput=Join-Path $run 'stdout.log';$launch.RedirectStandardError=Join-Path $run 'stderr.log'}
     $process = Start-Process @launch
+    $workerIdentity=@{pid=$process.Id;startTicks=$process.StartTime.ToUniversalTime().Ticks}
     if (-not $process.WaitForExit($TimeoutSeconds * 1000)) {
-        try { Stop-Process -Id $process.Id -Force -ErrorAction Stop } catch {}
-        $receipt = [ordered]@{
-            status = 'BLOCKED_COM'
-            mode = $Mode
-            candidatePath = $candidate
-            finalPath = if ($Mode -eq 'SaveAs') { [System.IO.Path]::GetFullPath($OutputPath) } else { $candidate }
-            firstOpen = $false
-            saveAs = $false
-            reopen = $false
-            pageCountBefore = $null
-            pageCountAfter = $null
-            error = "Hancom COM worker timed out after $TimeoutSeconds seconds. A hidden Hangul process may require manual closing."
-            checkedAt = (Get-Date).ToString('o')
-        }
+        [IO.File]::WriteAllText($cancellationPath,'Cancellation requested by controller timeout.',[Text.UTF8Encoding]::new($false))
+        $workerExited=$process.WaitForExit(5000)
+        $receipt = Get-HancomInterruptedReceipt $progressPath "Hancom COM worker timed out after $TimeoutSeconds seconds. Cancellation is requested; inspect the last stage and owned process before any retry."
+        $receipt.worker=@{pid=$workerIdentity.pid;startTicks=$workerIdentity.startTicks;exited=$workerExited;forced=$false;receiptPath=$temporaryReceipt;cancellationPath=$cancellationPath}
         Write-Receipt $receipt $ReceiptPath
         exit 3
     }
 
     if (-not (Test-Path -LiteralPath $temporaryReceipt)) {
-        $receipt = [ordered]@{
-            status = 'BLOCKED_COM'
-            mode = $Mode
-            candidatePath = $candidate
-            finalPath = if ($Mode -eq 'SaveAs') { [System.IO.Path]::GetFullPath($OutputPath) } else { $candidate }
-            error = "Hancom COM worker exited with code $($process.ExitCode) without producing a receipt."
-            checkedAt = (Get-Date).ToString('o')
-        }
+        $receipt = Get-HancomInterruptedReceipt $progressPath "Hancom COM worker exited with code $($process.ExitCode) without producing a receipt."
         Write-Receipt $receipt $ReceiptPath
         exit 3
     }
@@ -138,7 +178,7 @@ try {
 }
 finally {
     if($locked){$mutex.ReleaseMutex()};$mutex.Dispose()
-    if (Test-Path -LiteralPath $temporaryReceipt) {
+    if (-not (Test-Path -LiteralPath $cancellationPath) -and (Test-Path -LiteralPath $temporaryReceipt)) {
         Remove-Item -LiteralPath $temporaryReceipt -Force
     }
 }

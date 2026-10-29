@@ -1,0 +1,1586 @@
+{
+  "schemaVersion": "hwpx.agent-batch-result/v1",
+  "ok": true,
+  "rolledBack": false,
+  "dryRun": false,
+  "inputRevision": "sha256:235656c75672cd9c9ffff45ad1dec0bd0f178507990562086ad65384402468a5",
+  "documentRevision": "sha256:eb3deaadb8faf399e9b2f73ccb87c3138ee658301ceba4c3278e7ee7e0e859bd",
+  "output": {
+    "filename": "<local-path>"
+  },
+  "commandResults": [
+    {
+      "commandId": "fill-1",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"2613180041\"]/table[@id=\"1416251067\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[@id=\"2613180041\"]/table[@id=\"1416251067\"]/row[2]/cell[1]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "[계획서 제목]",
+          "after": "독서·책놀이 주간 운영계획(안)"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-2",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[2]/run[1]",
+      "parentPath": "/section[1]/paragraph[2]",
+      "changedProperties": {
+        "text": {
+          "before": "[학교·작성 부서]",
+          "after": "학교명 미정 · 독서교육 담당"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-3",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[13]/run[1]",
+      "parentPath": "/section[1]/paragraph[13]",
+      "changedProperties": {
+        "text": {
+          "before": "  ◦ 목적: [활동 목표]",
+          "after": "  ◦ 목적: 책을 스스로 고르고 함께 읽으며, 놀이·대화·추천으로 읽은 경험을 나눈다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-4",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[14]/run[1]",
+      "parentPath": "/section[1]/paragraph[14]",
+      "changedProperties": {
+        "text": {
+          "before": "  ◦ 대상: [참여 대상]",
+          "after": "  ◦ 대상: 전교생(참여 인원 미정), 학년별 수준에 맞추어 학급 단위로 운영"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-5",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[15]/run[1]",
+      "parentPath": "/section[1]/paragraph[15]",
+      "changedProperties": {
+        "text": {
+          "before": "  ◦ 장소: [운영 장소]",
+          "after": "  ◦ 장소: 각 학급 교실과 학교도서관 등 교내 공간(세부 장소 추후 확정)"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-6",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[20]/run[1]",
+      "parentPath": "/section[1]/paragraph[20]",
+      "changedProperties": {
+        "text": {
+          "before": "  ◦ 목적: [준비 목표]",
+          "after": "  ◦ 목적: 학년별 도서와 활동 자료를 점검하고 모든 학생이 참여할 수 있는 읽기 환경을 마련한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-7",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[21]/run[1]",
+      "parentPath": "/section[1]/paragraph[21]",
+      "changedProperties": {
+        "text": {
+          "before": "  ◦ 기간: [실시 기간]",
+          "after": "  ◦ 기간: 월요일~금요일 5일간(실시 날짜 미정), 학급 교육과정과 연계하여 시간 배정"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-8",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[22]/run[1]",
+      "parentPath": "/section[1]/paragraph[22]",
+      "changedProperties": {
+        "text": {
+          "before": "  ◦ 지원: [참여 지원]",
+          "after": "  ◦ 지원: 그림책·음성 자료·함께 읽기, 말·그림·글 등 다양한 표현 방식을 제공한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-9",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[23]/run[1]",
+      "parentPath": "/section[1]/paragraph[23]",
+      "changedProperties": {
+        "text": {
+          "before": "  ◦ 담당: [담당자·역할]",
+          "after": "  ◦ 담당: 독서교육 담당: 총괄·자료 지원 / 담임: 학급 운영·관찰 / 도서관 담당: 도서·공간 지원(담당자 추후 지정)"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-10",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[26]/run[1]",
+      "parentPath": "/section[1]/paragraph[26]",
+      "changedProperties": {
+        "text": {
+          "before": "  ◦ 안전: [안전·생활지도]",
+          "after": "  ◦ 안전: 이동 동선과 도서관 이용 약속을 사전 안내하고, 책놀이 도구 사용과 학생 간 표현을 살핀다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-11",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[27]/run[1]",
+      "parentPath": "/section[1]/paragraph[27]",
+      "changedProperties": {
+        "text": {
+          "before": "  ◦ 예산: [예산·준비물]",
+          "after": "  ◦ 예산: 예산 미정. 소장 도서·재사용 종이·그림 도구를 우선 활용하고 추가 구입은 수요 확인 후 결정한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-12",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[28]/run[1]",
+      "parentPath": "/section[1]/paragraph[28]",
+      "changedProperties": {
+        "text": {
+          "before": "  ◦ 평가: [평가·환류]",
+          "after": "  ◦ 평가: 참여 관찰과 추천 카드·돌아보기 내용을 확인하고, 운영 후 학생 의견과 담당자 협의로 개선점을 정리한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-13",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[1]/cell[1]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[1]/cell[1]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "[추진 단계 1]",
+          "after": "사전 준비: 도서·자료 점검, 학급별 일정과 참여 지원 확인"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-14",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[2]/cell[1]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "[단계 1 담당·시기]",
+          "after": "독서교육·도서관 담당, 담임 / 운영 전"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-15",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[1]/cell[3]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[1]/cell[3]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "[추진 단계 2]",
+          "after": "주간 운영: 요일별 활동을 학년 수준에 맞게 실행하고 참여 과정 관찰"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-16",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[2]/cell[2]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "[단계 2 담당·시기]",
+          "after": "담임 / 월~금 5일간"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-17",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[1]/cell[5]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[1]/cell[5]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "[추진 단계 3]",
+          "after": "공유·돌아보기: 추천 카드와 읽기 경험을 나누고 학생 의견 수렴"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-18",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[2]/cell[3]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[2]/cell[3]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "[단계 3 담당·시기]",
+          "after": "담임·학생 / 금요일"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-19",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[1]/cell[7]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[1]/cell[7]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "[추진 단계 4]",
+          "after": "평가·환류: 자료 정리, 운영상 어려움과 다음 독서활동 개선점 협의"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-20",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[2]/cell[4]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[2]/cell[4]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "[단계 4 담당·시기]",
+          "after": "독서교육 담당·담임 / 운영 후"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-21",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[34]/run[2]",
+      "parentPath": "/section[1]/paragraph[34]",
+      "changedProperties": {
+        "text": {
+          "before": " [기대 효과]",
+          "after": " 놀이·대화·추천을 통해 표현과 경청의 기회를 늘리고 학급의 책 나눔 문화를 형성하고자 한다. 실제 변화는 운영 후 확인한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-22",
+      "op": "copy",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"2613180042\"]",
+      "parentPath": "/section[1]",
+      "changedProperties": {},
+      "generatedIdentities": [
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "0",
+          "new": "2613180042"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-23",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[34]/run[2]",
+      "parentPath": "/section[1]/paragraph[34]",
+      "changedProperties": {
+        "text": {
+          "before": " 놀이·대화·추천을 통해 표현과 경청의 기회를 늘리고 학급의 책 나눔 문화를 형성하고자 한다. 실제 변화는 운영 후 확인한다.",
+          "after": " 책 선택과 공동 읽기를 통해 독서에 대한 관심과 자발적인 참여가 넓어질 것으로 기대한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-24",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[30]/run[1]",
+      "parentPath": "/section[1]/paragraph[30]",
+      "changedProperties": {
+        "text": {
+          "before": "   - [운영 확인 사항]",
+          "after": "   - 활동 중 소외되는 학생이 없는지 살피고 결과물 공개는 학생 의사를 존중한다. 사진 등 기록은 학교 기준에 따른다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-25",
+      "op": "copy",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"2613180043\"]",
+      "parentPath": "/section[1]",
+      "changedProperties": {},
+      "generatedIdentities": [
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "0",
+          "new": "2613180043"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-26",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[30]/run[1]",
+      "parentPath": "/section[1]/paragraph[30]",
+      "changedProperties": {
+        "text": {
+          "before": "   - 활동 중 소외되는 학생이 없는지 살피고 결과물 공개는 학생 의사를 존중한다. 사진 등 기록은 학교 기준에 따른다.",
+          "after": "   - 운영 전 도서 수량·자료 접근성·학급 시간·이동 동선과 지원이 필요한 학생의 참여 방법을 확인한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-27",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[17]/run[1]",
+      "parentPath": "/section[1]/paragraph[17]",
+      "changedProperties": {
+        "text": {
+          "before": "   - [활동 내용]",
+          "after": "   - 화요일 | 장면 책놀이: 인상 깊은 장면을 고른 뒤 몸짓, 역할놀이, 그림 등으로 표현하고 책 내용과 연결해 설명한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-28",
+      "op": "copy",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"2613180044\"]",
+      "parentPath": "/section[1]",
+      "changedProperties": {},
+      "generatedIdentities": [
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2613180044"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-29",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[17]/run[1]",
+      "parentPath": "/section[1]/paragraph[17]",
+      "changedProperties": {
+        "text": {
+          "before": "   - 화요일 | 장면 책놀이: 인상 깊은 장면을 고른 뒤 몸짓, 역할놀이, 그림 등으로 표현하고 책 내용과 연결해 설명한다.",
+          "after": "   - 수요일 | 책 대화: 기억에 남는 장면과 질문을 중심으로 대화하며 서로 다른 생각을 듣고 책 속 근거를 찾아본다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-30",
+      "op": "copy",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"2613180045\"]",
+      "parentPath": "/section[1]",
+      "changedProperties": {},
+      "generatedIdentities": [
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2613180045"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-31",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[17]/run[1]",
+      "parentPath": "/section[1]/paragraph[17]",
+      "changedProperties": {
+        "text": {
+          "before": "   - 수요일 | 책 대화: 기억에 남는 장면과 질문을 중심으로 대화하며 서로 다른 생각을 듣고 책 속 근거를 찾아본다.",
+          "after": "   - 목요일 | 추천 카드: 책 제목과 추천 이유를 말·그림·글로 담고, 친구가 읽고 싶어질 내용을 골라 카드를 만든다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-32",
+      "op": "copy",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"2613180046\"]",
+      "parentPath": "/section[1]",
+      "changedProperties": {},
+      "generatedIdentities": [
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2613180046"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-33",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[17]/run[1]",
+      "parentPath": "/section[1]/paragraph[17]",
+      "changedProperties": {
+        "text": {
+          "before": "   - 목요일 | 추천 카드: 책 제목과 추천 이유를 말·그림·글로 담고, 친구가 읽고 싶어질 내용을 골라 카드를 만든다.",
+          "after": "   - 금요일 | 공유·돌아보기: 추천 카드와 활동 경험을 나누고, 즐거웠던 점·어려웠던 점·다음에 읽고 싶은 책을 돌아본다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-34",
+      "op": "copy",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"2613180047\"]",
+      "parentPath": "/section[1]",
+      "changedProperties": {},
+      "generatedIdentities": [
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2613180047"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-35",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[17]/run[1]",
+      "parentPath": "/section[1]/paragraph[17]",
+      "changedProperties": {
+        "text": {
+          "before": "   - 금요일 | 공유·돌아보기: 추천 카드와 활동 경험을 나누고, 즐거웠던 점·어려웠던 점·다음에 읽고 싶은 책을 돌아본다.",
+          "after": "   - 월요일 | 책 고르기·함께 읽기: 표지와 소개를 살펴 관심 있는 책을 고르고, 교사·친구와 읽으며 궁금한 점을 나눈다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-36",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[10]/run[2]",
+      "parentPath": "/section[1]/paragraph[10]",
+      "changedProperties": {
+        "text": {
+          "before": " [운영 방침]",
+          "after": " 읽기 속도나 결과물의 양을 비교하지 않고 선택·경청·협력의 과정을 살핀다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-37",
+      "op": "copy",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"2613180048\"]",
+      "parentPath": "/section[1]",
+      "changedProperties": {},
+      "generatedIdentities": [
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2613180048"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-38",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[10]/run[2]",
+      "parentPath": "/section[1]/paragraph[10]",
+      "changedProperties": {
+        "text": {
+          "before": " 읽기 속도나 결과물의 양을 비교하지 않고 선택·경청·협력의 과정을 살핀다.",
+          "after": " 소장 자료를 우선 활용하며 도서 부족이나 읽기 어려움이 있는 학생을 사전에 지원한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-39",
+      "op": "copy",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"2613180049\"]",
+      "parentPath": "/section[1]",
+      "changedProperties": {},
+      "generatedIdentities": [
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2613180049"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-40",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[10]/run[2]",
+      "parentPath": "/section[1]/paragraph[10]",
+      "changedProperties": {
+        "text": {
+          "before": " 소장 자료를 우선 활용하며 도서 부족이나 읽기 어려움이 있는 학생을 사전에 지원한다.",
+          "after": " 전교생이 참여하되 학년·학급별 읽기 수준과 교육과정에 맞춰 도서, 활동 시간, 표현 방식을 조정한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-41",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[8]/run[2]",
+      "parentPath": "/section[1]/paragraph[8]",
+      "changedProperties": {
+        "text": {
+          "before": " [운영 목적]",
+          "after": " 책 속 장면과 생각을 다양한 방식으로 표현하며 친구의 해석을 존중한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-42",
+      "op": "copy",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"2613180050\"]",
+      "parentPath": "/section[1]",
+      "changedProperties": {},
+      "generatedIdentities": [
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2613180050"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-43",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[8]/run[2]",
+      "parentPath": "/section[1]/paragraph[8]",
+      "changedProperties": {
+        "text": {
+          "before": " 책 속 장면과 생각을 다양한 방식으로 표현하며 친구의 해석을 존중한다.",
+          "after": " 책을 추천하고 자신의 독서 경험을 돌아보며 다음 읽기로 연결한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-44",
+      "op": "copy",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"2613180051\"]",
+      "parentPath": "/section[1]",
+      "changedProperties": {},
+      "generatedIdentities": [
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2613180051"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-45",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[8]/run[2]",
+      "parentPath": "/section[1]/paragraph[8]",
+      "changedProperties": {
+        "text": {
+          "before": " 책을 추천하고 자신의 독서 경험을 돌아보며 다음 읽기로 연결한다.",
+          "after": " 관심과 읽기 수준에 맞는 책을 선택하고 함께 읽는 즐거움을 경험한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-46",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[6]/run[2]",
+      "parentPath": "/section[1]/paragraph[6]",
+      "changedProperties": {
+        "text": {
+          "before": " [추진 배경]",
+          "after": " 함께 읽은 책을 놀이와 대화로 연결하여 일상에서 책을 가까이하는 경험을 넓히고자 한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-47",
+      "op": "copy",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"2613180052\"]",
+      "parentPath": "/section[1]",
+      "changedProperties": {},
+      "generatedIdentities": [
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2613180052"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-48",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[6]/run[2]",
+      "parentPath": "/section[1]/paragraph[6]",
+      "changedProperties": {
+        "text": {
+          "before": " 함께 읽은 책을 놀이와 대화로 연결하여 일상에서 책을 가까이하는 경험을 넓히고자 한다.",
+          "after": " 학생마다 읽기 경험과 관심이 다르므로 책 선택에서 표현·공유까지 이어지는 다양한 참여 기회를 마련할 필요가 있다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-49",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[4]/run[2]",
+      "parentPath": "/section[1]/paragraph[4]",
+      "changedProperties": {
+        "text": {
+          "before": " [추진 근거]",
+          "after": " 학교 교육과정 및 독서교육 운영 방향과 연계한 제안이며, 관련 계획과 실시 일정은 학교 협의 후 확정한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    }
+  ],
+  "semanticDiff": {
+    "schemaVersion": "hwpx.agent-semantic-diff/v1",
+    "inputRevision": "sha256:235656c75672cd9c9ffff45ad1dec0bd0f178507990562086ad65384402468a5",
+    "candidateRevision": "sha256:eb3deaadb8faf399e9b2f73ccb87c3138ee658301ceba4c3278e7ee7e0e859bd",
+    "changes": [
+      {
+        "commandId": "fill-1",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[@id=\"2613180041\"]/table[@id=\"1416251067\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[@id=\"2613180041\"]/table[@id=\"1416251067\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "[계획서 제목]",
+            "after": "독서·책놀이 주간 운영계획(안)"
+          }
+        }
+      },
+      {
+        "commandId": "fill-2",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[2]/run[1]",
+        "afterPath": "/section[1]/paragraph[2]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "[학교·작성 부서]",
+            "after": "학교명 미정 · 독서교육 담당"
+          }
+        }
+      },
+      {
+        "commandId": "fill-3",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[13]/run[1]",
+        "afterPath": "/section[1]/paragraph[13]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "  ◦ 목적: [활동 목표]",
+            "after": "  ◦ 목적: 책을 스스로 고르고 함께 읽으며, 놀이·대화·추천으로 읽은 경험을 나눈다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-4",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[14]/run[1]",
+        "afterPath": "/section[1]/paragraph[14]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "  ◦ 대상: [참여 대상]",
+            "after": "  ◦ 대상: 전교생(참여 인원 미정), 학년별 수준에 맞추어 학급 단위로 운영"
+          }
+        }
+      },
+      {
+        "commandId": "fill-5",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[15]/run[1]",
+        "afterPath": "/section[1]/paragraph[15]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "  ◦ 장소: [운영 장소]",
+            "after": "  ◦ 장소: 각 학급 교실과 학교도서관 등 교내 공간(세부 장소 추후 확정)"
+          }
+        }
+      },
+      {
+        "commandId": "fill-6",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[20]/run[1]",
+        "afterPath": "/section[1]/paragraph[20]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "  ◦ 목적: [준비 목표]",
+            "after": "  ◦ 목적: 학년별 도서와 활동 자료를 점검하고 모든 학생이 참여할 수 있는 읽기 환경을 마련한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-7",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[21]/run[1]",
+        "afterPath": "/section[1]/paragraph[21]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "  ◦ 기간: [실시 기간]",
+            "after": "  ◦ 기간: 월요일~금요일 5일간(실시 날짜 미정), 학급 교육과정과 연계하여 시간 배정"
+          }
+        }
+      },
+      {
+        "commandId": "fill-8",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[22]/run[1]",
+        "afterPath": "/section[1]/paragraph[22]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "  ◦ 지원: [참여 지원]",
+            "after": "  ◦ 지원: 그림책·음성 자료·함께 읽기, 말·그림·글 등 다양한 표현 방식을 제공한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-9",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[23]/run[1]",
+        "afterPath": "/section[1]/paragraph[23]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "  ◦ 담당: [담당자·역할]",
+            "after": "  ◦ 담당: 독서교육 담당: 총괄·자료 지원 / 담임: 학급 운영·관찰 / 도서관 담당: 도서·공간 지원(담당자 추후 지정)"
+          }
+        }
+      },
+      {
+        "commandId": "fill-10",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[26]/run[1]",
+        "afterPath": "/section[1]/paragraph[26]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "  ◦ 안전: [안전·생활지도]",
+            "after": "  ◦ 안전: 이동 동선과 도서관 이용 약속을 사전 안내하고, 책놀이 도구 사용과 학생 간 표현을 살핀다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-11",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[27]/run[1]",
+        "afterPath": "/section[1]/paragraph[27]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "  ◦ 예산: [예산·준비물]",
+            "after": "  ◦ 예산: 예산 미정. 소장 도서·재사용 종이·그림 도구를 우선 활용하고 추가 구입은 수요 확인 후 결정한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-12",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[28]/run[1]",
+        "afterPath": "/section[1]/paragraph[28]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "  ◦ 평가: [평가·환류]",
+            "after": "  ◦ 평가: 참여 관찰과 추천 카드·돌아보기 내용을 확인하고, 운영 후 학생 의견과 담당자 협의로 개선점을 정리한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-13",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[1]/cell[1]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[1]/cell[1]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "[추진 단계 1]",
+            "after": "사전 준비: 도서·자료 점검, 학급별 일정과 참여 지원 확인"
+          }
+        }
+      },
+      {
+        "commandId": "fill-14",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "[단계 1 담당·시기]",
+            "after": "독서교육·도서관 담당, 담임 / 운영 전"
+          }
+        }
+      },
+      {
+        "commandId": "fill-15",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[1]/cell[3]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[1]/cell[3]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "[추진 단계 2]",
+            "after": "주간 운영: 요일별 활동을 학년 수준에 맞게 실행하고 참여 과정 관찰"
+          }
+        }
+      },
+      {
+        "commandId": "fill-16",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "[단계 2 담당·시기]",
+            "after": "담임 / 월~금 5일간"
+          }
+        }
+      },
+      {
+        "commandId": "fill-17",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[1]/cell[5]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[1]/cell[5]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "[추진 단계 3]",
+            "after": "공유·돌아보기: 추천 카드와 읽기 경험을 나누고 학생 의견 수렴"
+          }
+        }
+      },
+      {
+        "commandId": "fill-18",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[2]/cell[3]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[2]/cell[3]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "[단계 3 담당·시기]",
+            "after": "담임·학생 / 금요일"
+          }
+        }
+      },
+      {
+        "commandId": "fill-19",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[1]/cell[7]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[1]/cell[7]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "[추진 단계 4]",
+            "after": "평가·환류: 자료 정리, 운영상 어려움과 다음 독서활동 개선점 협의"
+          }
+        }
+      },
+      {
+        "commandId": "fill-20",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[2]/cell[4]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[32]/table[@id=\"1582124079\"]/row[2]/cell[4]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "[단계 4 담당·시기]",
+            "after": "독서교육 담당·담임 / 운영 후"
+          }
+        }
+      },
+      {
+        "commandId": "fill-21",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[34]/run[2]",
+        "afterPath": "/section[1]/paragraph[34]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": " [기대 효과]",
+            "after": " 놀이·대화·추천을 통해 표현과 경청의 기회를 늘리고 학급의 책 나눔 문화를 형성하고자 한다. 실제 변화는 운영 후 확인한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-22",
+        "op": "copy",
+        "beforePath": "/section[1]/paragraph[34]",
+        "afterPath": "/section[1]/paragraph[@id=\"2613180042\"]",
+        "changedProperties": {}
+      },
+      {
+        "commandId": "fill-23",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[34]/run[2]",
+        "afterPath": "/section[1]/paragraph[34]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": " 놀이·대화·추천을 통해 표현과 경청의 기회를 늘리고 학급의 책 나눔 문화를 형성하고자 한다. 실제 변화는 운영 후 확인한다.",
+            "after": " 책 선택과 공동 읽기를 통해 독서에 대한 관심과 자발적인 참여가 넓어질 것으로 기대한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-24",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[30]/run[1]",
+        "afterPath": "/section[1]/paragraph[30]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "   - [운영 확인 사항]",
+            "after": "   - 활동 중 소외되는 학생이 없는지 살피고 결과물 공개는 학생 의사를 존중한다. 사진 등 기록은 학교 기준에 따른다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-25",
+        "op": "copy",
+        "beforePath": "/section[1]/paragraph[30]",
+        "afterPath": "/section[1]/paragraph[@id=\"2613180043\"]",
+        "changedProperties": {}
+      },
+      {
+        "commandId": "fill-26",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[30]/run[1]",
+        "afterPath": "/section[1]/paragraph[30]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "   - 활동 중 소외되는 학생이 없는지 살피고 결과물 공개는 학생 의사를 존중한다. 사진 등 기록은 학교 기준에 따른다.",
+            "after": "   - 운영 전 도서 수량·자료 접근성·학급 시간·이동 동선과 지원이 필요한 학생의 참여 방법을 확인한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-27",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[17]/run[1]",
+        "afterPath": "/section[1]/paragraph[17]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "   - [활동 내용]",
+            "after": "   - 화요일 | 장면 책놀이: 인상 깊은 장면을 고른 뒤 몸짓, 역할놀이, 그림 등으로 표현하고 책 내용과 연결해 설명한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-28",
+        "op": "copy",
+        "beforePath": "/section[1]/paragraph[17]",
+        "afterPath": "/section[1]/paragraph[@id=\"2613180044\"]",
+        "changedProperties": {}
+      },
+      {
+        "commandId": "fill-29",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[17]/run[1]",
+        "afterPath": "/section[1]/paragraph[17]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "   - 화요일 | 장면 책놀이: 인상 깊은 장면을 고른 뒤 몸짓, 역할놀이, 그림 등으로 표현하고 책 내용과 연결해 설명한다.",
+            "after": "   - 수요일 | 책 대화: 기억에 남는 장면과 질문을 중심으로 대화하며 서로 다른 생각을 듣고 책 속 근거를 찾아본다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-30",
+        "op": "copy",
+        "beforePath": "/section[1]/paragraph[17]",
+        "afterPath": "/section[1]/paragraph[@id=\"2613180045\"]",
+        "changedProperties": {}
+      },
+      {
+        "commandId": "fill-31",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[17]/run[1]",
+        "afterPath": "/section[1]/paragraph[17]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "   - 수요일 | 책 대화: 기억에 남는 장면과 질문을 중심으로 대화하며 서로 다른 생각을 듣고 책 속 근거를 찾아본다.",
+            "after": "   - 목요일 | 추천 카드: 책 제목과 추천 이유를 말·그림·글로 담고, 친구가 읽고 싶어질 내용을 골라 카드를 만든다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-32",
+        "op": "copy",
+        "beforePath": "/section[1]/paragraph[17]",
+        "afterPath": "/section[1]/paragraph[@id=\"2613180046\"]",
+        "changedProperties": {}
+      },
+      {
+        "commandId": "fill-33",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[17]/run[1]",
+        "afterPath": "/section[1]/paragraph[17]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "   - 목요일 | 추천 카드: 책 제목과 추천 이유를 말·그림·글로 담고, 친구가 읽고 싶어질 내용을 골라 카드를 만든다.",
+            "after": "   - 금요일 | 공유·돌아보기: 추천 카드와 활동 경험을 나누고, 즐거웠던 점·어려웠던 점·다음에 읽고 싶은 책을 돌아본다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-34",
+        "op": "copy",
+        "beforePath": "/section[1]/paragraph[17]",
+        "afterPath": "/section[1]/paragraph[@id=\"2613180047\"]",
+        "changedProperties": {}
+      },
+      {
+        "commandId": "fill-35",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[17]/run[1]",
+        "afterPath": "/section[1]/paragraph[17]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "   - 금요일 | 공유·돌아보기: 추천 카드와 활동 경험을 나누고, 즐거웠던 점·어려웠던 점·다음에 읽고 싶은 책을 돌아본다.",
+            "after": "   - 월요일 | 책 고르기·함께 읽기: 표지와 소개를 살펴 관심 있는 책을 고르고, 교사·친구와 읽으며 궁금한 점을 나눈다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-36",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[10]/run[2]",
+        "afterPath": "/section[1]/paragraph[10]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": " [운영 방침]",
+            "after": " 읽기 속도나 결과물의 양을 비교하지 않고 선택·경청·협력의 과정을 살핀다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-37",
+        "op": "copy",
+        "beforePath": "/section[1]/paragraph[10]",
+        "afterPath": "/section[1]/paragraph[@id=\"2613180048\"]",
+        "changedProperties": {}
+      },
+      {
+        "commandId": "fill-38",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[10]/run[2]",
+        "afterPath": "/section[1]/paragraph[10]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": " 읽기 속도나 결과물의 양을 비교하지 않고 선택·경청·협력의 과정을 살핀다.",
+            "after": " 소장 자료를 우선 활용하며 도서 부족이나 읽기 어려움이 있는 학생을 사전에 지원한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-39",
+        "op": "copy",
+        "beforePath": "/section[1]/paragraph[10]",
+        "afterPath": "/section[1]/paragraph[@id=\"2613180049\"]",
+        "changedProperties": {}
+      },
+      {
+        "commandId": "fill-40",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[10]/run[2]",
+        "afterPath": "/section[1]/paragraph[10]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": " 소장 자료를 우선 활용하며 도서 부족이나 읽기 어려움이 있는 학생을 사전에 지원한다.",
+            "after": " 전교생이 참여하되 학년·학급별 읽기 수준과 교육과정에 맞춰 도서, 활동 시간, 표현 방식을 조정한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-41",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[8]/run[2]",
+        "afterPath": "/section[1]/paragraph[8]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": " [운영 목적]",
+            "after": " 책 속 장면과 생각을 다양한 방식으로 표현하며 친구의 해석을 존중한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-42",
+        "op": "copy",
+        "beforePath": "/section[1]/paragraph[8]",
+        "afterPath": "/section[1]/paragraph[@id=\"2613180050\"]",
+        "changedProperties": {}
+      },
+      {
+        "commandId": "fill-43",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[8]/run[2]",
+        "afterPath": "/section[1]/paragraph[8]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": " 책 속 장면과 생각을 다양한 방식으로 표현하며 친구의 해석을 존중한다.",
+            "after": " 책을 추천하고 자신의 독서 경험을 돌아보며 다음 읽기로 연결한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-44",
+        "op": "copy",
+        "beforePath": "/section[1]/paragraph[8]",
+        "afterPath": "/section[1]/paragraph[@id=\"2613180051\"]",
+        "changedProperties": {}
+      },
+      {
+        "commandId": "fill-45",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[8]/run[2]",
+        "afterPath": "/section[1]/paragraph[8]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": " 책을 추천하고 자신의 독서 경험을 돌아보며 다음 읽기로 연결한다.",
+            "after": " 관심과 읽기 수준에 맞는 책을 선택하고 함께 읽는 즐거움을 경험한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-46",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[6]/run[2]",
+        "afterPath": "/section[1]/paragraph[6]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": " [추진 배경]",
+            "after": " 함께 읽은 책을 놀이와 대화로 연결하여 일상에서 책을 가까이하는 경험을 넓히고자 한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-47",
+        "op": "copy",
+        "beforePath": "/section[1]/paragraph[6]",
+        "afterPath": "/section[1]/paragraph[@id=\"2613180052\"]",
+        "changedProperties": {}
+      },
+      {
+        "commandId": "fill-48",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[6]/run[2]",
+        "afterPath": "/section[1]/paragraph[6]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": " 함께 읽은 책을 놀이와 대화로 연결하여 일상에서 책을 가까이하는 경험을 넓히고자 한다.",
+            "after": " 학생마다 읽기 경험과 관심이 다르므로 책 선택에서 표현·공유까지 이어지는 다양한 참여 기회를 마련할 필요가 있다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-49",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[4]/run[2]",
+        "afterPath": "/section[1]/paragraph[4]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": " [추진 근거]",
+            "after": " 학교 교육과정 및 독서교육 운영 방향과 연계한 제안이며, 관련 계획과 실시 일정은 학교 협의 후 확정한다."
+          }
+        }
+      }
+    ],
+    "identityMap": [
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "0",
+        "new": "2613180042"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "0",
+        "new": "2613180043"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2613180044"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2613180045"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2613180046"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2613180047"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2613180048"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2613180049"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2613180050"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2613180051"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2613180052"
+      }
+    ]
+  },
+  "verificationReport": {
+    "schemaVersion": "hwpx.agent-batch/v1",
+    "catalogHash": "sha256:bef4d9c53240d62160365796ef02d49ba90aa85e7cdac97b42d3443b51a547fa",
+    "requirements": [
+      "package",
+      "reopen",
+      "openSafety",
+      "semanticDiff",
+      "bytePreservation"
+    ],
+    "idempotency": {
+      "keyProvided": true,
+      "requestHash": "sha256:494a0f1896bb81a867c05b518cc631c7da513f46d0cbac590717796cd150f7b0",
+      "replayed": false,
+      "store": "none"
+    },
+    "revision": {
+      "expected": "sha256:235656c75672cd9c9ffff45ad1dec0bd0f178507990562086ad65384402468a5",
+      "actual": "sha256:235656c75672cd9c9ffff45ad1dec0bd0f178507990562086ad65384402468a5",
+      "matched": true
+    },
+    "inputOpenSafety": {
+      "ok": true,
+      "summary": "editor-open safety verification passed",
+      "validatePackage": {
+        "ok": true,
+        "errors": [],
+        "warnings": [
+          "Contents/content.hpf: manifest does not reference a version part; engine will fall back to 'version.xml'"
+        ],
+        "blockingErrors": []
+      },
+      "validateDocument": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      },
+      "reopen": {
+        "ok": true,
+        "error": null
+      }
+    },
+    "candidateRevision": "sha256:eb3deaadb8faf399e9b2f73ccb87c3138ee658301ceba4c3278e7ee7e0e859bd",
+    "package": {
+      "ok": true,
+      "errors": [],
+      "warnings": [
+        "Contents/content.hpf: manifest does not reference a version part; engine will fall back to 'version.xml'"
+      ],
+      "blockingErrors": []
+    },
+    "reopen": {
+      "ok": true,
+      "error": null
+    },
+    "openSafety": {
+      "ok": true,
+      "summary": "editor-open safety verification passed",
+      "validatePackage": {
+        "ok": true,
+        "errors": [],
+        "warnings": [
+          "Contents/content.hpf: manifest does not reference a version part; engine will fall back to 'version.xml'"
+        ],
+        "blockingErrors": []
+      },
+      "validateDocument": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      },
+      "reopen": {
+        "ok": true,
+        "error": null
+      }
+    },
+    "semanticDiff": {
+      "ok": true,
+      "changeCount": 49
+    },
+    "bytePreservation": {
+      "ok": true,
+      "changedMembers": [
+        "Contents/section0.xml"
+      ],
+      "addedMembers": [],
+      "removedMembers": [],
+      "unchangedMemberCount": 12,
+      "beforeMemberCount": 13,
+      "afterMemberCount": 13
+    },
+    "domain": {
+      "ok": null,
+      "status": "not-requested"
+    },
+    "savePipeline": {
+      "ok": true,
+      "outputPath": "<local-path>",
+      "visualComplete": false,
+      "visualCompleteStatus": "unverified",
+      "renderChecked": false,
+      "openSafety": {
+        "ok": true,
+        "summary": "editor-open safety verification passed",
+        "detail": {
+          "ok": true,
+          "summary": "editor-open safety verification passed",
+          "validatePackage": {
+            "ok": true,
+            "errors": [],
+            "warnings": [
+              "Contents/content.hpf: manifest does not reference a version part; engine will fall back to 'version.xml'"
+            ],
+            "blockingErrors": []
+          },
+          "validateDocument": {
+            "ok": true,
+            "errors": [],
+            "warnings": []
+          },
+          "reopen": {
+            "ok": true,
+            "error": null
+          }
+        }
+      },
+      "semantic": {
+        "ok": true,
+        "checks": [],
+        "warnings": [],
+        "errors": []
+      },
+      "form": {
+        "ok": true,
+        "fields": [],
+        "warnings": [],
+        "errors": []
+      },
+      "layout": {
+        "ok": true,
+        "warnings": [],
+        "errors": [],
+        "status": "unverified",
+        "unverified_reason": "layout_lint policy is 'off'"
+      },
+      "visual": {
+        "ok": true,
+        "render_checked": false,
+        "original_render": null,
+        "output_render": null,
+        "diff_image": null,
+        "unexpected_diff_outside_mask": false,
+        "overlap_detected": false,
+        "overflow_detected": false,
+        "table_break_detected": false,
+        "page_count_changed": null,
+        "warnings": [
+          "visual gate disabled (render_check=off)"
+        ],
+        "errors": [],
+        "max_diff_ratio": null,
+        "before_page_count": null,
+        "after_page_count": null
+      },
+      "aesthetic": {
+        "ok": true,
+        "warnings": [],
+        "errors": []
+      },
+      "warnings": [],
+      "errors": [],
+      "debugPath": null,
+      "policy": {
+        "require_open_safety": true,
+        "require_visual_complete": false,
+        "require_reference_integrity": false,
+        "render_check": "off",
+        "xsd_mode": "off",
+        "overflow_policy": "warn",
+        "layout_lint": "off",
+        "allow_expert_unsafe": false
+      }
+    },
+    "realHancom": {
+      "required": false,
+      "ok": false,
+      "status": "unverified",
+      "renderChecked": false
+    }
+  },
+  "error": null,
+  "documentPublished": true,
+  "outputSha256": "eb3deaadb8faf399e9b2f73ccb87c3138ee658301ceba4c3278e7ee7e0e859bd",
+  "status": "PASS_STRUCTURE",
+  "runtime": {
+    "module": "<local-path>",
+    "parserSha256": "bd7e5d968c3585c7985de1f1c2871b643b9a0ab51f651b23bbda43de08bf25d1",
+    "shared": {
+      "python": "<local-path>",
+      "core": "<local-path>",
+      "automation": "<local-path>",
+      "sha256": {
+        "parser": "bd7e5d968c3585c7985de1f1c2871b643b9a0ab51f651b23bbda43de08bf25d1",
+        "run": "44b3e9f1370f5e8a89492f2eeb5ca214f830f7b6cc504ce308baac00eedb5575",
+        "commands": "6659ad403a69a54ba07d1417f8d244a6d11eca7f409adab4a8053b5e3beed34c"
+      }
+    }
+  }
+}

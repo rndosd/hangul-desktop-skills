@@ -4,7 +4,7 @@ import copy,hashlib,os
 from importlib.metadata import version
 from hwpx import HwpxDocument
 from hwpx.table_patch import apply_table_ops
-from hwpx.tools.package_validator import validate_editor_open_safety
+from hwpx.tools.package_validator import validate_editor_open_safety, editor_open_safety_scope
 from hwpx.tools.toc_author import ensure_paragraph_anchor_id
 from namespace_literal_guard import preserve_namespace_literals
 import safe_body_structure as body
@@ -35,8 +35,11 @@ def comparable(c):
  for p in c.iter(P+'p'):p.attrib.pop('id')
  return shape(c)
 def inspect(source,ordinal):
- data=Path(source).read_bytes();_,part,root,t=locate(data,ordinal);rows,g=grid(t)
- return dict(sourceSha256=sha(source),table=ordinal,tableId=t.get('id'),tableSha256=fingerprint(t),part=part,rows=len(rows),columns=int(t.get('colCnt')),owners=[dict(row=int(c.find(P+'cellAddr').get('rowAddr'))+1,column=int(c.find(P+'cellAddr').get('colAddr'))+1,span=dict(c.find(P+'cellSpan').attrib),text=''.join(n.text or '' for n in c.iter(P+'t'))) for row in rows for c in row.findall(P+'tc')])
+ return inspect_data(Path(source).read_bytes(),ordinal)
+
+def inspect_data(data,ordinal):
+ _,part,root,t=locate(data,ordinal);rows,g=grid(t)
+ return dict(sourceSha256=hashlib.sha256(data).hexdigest(),table=ordinal,tableId=t.get('id'),tableSha256=fingerprint(t),part=part,rows=len(rows),columns=int(t.get('colCnt')),owners=[dict(row=int(c.find(P+'cellAddr').get('rowAddr'))+1,column=int(c.find(P+'cellAddr').get('colAddr'))+1,span=dict(c.find(P+'cellSpan').attrib),text=''.join(n.text or '' for n in c.iter(P+'t'))) for row in rows for c in row.findall(P+'tc')])
 def checked(data,q):
  need(isinstance(q,dict) and set(q)=={'schema','sourceSha256','table','tableId','tableSha256','operation','parameters','editableReason'} and q['schema']==SCHEMA and hashlib.sha256(data).hexdigest()==q['sourceSha256'],'invalid/stale request');need(type(q['table'])is int and q['table']>0 and isinstance(q['editableReason'],str) and len(q['editableReason'])>=8,'explicit binding/reason required');_,part,root,t=locate(data,q['table']);need(t.get('id')==q['tableId'] and fingerprint(t)==q['tableSha256'],'stale table binding');rows,g=grid(t);p=q['parameters'];op=q['operation']
  if op in ['clone_after','delete_row']:
@@ -94,7 +97,10 @@ def expected(before,q):
    siblings=rows[yy].findall(P+'tc');index=next((i for i,c in enumerate(siblings) if int(c.find(P+'cellAddr').get('colAddr'))>x),len(siblings));rows[yy].insert(index,new)
  grid(t);return members,roots,part,root,fresh
 def verify(before,after,q):
- bm,br,part,want,fresh=expected(before,q);am,ar,ad=body.package(after);need(list(bm)==list(am) and list(br)==list(ar),'package inventory/spine changed');originalids={p.get('id') for root in br.values() for p in root.iter(P+'p')};newids=[]
+ return verify_expected(*expected(before,q),after)
+
+def verify_expected(bm,br,part,want,fresh,after):
+ am,ar,ad=body.package(after);need(list(bm)==list(am) and list(br)==list(ar),'package inventory/spine changed');originalids={p.get('id') for root in br.values() for p in root.iter(P+'p')};newids=[]
  def bind(a,b):
   need(a.tag==b.tag and len(a)==len(b),'expected structure mismatch')
   if any(a is p for p in fresh):need(b.get('id')not in originalids and b.get('id')not in newids,'new paragraph ID collision');newids.append(b.get('id'));a.set('id',b.get('id'))
@@ -107,6 +113,92 @@ def verify(before,after,q):
  return dict(status='PASS_MIXED_TABLE_PRESERVATION',entireNonTargetPackageExact=True,originalCellsTextRunsSpansSizesBordersExact=True,requestedGridExact=True,newParagraphIdsFresh=len(newids),onlySelectedRowAddressesAndExplicitLocalGeometryChanged=True)
 def api_table(doc,q):
  matches=[t for t in doc.tables.all if t.element.get('id')==q['tableId'] and fingerprint(t.element)==q['tableSha256']];need(len(matches)==1,'public table identity required');return matches[0]
+
+@preserve_namespace_literals
+@editor_open_safety_scope()
+def apply_sequence(source,output,headers,operations,reason,dry_run=False):
+    need(version('python-hwpx')=='6.3.0','qualified core6.3.0 required')
+    from lxml import etree as E
+    from hwpx.patch import _patch_zip_entries, _rewrite_zip_entries
+    import semantic_table_binding as binding
+    source=Path(source).resolve(strict=True)
+    output=Path(output).absolute()
+    need(output.parent.is_dir() and output.suffix.lower()=='.hwpx' and not output.exists() and not output.is_symlink() and source!=output.resolve(),'new output required')
+    need(isinstance(operations,list) and 1<=len(operations)<=20,'bounded operation list required')
+    data=source.read_bytes()
+    original_sha=hashlib.sha256(data).hexdigest()
+    need(validate_editor_open_safety(data).ok,'source safety failed')
+    bm,br,_=body.package(data)
+    original_ids={p.get('id') for root in br.values() for p in root.iter(P+'p')}
+    used_ids=set(original_ids)
+    next_id=max((int(v) for v in used_ids if v is not None and v.isdecimal()),default=0)+1
+    virtual=data
+    calls=[]
+    stages=[]
+    for op in operations:
+        need(isinstance(op,dict) and op.get('op') in ('delete','insert_after'),'delete/insert_after only')
+        insert=op['op']=='insert_after'
+        required={'op','key','cells','heightHwpunit'} if insert else {'op','key'}
+        need(set(op)==required,'exact operation keys required')
+        target=binding.bind_data(virtual,headers,op['key'])
+        parameters={'row':target['row']}
+        if insert:
+            values=op['cells']
+            need(isinstance(values,list) and len(values)==len(headers) and all(isinstance(v,str) for v in values),'complete cell values required')
+            need(all(len(model)==1 and len(model[0]['runs'])==1 for model in target['models']),'simple insertion requires one paragraph/run in every source cell')
+            parameters.update(cells=[[[v]] for v in values],heightHwpunit=op['heightHwpunit'])
+        q=dict(schema=SCHEMA,sourceSha256=target['sourceSha256'],table=target['table'],tableId=target['tableId'],
+               tableSha256=target['tableSha256'],operation='clone_after' if insert else 'delete_row',parameters=parameters,editableReason=reason)
+        _,_,part,want,fresh=expected(virtual,q)
+        _,_,root,raw=locate(virtual,target['table'])
+        table_index=next(i for i,t in enumerate(root.iter(P+'tbl')) if t is raw)
+        call=dict(op='insert_row_by_clone' if insert else 'delete_row',section_path=part,table_index=table_index)
+        call.update(dict(ref_row=target['row']-1,count=1) if insert else dict(row=target['row']-1))
+        calls.append(call)
+        for paragraph in fresh:
+            while str(next_id) in used_ids:next_id+=1
+            paragraph.set('id',str(next_id))
+            used_ids.add(str(next_id));next_id+=1
+        payload=E.tostring(want,encoding='utf-8',xml_declaration=True,standalone=True)
+        try:virtual=_patch_zip_entries(virtual,{part:payload})
+        except ValueError:virtual=_rewrite_zip_entries(virtual,{part:payload})
+        stages.append(dict(operation=op,binding=q,checks={'status':'CHECKED_OPERATION_PLAN'}))
+    final_tables=[t for t in want.iter(P+'tbl') if t.get('id')==q['tableId']]
+    need(len(final_tables)==1,'unique final table required')
+    wanted_table=final_tables[0]
+    fresh=[p for p in want.iter(P+'p') if p.get('id') not in original_ids]
+    result=apply_table_ops(data,calls)
+    need(result.ok,'public row patch failed:'+str(result.to_dict()))
+    with body.workspace_candidate(output.parent) as candidate:
+        candidate=Path(candidate)
+        with HwpxDocument.open(result.data) as document:
+            matches=[t for t in document.tables.all if t.element.get('id')==q['tableId']]
+            need(len(matches)==1,'unique public table identity required')
+            table=matches[0]
+            for y,row in enumerate(wanted_table.findall(P+'tr')):
+                if not any(p.get('id') not in original_ids for p in row.iter(P+'p')):continue
+                for raw_cell in row.findall(P+'tc'):
+                    x=int(raw_cell.find(P+'cellAddr').get('colAddr'))
+                    cell=table.cell(y,x)
+                    cell.set_size(cell.width,int(raw_cell.find(P+'cellSz').get('height')))
+                    for paragraph,raw_paragraph in zip(cell.paragraphs,raw_cell.findall('./'+P+'subList/'+P+'p')):
+                        for run,raw_run in zip(paragraph.runs,raw_paragraph.findall(P+'run')):
+                            text=raw_run.find(P+'t')
+                            value=text.text or '' if text is not None else ''
+                            if run.text!=value:run.text=value
+                        nocache(paragraph.element)
+            table.element.find(P+'sz').set('height',wanted_table.find(P+'sz').get('height'))
+            table.mark_dirty()
+            document.save_to_path(candidate)
+        after=candidate.read_bytes()
+        checks=verify_expected(bm,br,part,want,fresh,after)
+        need(validate_editor_open_safety(after).ok,'output safety failed')
+        need(sha(source)==original_sha,'source changed')
+        if not dry_run:os.link(candidate,output)
+    return dict(status='PASS_STRUCTURE',dryRun=dry_run,documentPublished=not dry_run,sourceSha256=original_sha,
+                outputSha256=hashlib.sha256(after).hexdigest(),stages=stages,checks=checks,
+                execution={'rowPatchCalls':1,'documentSaveCalls':1,'operations':len(operations)},native='NOT_CHECKED')
+
 @preserve_namespace_literals
 def apply(source,output,q,dry_run=False):
  source=Path(source).resolve(strict=True);output=Path(output).absolute();need(version('python-hwpx')=='6.3.0','qualified core6.3.0 required');need(output.parent.is_dir() and output.suffix.lower()=='.hwpx' and not output.exists() and not output.is_symlink() and source!=output.resolve(),'new output required');data=source.read_bytes();part,raw=checked(data,q);p=q['parameters'];op=q['operation'];need(validate_editor_open_safety(source).ok,'source safety failed')

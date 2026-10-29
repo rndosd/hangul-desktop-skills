@@ -1,6 +1,6 @@
 """Guard failures, atomic publication and valid controls for the common facade."""
 from pathlib import Path
-import subprocess,sys,uuid,unittest
+import copy,sys,uuid,unittest
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'scripts'))
 import hangul_task as task
@@ -18,24 +18,6 @@ class CommonTask(unittest.TestCase):
   self.assertFalse(self.out.exists());self.assertEqual(before,task.sha(source))
  def test_doctor_is_not_permission_or_native_proof(self):
   d=task.doctor();self.assertEqual(d['writePermission'],'UNTESTED');self.assertEqual(d['securityModule'],'NOT_CHECKED');self.assertIn(str(ROOT/'vendor'),d['hwpxModule'])
- def test_removed_blank_document_commands_publish_nothing(self):
-  for args in [('new',str(self.out)),('schema','new')]:
-   result=subprocess.run([sys.executable,'-X','utf8','-B',str(ROOT/'scripts/hangul_task.py'),*args],capture_output=True)
-   self.assertEqual(result.returncode,2);self.assertFalse(self.out.exists())
-  result=subprocess.run([sys.executable,'-X','utf8','-B',str(ROOT/'scripts/create_new_document.py')],capture_output=True)
-  self.assertEqual(result.returncode,2);self.assertIn(b'BLOCKED_REMOVED_WORKFLOW',result.stdout);self.assertFalse(self.out.exists())
- def test_source_template_copy_preserves_original_and_rejects_overwrite(self):
-  from select_document_template import select
-  source=ROOT/'assets/mixed-runs/source.hwpx';before=task.sha(source)
-  result=select(ROOT,output=self.out,user_source=source)
-  self.assertEqual(result['selection'],'user_source_first');self.assertEqual(before,task.sha(self.out));self.assertEqual(before,task.sha(source))
-  with self.assertRaises(FileExistsError):select(ROOT,output=self.out,user_source=source)
-  self.assertEqual(before,task.sha(self.out))
- def test_source_template_rejects_extension_change(self):
-  from select_document_template import select
-  source=ROOT/'assets/mixed-runs/source.hwpx'
-  with self.assertRaises(ValueError):select(ROOT,output=self.temp/'wrong.hwp',user_source=source)
-  self.assertFalse((self.temp/'wrong.hwp').exists())
  def test_table_atomic_and_complete_name(self):
   source=ROOT/'assets/complex-structure/source.hwpx';before=task.sha(source);q=self.table_request();dry=task.table(source,self.out,q,True);self.assertFalse(self.out.exists());self.assertEqual(dry['status'],'PASS_STRUCTURE');task.table(source,self.out,q)
   import semantic_table_binding as b

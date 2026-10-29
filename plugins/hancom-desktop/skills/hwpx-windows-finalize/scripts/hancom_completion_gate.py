@@ -5,12 +5,15 @@ collect: verify native receipt and capture XML differences + PDF page renders.
 check: recheck bytes and require specific performed preservation/visual reviews.
 This gate verifies the candidate-to-native stage, not an earlier content edit.
 Review records are attestations, not proof that a person actually looked.
+Bounded in-process reuse retains only locally computed proofs for exact input
+bytes and render options; disk records never seed this cache or a verdict.
 """
 from __future__ import annotations
 
 import argparse
 from collections import Counter
 import hashlib
+from io import BytesIO
 import json
 import posixpath
 from pathlib import Path
@@ -20,6 +23,10 @@ from zipfile import ZipFile
 
 SCHEMA = 'hwpx.completion-gate.v1'
 CHECKS = ('content_and_counts', 'non_target_structure', 'formatting_and_assets')
+_COMPARISON_CACHE_LIMIT = 32 * 1024 * 1024
+_RENDER_CACHE_LIMIT = 16 * 1024 * 1024
+_comparison_cache = None
+_render_cache = None
 
 
 class GateError(Exception):
@@ -137,7 +144,12 @@ def read_package(path):
 
 
 def compare(source, final):
-    a, b = read_package(source), read_package(final)
+    global _comparison_cache
+    inputs = (Path(source).read_bytes(), Path(final).read_bytes())
+    cached = _comparison_cache
+    if cached is not None and cached[0] == inputs:
+        return json.loads(cached[1])
+    a, b = (read_package(BytesIO(data)) for data in inputs)
     changes = [{'path': k, 'before': a['flat'].get(k), 'after': b['flat'].get(k)}
                for k in sorted(a['flat'].keys() | b['flat'].keys()) if a['flat'].get(k) != b['flat'].get(k)]
     invariants = {key: a[key] == b[key] for key in ('texts', 'counts', 'sections', 'binaryPayloads', 'binaryReferences', 'controls')}
@@ -146,10 +158,60 @@ def compare(source, final):
             if extension in location:
                 return location.split(extension, 1)[0] + extension
         return location
-    return {'invariants': invariants, 'beforeCounts': a['counts'], 'afterCounts': b['counts'],
+    result = {'invariants': invariants, 'beforeCounts': a['counts'], 'afterCounts': b['counts'],
             'binaryPathsEqual': a['binaries'] == b['binaries'],
             'changedMembers': sorted({member(x['path']) for x in changes}),
             'changes': changes}
+    encoded = json.dumps(result, ensure_ascii=False).encode('utf-8')
+    _comparison_cache = ((inputs, encoded) if sum(map(len, inputs)) + len(encoded) <= _COMPARISON_CACHE_LIMIT else None)
+    return result
+
+
+def _render_proofs(pdf, output_dir=None):
+    global _render_cache
+    try:
+        import pymupdf
+    except ImportError:
+        raise GateError('missing_dependency:pymupdf', 'pending')
+    data = Path(pdf).read_bytes()
+    key = (data, pymupdf.VersionBind, 1.5, False)
+    cached = _render_cache
+    if output_dir is None and cached is not None and cached[0] == key:
+        return json.loads(cached[1])
+    proofs = []
+    with pymupdf.open(stream=data, filetype='pdf') as doc:
+        require(len(doc) > 0, 'empty_pdf')
+        for number, page in enumerate(doc, 1):
+            png = page.get_pixmap(matrix=pymupdf.Matrix(1.5, 1.5), alpha=False).tobytes('png')
+            if output_dir is not None:
+                (Path(output_dir) / f'{number:04d}.png').write_bytes(png)
+            proofs.append({'page': number, 'sha256': digest(png),
+                           'extractedTextSha256': digest(page.get_text().encode('utf-8'))})
+    encoded = json.dumps(proofs).encode('utf-8')
+    _render_cache = ((key, encoded) if len(data) + len(encoded) <= _RENDER_CACHE_LIMIT else None)
+    return proofs
+
+
+def preview_pdf(pdf, output_dir):
+    """Render an existing PDF for review, or reuse its unchanged page images."""
+    import pymupdf
+    pdf, root = Path(pdf).resolve(), Path(output_dir).absolute()
+    require(pdf.is_file() and pdf.suffix.lower()=='.pdf' and root.parent.is_dir(), 'invalid_preview_paths')
+    pdf_ref=ref(pdf)
+    render={'engine':'pymupdf','version':pymupdf.VersionBind,'scale':1.5}
+    receipt=root/'preview.json'
+    if root.exists():
+        saved=load(receipt)
+        require(saved.get('pdf')==pdf_ref and saved.get('render')==render,'preview_input_changed')
+        for page in saved['pages']:verify_ref(page['image'])
+        return dict(saved,reused=True)
+    root.mkdir()
+    proofs=_render_proofs(pdf,root)
+    require(ref(pdf)==pdf_ref,'preview_pdf_changed_during_render')
+    result={'status':'PREVIEW_READY','pdf':pdf_ref,'render':render,'reused':False,'visual':'NOT_CHECKED',
+            'pages':[{'page':proof['page'],'image':ref(root/f"{proof['page']:04d}.png")} for proof in proofs]}
+    write_new(receipt,result)
+    return result
 
 
 def prepare(bundle, source, final, pdf, run):
@@ -203,13 +265,9 @@ def collect(bundle):
         raise GateError('missing_dependency:pymupdf', 'pending')
     require(not (root / 'evidence.json').exists() and not (root / 'pages').exists(), 'evidence_already_exists')
     (root / 'pages').mkdir()
-    pages = []
-    with pymupdf.open(plan['pdf']) as doc:
-        require(len(doc) > 0, 'empty_pdf')
-        for i, page in enumerate(doc):
-            out = root / 'pages' / f'{i+1:04d}.png'
-            page.get_pixmap(matrix=pymupdf.Matrix(1.5, 1.5), alpha=False).save(out)
-            pages.append({'page': i+1, 'image': ref(out), 'extractedTextSha256': digest(page.get_text().encode('utf-8'))})
+    pages = [{'page': proof['page'], 'image': ref(root / 'pages' / f"{proof['page']:04d}.png"),
+              'extractedTextSha256': proof['extractedTextSha256']}
+             for proof in _render_proofs(plan['pdf'], root / 'pages')]
     write_new(root / 'differences.json', differences)
     evidence = {'schema': SCHEMA, 'plan': ref(root / 'plan.json'), 'artifacts': refs,
                 'comparison': ref(root / 'differences.json'), 'comparisonDigest': json_digest(differences),
@@ -241,17 +299,12 @@ def check(bundle, review_path):
     require(all(differences['invariants'].values()), 'native_content_counts_or_assets_changed')
     require(json_digest(differences) == evidence['comparisonDigest'] and load(evidence['comparison']['path']) == differences, 'comparison_changed')
     require(evidence.get('render', {}).get('performed') is True and bool(evidence.get('pages')), 'render_not_performed', 'pending')
-    # Re-render from the current PDF to establish image/PDF linkage, not just PNG existence.
-    try:
-        import pymupdf
-    except ImportError:
-        raise GateError('missing_dependency:pymupdf', 'pending')
-    with pymupdf.open(plan['pdf']) as doc:
-        require(len(doc) == len(evidence['pages']), 'page_inventory_mismatch')
-        for number, (page, saved) in enumerate(zip(doc, evidence['pages']), 1):
-            require(saved['page'] == number, 'page_order_mismatch')
-            verify_ref(saved['image'])
-            require(digest(page.get_pixmap(matrix=pymupdf.Matrix(1.5, 1.5), alpha=False).tobytes('png')) == saved['image']['sha256'], 'render_does_not_match_pdf')
+    proofs = _render_proofs(plan['pdf'])
+    require(len(proofs) == len(evidence['pages']), 'page_inventory_mismatch')
+    for proof, saved in zip(proofs, evidence['pages']):
+        require(saved['page'] == proof['page'], 'page_order_mismatch')
+        verify_ref(saved['image'])
+        require(proof['sha256'] == saved['image']['sha256'], 'render_does_not_match_pdf')
     review = load(review_path)
     require(review.get('schema') == SCHEMA and review.get('evidence') == ref(root / 'evidence.json'), 'review_not_bound_to_evidence')
     require(bool(str(review.get('reviewer', '')).strip()) and bool(str(review.get('reviewedAt', '')).strip()), 'review_identity_missing', 'pending')

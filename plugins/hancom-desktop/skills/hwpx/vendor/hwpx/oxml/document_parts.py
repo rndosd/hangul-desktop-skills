@@ -287,6 +287,9 @@ def _run_style_apply_underline(
 def _run_style_apply_strikeout(
     element: ET.Element, base_strike_attrs: dict[str, str], strike: bool | None
 ) -> None:
+    if strike is None and base_strike_attrs.get('shape', 'NONE').upper() != 'NONE':
+        _append_child(element, f"{_HH}strikeout", dict(base_strike_attrs))
+        return
     if strike is not None:
         strike_attrs = dict(base_strike_attrs)
         strike_attrs["shape"] = "SOLID" if strike else "NONE"

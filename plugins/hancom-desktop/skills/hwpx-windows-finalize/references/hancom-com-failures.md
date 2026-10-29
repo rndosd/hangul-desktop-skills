@@ -40,9 +40,21 @@ Quit 직후 새 HwpObject 생성은 RPC_E_DISCONNECTED를 일으킬 수 있다.
 
 저장 실패 시 후보를 유지한다. 부분 출력은 검증 전 최종본으로 제시하지 않는다.
 새 창을 연 뒤에는 파일명과 창 식별자를 다시 확인한다.
-사용자 한글 프로세스를 종료하지 않는다. COM controller의 timeout은 자신의 worker만 중단한다.
-자신이 만든 COM 객체는 finally에서 Quit한다. 모달 때문에 정리되지 않으면 알려준다.
-숨은 한글 인스턴스가 남았다는 영수증 경고가 있으면 사용자에게 관련 창의 수동 종료를 요청한다.
+사용자 한글 프로세스를 종료하지 않는다. 일반 `verify_hwpx_with_hancom.ps1` controller는 timeout 때 취소 표식을 만들고 최대 5초간 worker의 정상 종료를 기다린다. worker는 다음 단계에서 취소를 확인하고 finally의 Clear(1)과 Quit을 수행한다. 동기 COM 호출이 대화상자를 기다리는 동안에는 취소 표식을 읽을 수 없다. 이 경우 프로세스를 강제 종료하지 않으며 영수증의 worker PID, owner, 마지막 stage, 취소 표식과 부분 출력을 보존한다. 다른 전문 controller에 같은 동작이 적용됐다고 가정하지 않는다.
+
+PDF를 요청하지 않아도 진행 기록은 영수증 옆 `.progress.jsonl`에 남는다. PDF를 요청하면 기존 PDF 옆 기록 위치를 유지한다. 각 행은 누적 시간과 직전 단계 이후 시간, 당시 완료 상태를 담는다. timeout 영수증의 `inFlightOutcome=UNKNOWN_DO_NOT_RETRY`는 진행 중 호출의 결과를 확인해야 한다는 뜻이다. 마지막 완전한 행이 없는 항목은 null로 남긴다. 원본 hash나 산출물 관찰이 실패해도 `observationErrors`를 포함한 차단 영수증을 남긴다. 같은 쓰기를 반복하지 않는다.
+
+controller의 직렬화 잠금 외에 worker는 COM 시작 전부터 정상 정리가 끝날 때까지 별도 `Local\CodexHancomAutomationWorker` mutex를 보유한다. timeout 뒤 controller가 반환해도 살아 있는 worker가 새 worker의 COM 시작을 막는다. 취소된 worker가 늦게 시작하면 `com-start` 단계의 취소 검사로 COM 생성 전에 멈춘다.
+
+검색 확인창이 원인이면 computer-use로 이번 소유 창을 확인하고 취소한다. `RepeatFind` 반복 호출은 [매회 옵션 초기화 예시](native-writing.md#com-반복-찾기)를 따른다. 파일 접근·보안 승인창은 이 검색 확인창과 구분한다.
+
+worker가 이미 종료했는데 자신의 Hwp만 남은 경우에는 `scripts/Recover-HancomOwnedInstance.ps1`로 기존 Running Object Table 객체를 정상 종료할 수 있다. 일반 사용자 맥락의 ROT 조회로 실제 모니커를 확인한 뒤 진행 기록, 예상 문서 경로, 모니커, 새 로그 경로를 전달한다. 스크립트는 새 COM 객체를 만들지 않는다. PID·시작시각·실행경로·HWND와 열린 문서 한 개의 경로가 모두 일치할 때만 Clear(1)과 Quit을 호출한다. 문서가 추가됐거나 다른 문서이면 종료하지 않는다.
+
+```powershell
+& scripts/Recover-HancomOwnedInstance.ps1 -ProgressPath candidate.pdf.progress.jsonl -ExpectedDocumentPath candidate.hwpx -Moniker '!HwpObject.130.1' -LogPath new-owned-recovery.jsonl
+```
+
+모니커는 예시를 그대로 쓰지 않고 해당 실행에서 관찰한 값을 사용한다. 스크립트는 진행 기록의 worker가 아직 살아 있으면 Bind 전에 거부한다. worker 항목이 없는 과거 기록은 controller에서 확인한 `-WorkerProcessId`와 `-WorkerStartTicks`를 전달해야 한다. 정상 복구도 동기 COM 대기가 생길 수 있으므로 실행 도구의 세션 ID와 단계 로그를 유지한다. 로그의 `exit-observed-True`와 PID 부재 또는 일치한 instance의 종료를 확인한 뒤 작업을 이어간다. Bind·문서 경로 확인·Clear·Quit에서 대기하거나 실패하면 반복하지 않고 소유 창의 GUI 상태를 확인한다.
 
 
 ## 차트 재작성 시험에서 확인한 중단의 구분

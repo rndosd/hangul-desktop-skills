@@ -256,7 +256,9 @@ class HwpxOxmlHeader:
     ) -> ET.Element:
         """Return a ``<hh:charPr>`` element matching *predicate* or create one.
 
-        When an existing entry satisfies *predicate*, it is returned unchanged.
+        Without an explicit base, an entry satisfying *predicate* is reused.
+        With a base, reuse requires the entire modified base to match: omitted
+        properties must not be inherited from an unrelated existing style.
         Otherwise a new element is produced by cloning ``base_char_pr_id`` (or the
         first available entry) and applying *modifier* before assigning a fresh
         identifier and updating ``itemCnt``.
@@ -266,7 +268,7 @@ class HwpxOxmlHeader:
         if char_props is None:  # pragma: no cover - defensive branch
             raise RuntimeError("failed to create <charProperties> element")
 
-        if predicate is not None:
+        if predicate is not None and base_char_pr_id is None:
             for child in char_props.findall(f"{_HH}charPr"):
                 if predicate(child):
                     return child
@@ -288,6 +290,16 @@ class HwpxOxmlHeader:
 
         if modifier is not None:
             modifier(new_char_pr)
+
+        if predicate is not None and base_char_pr_id is not None:
+            def signature(node, root=False):
+                attrs = tuple(sorted((key, value) for key, value in node.attrib.items()
+                                     if not (root and key == "id")))
+                return (node.tag, attrs, node.text, tuple(signature(child) for child in node))
+            expected = signature(new_char_pr, root=True)
+            for child in char_props.findall(f"{_HH}charPr"):
+                if signature(child, root=True) == expected:
+                    return child
 
         char_id = self._allocate_char_property_id(char_props, preferred_id=preferred_id)
         new_char_pr.set("id", char_id)

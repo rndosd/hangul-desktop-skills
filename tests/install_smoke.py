@@ -1,9 +1,9 @@
 """Install only into a newly created test CODEX_HOME; never register a module/COM.
 
-Keep local receipts in ignored .verification for review. No downloads or DLL loads.
+Keep local receipts in a compact temporary directory for review. No downloads or DLL loads.
 """
 from pathlib import Path
-import hashlib, json, os, shutil, subprocess, sys, uuid
+import hashlib, json, os, shutil, subprocess, sys, tempfile, uuid
 
 ROOT=Path(__file__).resolve().parents[1]
 PLUGIN=ROOT/'plugins/hancom-desktop'
@@ -21,7 +21,7 @@ def json_prefix(text):
 if __name__=='__main__':
     if os.name!='nt':raise SystemExit('Windows required; not run.')
     # Keep nested bundle paths below Windows PowerShell 5.1's path limit.
-    workspace=ROOT/'.verification'/('i-'+uuid.uuid4().hex[:12]);workspace.mkdir(parents=True)
+    workspace=Path(tempfile.mkdtemp(prefix='hi-')).resolve()
     home=workspace/'한글 test home'
     installer=ROOT/'Install.ps1'
     args=['-CodexRoot',home,'-PythonPath',sys.executable]

@@ -17,13 +17,13 @@ def select(skill_root,kind=None,output=None,template_id=None,user_source=None):
  else:
   chosen=template_id or data['defaults'].get(kind)
   matches=[r for r in data['templates'] if r['id']==chosen]
-  if len(matches)!=1:raise ValueError('네 갈래 목적 또는 목록의 원본 id를 선택하세요.')
+  if len(matches)!=1:raise ValueError('완성형 계획서 ID를 선택하세요. 다른 문서는 사용자 원본을 지정하세요.')
   entry=dict(matches[0])
   if entry.get('status')!='active_source':raise ValueError('선택할 수 없는 원본 상태입니다.')
   source=(root/entry['path']).resolve(strict=True)
   if not source.is_relative_to(root.resolve()):raise ValueError('보관 폴더 밖 경로입니다.')
   if digest(source)!=entry['sha256']:raise ValueError('보관 원본 해시가 목록과 다릅니다.')
-  entry.update(source=str(source),selection='existing_source',preview=str(root/entry['preview']) if entry.get('preview') else None)
+  entry.update(source=str(source),selection='prepared_plan',preview=str(root/entry['preview']) if entry.get('preview') else None)
  entry['source_sha256']=digest(source)
  entry['native']='NEW_CONTENT_NOT_CHECKED'
  if source.suffix.lower()=='.hwp':entry['conversion_note']='HWPX API 편집이 필요하면 구형 HWP 변환 안내에 따라 HWPX 사본으로 변환합니다. 확장자만 바꾸지 않습니다.'

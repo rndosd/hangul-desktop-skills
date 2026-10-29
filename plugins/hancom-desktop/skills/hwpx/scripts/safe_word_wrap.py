@@ -7,7 +7,7 @@ from lxml import etree as E
 from hwpx import HwpxDocument
 from hwpx.oxml import HwpxOxmlParagraph
 from hwpx.tools.package_validator import validate_editor_open_safety
-from safe_edit import candidates,digest,parse,local,snapshot,source_path
+from safe_edit import candidates_many,digest,parse,local,snapshot,source_path
 from namespace_literal_guard import preserve_namespace_literals
 SCHEMA='hwpx.word-wrap.v1'
 H='{http://www.hancom.co.kr/hwpml/2011/head}'
@@ -22,8 +22,11 @@ def selections(source,req):
   require(item['korean']=='WORD' and item['latin']=='WORD' and isinstance(item['reason'],str) and item['reason'].strip(),'explicit WORD/WORD and reason required')
   require(isinstance(item['paragraph_path'],list) and item['paragraph_path'] and all(type(v)is int and v>=0 for v in item['paragraph_path']),'exact nonnegative integer path required')
   require(isinstance(item['expected_text'],str) and item['expected_text'].strip() and isinstance(item['part'],str),'nonempty expected paragraph required');key=item['part'],tuple(item['paragraph_path']);require(key not in seen,'duplicate paragraph');seen.add(key)
-  found=[c for c in candidates(source,item['expected_text'],req['source_sha256']) if c['part']==key[0] and tuple(c['paragraph_path'])==key[1]]
-  require(len(found)==1 and found[0]['supported'] and found[0]['_paragraph_text']==item['expected_text'],'plain exact paragraph missing/unsupported');out.append((key,item))
+  out.append((key,item))
+ by_find=candidates_many(source,[item['expected_text'] for _,item in out],req['source_sha256'])
+ for key,item in out:
+  found=[c for c in by_find[item['expected_text']] if c['part']==key[0] and tuple(c['paragraph_path'])==key[1]]
+  require(len(found)==1 and found[0]['supported'] and found[0]['_paragraph_text']==item['expected_text'],'plain exact paragraph missing/unsupported')
  return out
 @preserve_namespace_literals
 def apply(source,output,req,dry_run=False):

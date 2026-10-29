@@ -1,0 +1,557 @@
+{
+  "schema": "hangul.fill.v1",
+  "blockId": "plan-education",
+  "sourceDocumentSha256": "4d776ccfb915bf904fef9f96b7d241f77ca280bd888f1b896c6c78bd7aea4040",
+  "template": {
+    "path": "full-plans/plan-education/template.hwpx",
+    "sha256": "4d776ccfb915bf904fef9f96b7d241f77ca280bd888f1b896c6c78bd7aea4040"
+  },
+  "styles": {
+    "path": "full-plans/plan-education/styles.json",
+    "sha256": "3ded9e83bf729d7e22bfb8332cb6aaa2134e2c66802dc9b4ec08a396965d60d8"
+  },
+  "preparedStylesSha256": "85bf8ed25c5178ea246b1e280d87c0c0a41f967fff6eafa3e81132091cd861d9",
+  "slots": {
+    "subtitle": {
+      "path": "/section[1]/paragraph[4]/run[1]",
+      "role": "body",
+      "label": "계획서 부제",
+      "prefix": "",
+      "suffix": "",
+      "default": "교육활동 운영과 역량 강화를 위한"
+    },
+    "title": {
+      "path": "/section[1]/paragraph[5]/table[@id=\"1603513470\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+      "role": "body",
+      "label": "사업 계획 제목",
+      "prefix": "",
+      "suffix": "",
+      "default": "교육사업 추진계획(안)"
+    },
+    "publication_date": {
+      "path": "/section[1]/paragraph[12]/run[1]",
+      "role": "body",
+      "label": "작성 연월",
+      "prefix": "",
+      "suffix": "",
+      "default": "미정"
+    },
+    "organization": {
+      "path": "/section[1]/paragraph[25]/run[1]",
+      "role": "body",
+      "label": "작성 기관·부서",
+      "prefix": "",
+      "suffix": "",
+      "default": "미정"
+    },
+    "_inner_title": {
+      "path": "/section[1]/paragraph[28]/table[@id=\"1284049242\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+      "role": "body",
+      "label": "본문 사업 제목",
+      "prefix": "",
+      "suffix": "",
+      "valueFrom": "title"
+    },
+    "_inner_organization": {
+      "path": "/section[1]/paragraph[29]/run[1]",
+      "role": "body",
+      "label": "본문 작성 기관",
+      "prefix": "",
+      "suffix": "",
+      "valueFrom": "organization"
+    },
+    "task1_title": {
+      "path": "/section[1]/paragraph[40]/run[1]",
+      "role": "body",
+      "label": "추진 과제 1 제목",
+      "prefix": "󰊱 ",
+      "suffix": "",
+      "default": "주요 교육활동"
+    },
+    "period": {
+      "path": "/section[1]/paragraph[43]/run[1]",
+      "role": "body",
+      "label": "운영 기간",
+      "prefix": "  ◦ 기간: ",
+      "suffix": "",
+      "default": "미정"
+    },
+    "audience": {
+      "path": "/section[1]/paragraph[44]/run[1]",
+      "role": "body",
+      "label": "교육 대상",
+      "prefix": "  ◦ 대상: ",
+      "suffix": "",
+      "default": "미정"
+    },
+    "method": {
+      "path": "/section[1]/paragraph[45]/run[1]",
+      "role": "body",
+      "label": "운영 방법",
+      "prefix": "  ◦ 방법: ",
+      "suffix": "",
+      "default": "미정"
+    },
+    "task2_title": {
+      "path": "/section[1]/paragraph[49]/run[1]",
+      "role": "body",
+      "label": "추진 과제 2 제목",
+      "prefix": "󰊱 ",
+      "suffix": "",
+      "default": "활동 지원"
+    },
+    "_task2_period": {
+      "path": "/section[1]/paragraph[52]/run[1]",
+      "role": "body",
+      "label": "과제 2 기간",
+      "prefix": "  ◦ 기간: ",
+      "suffix": "",
+      "valueFrom": "period"
+    },
+    "support_audience": {
+      "path": "/section[1]/paragraph[53]/run[1]",
+      "role": "body",
+      "label": "지원 대상",
+      "prefix": "  ◦ 대상: ",
+      "suffix": "",
+      "default": "미정"
+    },
+    "support_budget": {
+      "path": "/section[1]/paragraph[56]/run[1]",
+      "role": "body",
+      "label": "지원 예산",
+      "prefix": "  ◦ 예산: ",
+      "suffix": "",
+      "default": "미정"
+    },
+    "task3_title": {
+      "path": "/section[1]/paragraph[58]/run[1]",
+      "role": "body",
+      "label": "추진 과제 3 제목",
+      "prefix": "󰊱 ",
+      "suffix": "",
+      "default": "운영 관리"
+    },
+    "management_goal": {
+      "path": "/section[1]/paragraph[59]/run[1]",
+      "role": "body",
+      "label": "운영 관리 목표",
+      "prefix": "  ◦ 목적: ",
+      "suffix": "",
+      "default": "미정"
+    },
+    "_task3_period": {
+      "path": "/section[1]/paragraph[60]/run[1]",
+      "role": "body",
+      "label": "관리 기간",
+      "prefix": "  ◦ 기간: ",
+      "suffix": "",
+      "valueFrom": "period"
+    },
+    "owners": {
+      "path": "/section[1]/paragraph[61]/run[1]",
+      "role": "body",
+      "label": "운영 담당·역할",
+      "prefix": "  ◦ 담당: ",
+      "suffix": "",
+      "default": "미정"
+    },
+    "management_budget": {
+      "path": "/section[1]/paragraph[64]/run[1]",
+      "role": "body",
+      "label": "관리 예산",
+      "prefix": "  ◦ 예산: ",
+      "suffix": "",
+      "default": "미정"
+    },
+    "evaluation_period": {
+      "path": "/section[1]/paragraph[67]/run[1]",
+      "role": "body",
+      "label": "평가 시기",
+      "prefix": "  ◦ 시기: ",
+      "suffix": "",
+      "default": "미정"
+    }
+  },
+  "repeats": {
+    "basis": {
+      "path": "/section[1]/paragraph[31]",
+      "fields": {
+        "text": {
+          "path": "/section[1]/paragraph[31]/run[2]",
+          "role": "body",
+          "label": "추진 근거",
+          "prefix": " ",
+          "suffix": ""
+        }
+      },
+      "label": "추진 근거"
+    },
+    "objectives": {
+      "path": "/section[1]/paragraph[33]",
+      "fields": {
+        "text": {
+          "path": "/section[1]/paragraph[33]/run[2]",
+          "role": "body",
+          "label": "추진 목적",
+          "prefix": " ",
+          "suffix": ""
+        }
+      },
+      "label": "추진 목적"
+    },
+    "status": {
+      "path": "/section[1]/paragraph[35]",
+      "fields": {
+        "text": {
+          "path": "/section[1]/paragraph[35]/run[2]",
+          "role": "body",
+          "label": "운영 여건 설명",
+          "prefix": " ",
+          "suffix": ""
+        }
+      },
+      "label": "운영 여건 설명"
+    },
+    "status_rows": {
+      "path": "/section[1]/paragraph[36]/table[@id=\"1603622838\"]/row[2]",
+      "fields": {
+        "number": {
+          "path": "/section[1]/paragraph[36]/table[@id=\"1603622838\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+          "role": "body",
+          "label": "현황 표 순",
+          "prefix": "",
+          "suffix": ""
+        },
+        "audience": {
+          "path": "/section[1]/paragraph[36]/table[@id=\"1603622838\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+          "role": "body",
+          "label": "현황 표 대상",
+          "prefix": "",
+          "suffix": ""
+        },
+        "owner": {
+          "path": "/section[1]/paragraph[36]/table[@id=\"1603622838\"]/row[2]/cell[3]/paragraph[1]/run[1]",
+          "role": "body",
+          "label": "현황 표 담당 기관·부서",
+          "prefix": "",
+          "suffix": ""
+        },
+        "activity": {
+          "path": "/section[1]/paragraph[36]/table[@id=\"1603622838\"]/row[2]/cell[4]/paragraph[1]/run[1]",
+          "role": "body",
+          "label": "현황 표 사업·활동",
+          "prefix": "",
+          "suffix": ""
+        },
+        "period": {
+          "path": "/section[1]/paragraph[36]/table[@id=\"1603622838\"]/row[2]/cell[5]/paragraph[1]/run[1]",
+          "role": "body",
+          "label": "현황 표 기간",
+          "prefix": "",
+          "suffix": ""
+        },
+        "note": {
+          "path": "/section[1]/paragraph[36]/table[@id=\"1603622838\"]/row[2]/cell[6]/paragraph[1]/run[1]",
+          "role": "body",
+          "label": "현황 표 비고",
+          "prefix": "",
+          "suffix": ""
+        }
+      },
+      "label": "현황 표 순"
+    },
+    "principles": {
+      "path": "/section[1]/paragraph[38]",
+      "fields": {
+        "text": {
+          "path": "/section[1]/paragraph[38]/run[2]",
+          "role": "body",
+          "label": "추진 방침",
+          "prefix": " ",
+          "suffix": ""
+        }
+      },
+      "label": "추진 방침"
+    },
+    "task1_goals": {
+      "path": "/section[1]/paragraph[42]",
+      "fields": {
+        "text": {
+          "path": "/section[1]/paragraph[42]/run[1]",
+          "role": "body",
+          "label": "과제 1 목적",
+          "prefix": "   - ",
+          "suffix": ""
+        }
+      },
+      "label": "과제 1 목적"
+    },
+    "task1_details": {
+      "path": "/section[1]/paragraph[47]",
+      "fields": {
+        "text": {
+          "path": "/section[1]/paragraph[47]/run[1]",
+          "role": "body",
+          "label": "과제 1 내용",
+          "prefix": "   - ",
+          "suffix": ""
+        }
+      },
+      "label": "과제 1 내용"
+    },
+    "task2_goals": {
+      "path": "/section[1]/paragraph[51]",
+      "fields": {
+        "text": {
+          "path": "/section[1]/paragraph[51]/run[1]",
+          "role": "body",
+          "label": "과제 2 목적",
+          "prefix": "   - ",
+          "suffix": ""
+        }
+      },
+      "label": "과제 2 목적"
+    },
+    "task2_details": {
+      "path": "/section[1]/paragraph[55]",
+      "fields": {
+        "text": {
+          "path": "/section[1]/paragraph[55]/run[1]",
+          "role": "body",
+          "label": "과제 2 내용",
+          "prefix": "   - ",
+          "suffix": ""
+        }
+      },
+      "label": "과제 2 내용"
+    },
+    "management": {
+      "path": "/section[1]/paragraph[63]",
+      "fields": {
+        "text": {
+          "path": "/section[1]/paragraph[63]/run[1]",
+          "role": "body",
+          "label": "운영 관리 내용",
+          "prefix": "   - ",
+          "suffix": ""
+        }
+      },
+      "label": "운영 관리 내용"
+    },
+    "evaluation": {
+      "path": "/section[1]/paragraph[66]",
+      "fields": {
+        "text": {
+          "path": "/section[1]/paragraph[66]/run[1]",
+          "role": "body",
+          "label": "평가·환류 내용",
+          "prefix": "  ◦ ",
+          "suffix": ""
+        }
+      },
+      "label": "평가·환류 내용"
+    },
+    "follow_up": {
+      "path": "/section[1]/paragraph[69]",
+      "fields": {
+        "text": {
+          "path": "/section[1]/paragraph[69]/run[1]",
+          "role": "body",
+          "label": "후속 조치",
+          "prefix": "   - ",
+          "suffix": ""
+        }
+      },
+      "label": "후속 조치"
+    },
+    "effects": {
+      "path": "/section[1]/paragraph[71]",
+      "fields": {
+        "text": {
+          "path": "/section[1]/paragraph[71]/run[2]",
+          "role": "body",
+          "label": "기대 효과",
+          "prefix": " ",
+          "suffix": ""
+        }
+      },
+      "label": "기대 효과"
+    }
+  },
+  "preparation": {
+    "mode": "whole-source-prepared-form",
+    "sourceId": "source-B",
+    "sourceSha256": "c7fe68b0447a07efdd05832018dc87956339bc1829ca1a4c85b51d196958865b",
+    "scope": "One coherent source; unnecessary original examples removed once; no component assembly.",
+    "sourceRegions": [
+      {
+        "id": "cover",
+        "label": "표지",
+        "sourceStart": 1,
+        "sourceEnd": 29
+      },
+      {
+        "id": "overview",
+        "label": "추진 개요·여건",
+        "sourceStart": 30,
+        "sourceEnd": 50
+      },
+      {
+        "id": "task1",
+        "label": "교육활동 운영",
+        "sourceStart": 62,
+        "sourceEnd": 71
+      },
+      {
+        "id": "task2",
+        "label": "교육활동 지원",
+        "sourceStart": 75,
+        "sourceEnd": 85
+      },
+      {
+        "id": "management",
+        "label": "관리·평가",
+        "sourceStart": 98,
+        "sourceEnd": 130
+      }
+    ],
+    "preparedRanges": {
+      "documentSha256": "4d776ccfb915bf904fef9f96b7d241f77ca280bd888f1b896c6c78bd7aea4040",
+      "regions": [
+        {
+          "id": "cover",
+          "label": "표지",
+          "firstRootPath": "/section[1]/paragraph[@id=\"2613180041\"]",
+          "lastRootPath": "/section[1]/paragraph[27]",
+          "rootPaths": [
+            "/section[1]/paragraph[@id=\"2613180041\"]",
+            "/section[1]/paragraph[2]",
+            "/section[1]/paragraph[3]",
+            "/section[1]/paragraph[4]",
+            "/section[1]/paragraph[5]",
+            "/section[1]/paragraph[6]",
+            "/section[1]/paragraph[7]",
+            "/section[1]/paragraph[8]",
+            "/section[1]/paragraph[9]",
+            "/section[1]/paragraph[10]",
+            "/section[1]/paragraph[11]",
+            "/section[1]/paragraph[12]",
+            "/section[1]/paragraph[13]",
+            "/section[1]/paragraph[14]",
+            "/section[1]/paragraph[15]",
+            "/section[1]/paragraph[16]",
+            "/section[1]/paragraph[17]",
+            "/section[1]/paragraph[18]",
+            "/section[1]/paragraph[19]",
+            "/section[1]/paragraph[20]",
+            "/section[1]/paragraph[21]",
+            "/section[1]/paragraph[22]",
+            "/section[1]/paragraph[23]",
+            "/section[1]/paragraph[24]",
+            "/section[1]/paragraph[25]",
+            "/section[1]/paragraph[26]",
+            "/section[1]/paragraph[27]"
+          ],
+          "sectionPropertiesParagraphMustRemain": true
+        },
+        {
+          "id": "overview",
+          "label": "추진 개요·여건",
+          "firstRootPath": "/section[1]/paragraph[28]",
+          "lastRootPath": "/section[1]/paragraph[38]",
+          "rootPaths": [
+            "/section[1]/paragraph[28]",
+            "/section[1]/paragraph[29]",
+            "/section[1]/paragraph[30]",
+            "/section[1]/paragraph[31]",
+            "/section[1]/paragraph[32]",
+            "/section[1]/paragraph[33]",
+            "/section[1]/paragraph[34]",
+            "/section[1]/paragraph[35]",
+            "/section[1]/paragraph[36]",
+            "/section[1]/paragraph[37]",
+            "/section[1]/paragraph[38]"
+          ],
+          "sectionPropertiesParagraphMustRemain": false
+        },
+        {
+          "id": "task1",
+          "label": "교육활동 운영",
+          "firstRootPath": "/section[1]/paragraph[39]",
+          "lastRootPath": "/section[1]/paragraph[47]",
+          "rootPaths": [
+            "/section[1]/paragraph[39]",
+            "/section[1]/paragraph[40]",
+            "/section[1]/paragraph[41]",
+            "/section[1]/paragraph[42]",
+            "/section[1]/paragraph[43]",
+            "/section[1]/paragraph[44]",
+            "/section[1]/paragraph[45]",
+            "/section[1]/paragraph[46]",
+            "/section[1]/paragraph[47]"
+          ],
+          "sectionPropertiesParagraphMustRemain": false
+        },
+        {
+          "id": "task2",
+          "label": "교육활동 지원",
+          "firstRootPath": "/section[1]/paragraph[48]",
+          "lastRootPath": "/section[1]/paragraph[56]",
+          "rootPaths": [
+            "/section[1]/paragraph[48]",
+            "/section[1]/paragraph[49]",
+            "/section[1]/paragraph[50]",
+            "/section[1]/paragraph[51]",
+            "/section[1]/paragraph[52]",
+            "/section[1]/paragraph[53]",
+            "/section[1]/paragraph[54]",
+            "/section[1]/paragraph[55]",
+            "/section[1]/paragraph[56]"
+          ],
+          "sectionPropertiesParagraphMustRemain": false
+        },
+        {
+          "id": "management",
+          "label": "관리·평가",
+          "firstRootPath": "/section[1]/paragraph[57]",
+          "lastRootPath": "/section[1]/paragraph[71]",
+          "rootPaths": [
+            "/section[1]/paragraph[57]",
+            "/section[1]/paragraph[58]",
+            "/section[1]/paragraph[59]",
+            "/section[1]/paragraph[60]",
+            "/section[1]/paragraph[61]",
+            "/section[1]/paragraph[62]",
+            "/section[1]/paragraph[63]",
+            "/section[1]/paragraph[64]",
+            "/section[1]/paragraph[65]",
+            "/section[1]/paragraph[66]",
+            "/section[1]/paragraph[67]",
+            "/section[1]/paragraph[68]",
+            "/section[1]/paragraph[69]",
+            "/section[1]/paragraph[70]",
+            "/section[1]/paragraph[71]"
+          ],
+          "sectionPropertiesParagraphMustRemain": false
+        }
+      ],
+      "usage": "Index of the unchanged prepared file. After fill or structural edits refresh numeric paths; keep section properties. Use existing public edit APIs; arbitrary subsets require output review."
+    },
+    "layoutRepair": "2026-10-28 feedback2: reduced donor indentation while retaining hanging alignment; education title cell 20pt centered; table outer spacing and per-column padding. Reused on every fill."
+  },
+  "verification": {
+    "evidence": {
+      "path": "full-plans/plan-education/fill-evidence.json",
+      "sha256": "f3f4b21a9d7fb8c81abcca2380d962782361d20a02f8757235faa6868c3b1420"
+    }
+  },
+  "preview": {
+    "path": "full-plans/plan-education/preview.png",
+    "sha256": "c416277624821303f4d9c5d7af892a8ce158ae97c76ff5ff3d78d81f69e13578"
+  },
+  "limits": [
+    "준비본과 입력 예시의 검증이며 모든 분량·부분 선택·사용자 양식의 성공 보증이 아님",
+    "새 작성 결과의 실제 출력은 내용과 분량에 따라 확인한다"
+  ]
+}

@@ -23,7 +23,7 @@ Plugin setup: use the PC configuration from `${CODEX_HOME}/skills/hwpx/environme
 
 ## 기존 서식에서 작성
 
-새 업무 문서도 [서식 선택](template-selection.md) 후 원본 사본을 채우고 변형한다. 빈 문서 생성은 사용하지 않는다. 번호·들여쓰기는 원본 체계를 우선하고 실제 한글에서 확인한다.
+새 업무 문서는 [서식 선택](template-selection.md)의 보존·변형·참고 구분을 따른다. 원본 사본의 수정 비용이 크고 보존 의무가 없으면 신규 저작 경로도 사용할 수 있다. 아래 로컬 편집 계약은 해당 경로를 선택했을 때 적용하며, 경로 우선순위는 [실행 경로 선택](task-routing.md#실행-경로-선택)이 기준이다.
 
 ## 자주 쓰는 편집 우선
 
@@ -59,7 +59,7 @@ Plugin setup: use the PC configuration from `${CODEX_HOME}/skills/hwpx/environme
 | 기존 셀 가로 병합·해제·문단 좌/중앙/우 정렬 | hash-bound 범위 → public 편집/독립 보존 → native 전체 검토 | [셀 병합·정렬](cell-merge-alignment.md) |
 | 기존 셀 세로 정렬·안쪽 여백·일반 줄바꿈 | hash-bound 셀 검사 → 배치 속성만 변경/독립 보존 → native 전체 검토 | [셀 안 배치](cell-spacing-wrap.md) |
 | 기존 일반 표 행 추가/삭제·셀 너비/높이 | 제한 구조 진단 → hash-bound 요청 → dry-run/독립 보존 비교 → native 저장/출력 | [표 크기 편집](table-layout-edit.md) |
-| 일반 복합 생성·편집 | 지원되는 start_workflow / continue_workflow | [autonomous](workflows-autonomous.md) |
+| 전문 workflow의 상태·재개 계약이 필요한 작업 | 지원되는 start_workflow / continue_workflow | [autonomous](workflows-autonomous.md) |
 | 전문 양식·시험·메일머지·이식 | 전문 도구 유지 | [기능별 참조](task-routing.md) |
 
 아래는 SKILL.md에서 선택한 경로의 상세 절차다. 각 도구의 지원 범위·인자·보존 계약을 유지한다.
@@ -178,7 +178,6 @@ Plugin setup: use the PC configuration from `${CODEX_HOME}/skills/hwpx/environme
 기존 보고서의 plain 본문 문단/native 번호·글머리표를 제한적으로 추가·삭제할 때는 [기존 본문 구조 편집](body-structure-edit.md)을 읽고 safe_body_structure.py를 선택한다. 원본 해시/전체 문단 binding과 보호 범위를 지정하고 유지 문단·전체 비대상 package를 대조한다. 셀/control/새 번호 계층 편집이나 다른 helper BLOCK의 우회로 확대하지 않는다.
 
 
-기존 보고서의 plain 본문 문단/native 번호·글머리표를 제한적으로 추가·삭제할 때는 [기존 본문 구조 편집](body-structure-edit.md)을 읽고 safe_body_structure.py를 선택한다. 원본 해시/전체 문단 binding과 보호 범위를 지정하고 유지 문단·전체 비대상 package를 대조한다. 셀/control/새 번호 계층 편집이나 다른 helper BLOCK의 우회로 확대하지 않는다.
 
 
 기존 plain 본문에서 여러 글자 서식이 섞인 문단의 수정·추가와 제목 쪽 흐름은 [혼합 서식 본문 편집](mixed-run-body.md)을 읽고 safe_body_structure.py v2를 사용한다. run별 문구를 명시하고 기존 스타일·표/개체·번호 소속을 보존한다. 필요한 제목에만 다음 문단과 연결/새 쪽 시작을 적용하고 실제 한글 쪽 배치를 확인한다.

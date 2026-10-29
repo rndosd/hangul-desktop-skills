@@ -18,9 +18,9 @@ Python 3.12와 의존성은 설치기가 필요한 경우 전용 환경에 준�
 
 ## 2. ZIP 내려받고 PowerShell 열기
 
-1. [베타 릴리스](https://github.com/rndosd/hangul-desktop-skills/releases/tag/v0.1.0-beta.1)를 엽니다.
-2. **Assets**에서 `hangul-desktop-skills-0.1.0-beta.1.zip`을 내려받습니다. 설치용으로는 이 첨부 파일을 선택하세요.
-3. 파일 탐색기에서 ZIP을 **모두 압축 풀기**로 풉니다. ZIP 내부에서 바로 실행하지 않습니다.
+1. [베타 릴리스](https://github.com/rndosd/hangul-desktop-skills/releases/tag/v0.2.0-beta.1)를 엽니다.
+2. **Assets**에서 `hangul-desktop-skills-0.2.0-beta.1.zip`을 내려받습니다. 설치용으로는 이 첨부 파일을 선택하세요.
+3. 파일 탐색기에서 ZIP을 **모두 압축 풀기**로 풉니다. Windows PowerShell 5.1의 경로 길이 제한을 피하도록 압축 해제 위치와 사용자 지정 CODEX_HOME은 짧게 잡습니다. ZIP 내부에서 바로 실행하지 않습니다.
 4. 압축을 푼 폴더 안에서 **Install.ps1이 보이는 폴더**까지 들어갑니다. 버전에 따라 바깥 폴더가 한 겹 더 있을 수 있습니다.
 5. 그 폴더의 탐색기 주소 표시줄에 `powershell`을 입력하고 Enter를 누릅니다. 일반 Windows PowerShell 창이 열립니다.
 
@@ -105,7 +105,9 @@ COM은 이 PC의 한글 프로그램을 호출하는 Windows 연결입니다. �
 
 COM·모듈 성공만으로 이 문서 시험이 성공한 것은 아닙니다. 반대로 파일 접근 승인창이나 실패가 발생하면 발생 단계와 원인을 확인합니다. 자동 클릭, 실행 정책·ACL 변경, 미확인 DLL 교체로 해결하지 않습니다.
 
-## 7. 두 가지 문서 요청 방법
+## 7. 기본형과 사용자 양식으로 문서 요청하기
+
+현재 기본 제공은 [완성형 계획서 3종](template-library.md)입니다. 학교 양식을 기본형으로 등록하는 복사 가능한 요청문도 같은 안내에 있습니다. 옛 원본·합본·블록 목록은 기본 작성 후보에서 제외합니다. 이전 0.1.0 베타 ZIP 대신 0.2.0 베타 ZIP을 사용하세요.
 
 ### 원본이 HWP일 때: 공식 HWPX 변환기
 

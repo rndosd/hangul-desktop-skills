@@ -98,12 +98,42 @@ def run_tree(p,values,*,new_id=False):
   run[3][0][2]=content
  return value
 def binding(part,index,p):return dict(part=part,index=index,id=p.get('id'),sha256=node_sha(p),text=text(p))
+
+def direct_run_text_candidate(p,field_context=False):
+ result=dict(status='unsupported',reason=None,route=None,runs=[],preservationVerificationRequired=True)
+ if field_context:
+  result['reason']='field-containing section requires a field-aware edit route';return result
+ if any(n.tag not in (P+'run',P+'linesegarray') for n in p):
+  result['reason']='unsupported paragraph child';return result
+ runs=p.findall(P+'run');candidates=[]
+ core='{http://www.hancom.co.kr/hwpml/2011/core}'
+ rect_tags={P+x for x in ['rect','offset','orgSz','curSz','flip','rotationInfo','renderingInfo','lineShape','shadow','drawText','subList','p','run','linesegarray','lineseg','textMargin','sz','pos','outMargin','shapeComment']}|{core+x for x in ['transMatrix','scaMatrix','rotMatrix','fillBrush','winBrush','pt0','pt1','pt2','pt3']}
+ for index,run in enumerate(runs):
+  if set(run.attrib)!={'charPrIDRef'} or any(n.tag not in (P+'t',P+'rect') for n in run):
+   result['reason']='unsupported run attributes or control';return result
+  for rect in run.findall(P+'rect'):
+   if any(n.tag not in rect_tags for n in rect.iter()):
+    result['reason']='rectangle payload outside the inspected decoration shape';return result
+  ts=run.findall(P+'t')
+  if len(ts)>1 or any(len(t) or t.attrib for t in ts):
+   result['reason']='multiple text nodes or mixed inline text require an explicit segment route';return result
+  if ts:candidates.append(dict(index=index,text=ts[0].text or '',charPrIDRef=run.get('charPrIDRef')))
+ if not candidates:
+  result['reason']='no direct plain text node';return result
+ result.update(status='candidate',reason='direct plain text with only inspected rectangle decoration or plain runs',route='public batch set on the selected run path, properties.text',runs=candidates)
+ return result
+
 def inspect(source):
  raw=Path(source).read_bytes();parts,roots,defs=package(raw)
  records=[]
  for name,root in roots.items():
+  field_context=any(n.tag in (P+'fieldBegin',P+'fieldEnd') for n in root.iter())
   for idx,p in enumerate(root):
-   records.append(dict(binding=binding(name,idx,p),plain=eligible(p,defs),template=eligible(p,defs,True),richTemplate=eligible(p,defs,True,True),runs=[dict(text=r.find(P+'t').text or '',charPrIDRef=r.get('charPrIDRef')) for r in p.findall(P+'run')] if eligible(p,defs,True,True) else None,heading=heading(p,defs),controls=[n.tag.rsplit('}',1)[-1] for n in p.iter() if n.tag in [P+x for x in ['tbl','pic','ctrl','footNote','endNote','fieldBegin','bookmark']]]))
+   controls=[n.tag.rsplit('}',1)[-1] for n in p.iter() if n.tag in {P+x for x in ['tbl','pic','ctrl','footNote','endNote','fieldBegin','fieldEnd','bookmark','rect','line','ellipse','arc','polygon','curve','connectLine','container','ole','equation','textart','video','chart']}]
+   rich=eligible(p,defs,True,True)
+   reason='eligible plain-text run template' if rich else ('control-bearing paragraphs cannot be cloned by this tool: '+', '.join(controls) if controls else 'paragraph structure, run text shape, breaks, numbering, or empty text is outside the clone contract')
+   candidate=direct_run_text_candidate(p,field_context)
+   records.append(dict(binding=binding(name,idx,p),plain=eligible(p,defs),template=eligible(p,defs,True),richTemplate=rich,runs=[dict(text=r.find(P+'t').text or '',charPrIDRef=r.get('charPrIDRef')) for r in p.findall(P+'run')] if rich else None,heading=heading(p,defs),controls=controls,cloneEligibility=dict(eligible=rich,reason=reason),directRunTextEdit=candidate))
  return dict(schema=SCHEMA,sourceSha256=digest(raw),paragraphs=records,native='NOT_CHECKED')
 def locate(b,roots):
  require(isinstance(b,dict) and set(b)=={'part','index','id','sha256','text'},'complete bound paragraph selector required')
@@ -309,12 +339,15 @@ def apply(source,output,request,dry_run=False):
  return result
 def main():
  p=argparse.ArgumentParser();sub=p.add_subparsers(dest='command',required=True)
- i=sub.add_parser('inspect');i.add_argument('source');i.add_argument('--output',required=True)
+ i=sub.add_parser('inspect');i.add_argument('source');i.add_argument('--output',required=True);i.add_argument('--summary',action='store_true');i.add_argument('--find',help='Filter the compact view only; full inspection is saved')
  a=sub.add_parser('apply');a.add_argument('source');a.add_argument('output');a.add_argument('--request',required=True);a.add_argument('--dry-run',action='store_true')
  args=p.parse_args()
  if args.command=='inspect':
   value=inspect(args.source)
   with Path(args.output).open('x',encoding='utf8') as f:json.dump(value,f,ensure_ascii=False,indent=2)
  else:value=apply(args.source,args.output,json.loads(Path(args.request).read_text(encoding='utf-8-sig')),args.dry_run)
+ if args.command=='inspect' and args.summary:
+  from inspection_summary import body_summary
+  value=body_summary(value,args.output,args.find)
  print(json.dumps(value,ensure_ascii=False,indent=2))
 if __name__=='__main__':main()

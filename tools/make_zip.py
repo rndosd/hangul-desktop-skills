@@ -6,7 +6,7 @@ ROOT=Path(__file__).resolve().parents[1]
 if __name__=='__main__':
     subprocess.run([sys.executable,'-B',str(ROOT/'tools/verify_release.py')],cwd=ROOT,check=True)
     tracked=subprocess.run(['git','ls-files','-z'],cwd=ROOT,capture_output=True,check=True).stdout.decode('utf-8').split('\0')
-    target=ROOT/'dist/hangul-desktop-skills-0.1.0-beta.1.zip';target.parent.mkdir(exist_ok=True)
+    target=ROOT/'dist/hangul-desktop-skills-0.2.0-beta.1.zip';target.parent.mkdir(exist_ok=True)
     if target.exists():raise FileExistsError('Review existing archive; no overwrite')
     with zipfile.ZipFile(target,'w',compression=zipfile.ZIP_DEFLATED) as z:
         for relative in sorted(filter(None,tracked)):

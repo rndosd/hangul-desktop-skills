@@ -1,4 +1,4 @@
-﻿[CmdletBinding()]
+[CmdletBinding()]
 param(
  [Parameter(Mandatory)][ValidateSet('Inspect','InspectMany','InspectGrid','SetAlignment','SetAlignmentMany','SetAlignmentGrid')][string]$Operation,
  [string]$InputPath,[string]$OutputPath,[string]$PdfPath,

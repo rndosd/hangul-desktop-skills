@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """Selected, run-preserving text edits on an immutable HWPX source.
 
-Local CLI implementation 0.3.1. Uses python-hwpx 6.3.0 public run API;
+Local CLI implementation 0.3.2. Uses python-hwpx 6.3.0 public run API;
 XML is read for selection and preservation evidence, never written directly.
 Native Hancom opening/rendering remains a separate required verification step.
 """
@@ -10,6 +10,7 @@ from workspace_candidate_directory import workspace_candidate_directory
 
 import argparse
 import hashlib
+import io
 import json
 import os
 import posixpath
@@ -23,7 +24,7 @@ from lxml import etree as ET
 
 SCHEMA = 'hwpx.selected-text-edit.v1'
 POLICY = 'preserve-matched-run-lengths-extra-in-last-run'
-IMPLEMENTATION_VERSION = '0.3.1'
+IMPLEMENTATION_VERSION = '0.3.2'
 MAX_EDITS = 100
 
 
@@ -99,13 +100,12 @@ def paragraph_view(node, ancestry, table_ordinals, *, allow_empty_runs=False):
             reason = 'unsupported_paragraph_child'
             continue
         children = list(child)
-        # Hancom saves genuinely empty cells as a styled, childless run.
-        # Only the form path opts in; body selection and controls stay unchanged.
-        if (allow_empty_runs and not children and child.text in (None, '')
+        if (not children and child.text in (None, '')
                 and child.get('charPrIDRef') is not None):
-            runs.append({'path': [index, 0], 'text': '',
-                         'char_pr': child.get('charPrIDRef'), 'start': len(text),
-                         'create_plain_text': True})
+            if allow_empty_runs:
+                runs.append({'path': [index, 0], 'text': '',
+                             'char_pr': child.get('charPrIDRef'), 'start': len(text),
+                             'create_plain_text': True})
             continue
         ts = [(i, n) for i, n in enumerate(children) if local(n) == 't']
         # Real Hancom titles often start with a separate, text-free run carrying
@@ -190,11 +190,14 @@ def valid_table_geometry(table):
         return False
 
 
-def candidates(path, find, source_sha):
-    single_line(find, search=True)
-    result = []
+def candidates_many(path, finds, source_sha):
+    result = {single_line(find, search=True): [] for find in finds}
+    data = Path(path).read_bytes()
+    actual_sha = hashlib.sha256(data).hexdigest()
+    if actual_sha != source_sha:
+        raise ValueError('source changed during preparation')
     table_number = 0
-    for section_number, (member, root) in enumerate(sections(path), 1):
+    for section_number, (member, root) in enumerate(sections(io.BytesIO(data)), 1):
         table_ordinals = {}
         for node in root.iter():
             if local(node) == 'tbl':
@@ -204,20 +207,25 @@ def candidates(path, find, source_sha):
         def walk(node, ancestry, location):
             if local(node) == 'p':
                 text, runs, scope, reason = paragraph_view(node, ancestry, table_ordinals)
-                start = text.find(find)
-                while start >= 0:
-                    binding = [source_sha, member, location, start, find]
-                    token = hashlib.sha256(json.dumps(binding, ensure_ascii=False).encode('utf-8')).hexdigest()
-                    result.append({'target_id': token, 'part': member, 'section': section_number,
-                                   'paragraph_path': location, 'start': start, 'end': start + len(find),
-                                   'scope': scope, 'supported': reason is None, 'reason': reason,
-                                   'context': text[max(0, start-30):start+len(find)+30],
-                                   '_runs': runs, '_paragraph_text': text})
-                    start = text.find(find, start + 1)
+                for find, targets in result.items():
+                    start = text.find(find)
+                    while start >= 0:
+                        binding = [actual_sha, member, location, start, find]
+                        token = hashlib.sha256(json.dumps(binding, ensure_ascii=False).encode('utf-8')).hexdigest()
+                        targets.append({'target_id': token, 'part': member, 'section': section_number,
+                                        'paragraph_path': location, 'start': start, 'end': start + len(find),
+                                        'scope': scope, 'supported': reason is None, 'reason': reason,
+                                        'context': text[max(0, start-30):start+len(find)+30],
+                                        '_runs': runs, '_paragraph_text': text})
+                        start = text.find(find, start + 1)
             for i, child in enumerate(node):
                 walk(child, ancestry + [node], location + [i])
         walk(root, [], [])
     return result
+
+
+def candidates(path, find, source_sha):
+    return candidates_many(path, [find], source_sha)[find]
 
 
 def public_target(item):
@@ -225,28 +233,46 @@ def public_target(item):
 
 
 def inspect_targets(source, find, *, table=None, row=None, column=None, limit=200):
+    return inspect_many(source, [{'find': find, 'table': table, 'row': row,
+                                  'column': column, 'limit': limit}])[0]
+
+
+def inspect_many(source, queries):
     source = source_path(source)
-    if not isinstance(limit, int) or not 1 <= limit <= 1000:
-        raise ValueError('limit must be 1..1000')
-    coordinates = (table, row, column)
-    if any(x is not None for x in coordinates) and not all(isinstance(x, int) and x > 0 for x in coordinates):
-        raise ValueError('table, row and column must all be positive 1-based coordinates')
+    if not isinstance(queries, list) or not queries:
+        raise ValueError('queries must be a nonempty array')
+    for query in queries:
+        if (not isinstance(query, dict) or 'find' not in query
+                or set(query) - {'find', 'table', 'row', 'column', 'limit'}):
+            raise ValueError('query requires find and optional table, row, column, limit')
+        single_line(query['find'], search=True)
+        limit = query.get('limit', 200)
+        if not isinstance(limit, int) or not 1 <= limit <= 1000:
+            raise ValueError('limit must be 1..1000')
+        coordinates = tuple(query.get(k) for k in ('table', 'row', 'column'))
+        if any(x is not None for x in coordinates) and not all(isinstance(x, int) and x > 0 for x in coordinates):
+            raise ValueError('table, row and column must all be positive 1-based coordinates')
     before = digest(source)
-    targets = candidates(source, find, before)
-    if table is not None:
-        targets = [t for t in targets if t['scope']['kind'] == 'cell'
-                   and t['scope']['table'] == table and all(k in t['scope'] for k in ('row', 'column', 'row_span', 'column_span'))
-                   and t['scope']['row'] <= row < t['scope']['row'] + t['scope']['row_span']
-                   and t['scope']['column'] <= column < t['scope']['column'] + t['scope']['column_span']]
-        # Ambiguous/overlapping cell geometry must never silently select an owner.
-        owners = {(t['scope']['row'], t['scope']['column']) for t in targets}
-        if len(owners) > 1:
-            raise ValueError('ambiguous cell ownership')
+    by_find = candidates_many(source, [q['find'] for q in queries], before)
+    result = []
+    for query in queries:
+        find, limit = query['find'], query.get('limit', 200)
+        table, row, column = (query.get(k) for k in ('table', 'row', 'column'))
+        targets = by_find[find]
+        if table is not None:
+            targets = [t for t in targets if t['scope']['kind'] == 'cell'
+                       and t['scope']['table'] == table and all(k in t['scope'] for k in ('row', 'column', 'row_span', 'column_span'))
+                       and t['scope']['row'] <= row < t['scope']['row'] + t['scope']['row_span']
+                       and t['scope']['column'] <= column < t['scope']['column'] + t['scope']['column_span']]
+            owners = {(t['scope']['row'], t['scope']['column']) for t in targets}
+            if len(owners) > 1:
+                raise ValueError('ambiguous cell ownership')
+        result.append({'schema': 'hwpx.text-targets.v1', 'source_sha256': before, 'find': find,
+                       'total': len(targets), 'truncated': len(targets) > limit,
+                       'targets': [public_target(t) for t in targets[:limit]], 'native_render': 'not_checked'})
     if digest(source) != before:
         raise ValueError('source changed during inspection')
-    return {'schema': 'hwpx.text-targets.v1', 'source_sha256': before, 'find': find,
-            'total': len(targets), 'truncated': len(targets) > limit,
-            'targets': [public_target(t) for t in targets[:limit]], 'native_render': 'not_checked'}
+    return result
 
 
 def make_plan(inspection, target_ids, replacement):
@@ -263,6 +289,40 @@ def make_plan(inspection, target_ids, replacement):
             'edits': [{'target_id': token, 'find': inspection['find'], 'replace': replacement} for token in target_ids]}
 
 
+def combine_plans(inspections, changes):
+    """Reuse reviewed inspections to build one existing selected-text plan."""
+    if isinstance(inspections, dict):
+        inspections = [inspections]
+    if (not isinstance(inspections, list) or not inspections
+            or any(not isinstance(i, dict) or i.get('schema') != 'hwpx.text-targets.v1'
+                   for i in inspections)):
+        raise ValueError('selected-text inspection or inspection array required')
+    revisions = {i.get('source_sha256') for i in inspections}
+    if len(revisions) != 1 or not isinstance(next(iter(revisions)), str):
+        raise ValueError('all inspections must belong to the same source revision')
+    if not isinstance(changes, list) or not changes:
+        raise ValueError('nonempty changes array required')
+    edits, seen = [], set()
+    for change in changes:
+        if not isinstance(change, dict) or set(change) != {'query', 'targets', 'replace'}:
+            raise ValueError('each change requires query, targets and replace')
+        index = change['query']
+        if type(index) is not int or not 0 <= index < len(inspections):
+            raise ValueError('query must be a valid zero-based inspection index')
+        if not isinstance(change['targets'], list):
+            raise ValueError('targets must be an explicit target_id array')
+        part = make_plan(inspections[index], change['targets'], change['replace'])
+        for edit in part['edits']:
+            if edit['target_id'] in seen:
+                raise ValueError('duplicate selected target across changes')
+            seen.add(edit['target_id'])
+            edits.append(edit)
+    if len(edits) > MAX_EDITS:
+        raise ValueError('too many edits for one selected-text plan')
+    return dict(schema=SCHEMA, source_sha256=inspections[0]['source_sha256'],
+                style_policy=POLICY, edits=edits)
+
+
 def compile_edits(source, plan, source_sha):
     if not isinstance(plan, dict) or plan.get('schema') != SCHEMA or plan.get('style_policy') != POLICY:
         raise ValueError('unsupported plan schema or style policy')
@@ -271,17 +331,18 @@ def compile_edits(source, plan, source_sha):
     edits = plan.get('edits')
     if not isinstance(edits, list) or not 1 <= len(edits) <= MAX_EDITS:
         raise ValueError('plan must contain 1..100 explicit edits')
-    by_find = {}
-    selected = []
-    spans = defaultdict(list)
     for edit in edits:
         if not isinstance(edit, dict):
             raise ValueError('invalid edit')
         find, replacement = single_line(edit.get('find'), search=True), single_line(edit.get('replace'))
         if find == replacement:
             raise ValueError('replacement must change the selected text')
-        if find not in by_find:
-            by_find[find] = {t['target_id']: t for t in candidates(source, find, source_sha)}
+    by_find = {find: {t['target_id']: t for t in targets}
+               for find, targets in candidates_many(source, [e['find'] for e in edits], source_sha).items()}
+    selected = []
+    spans = defaultdict(list)
+    for edit in edits:
+        find, replacement = edit['find'], edit['replace']
         target = by_find[find].get(edit.get('target_id'))
         if target is None or not target['supported']:
             raise ValueError('target is missing or unsupported: ' + str(target['reason'] if target else 'unknown_target'))
@@ -451,6 +512,35 @@ def apply_run_updates(source, output, updates, changed, *, source_sha, dry_run=F
             'native_open': 'not_checked', 'native_render': 'not_checked', 'visual_review': 'not_performed'}
 
 
+def layout_follow_up(selected):
+    """Report newly blank cell paragraphs from bound edits, without re-reading.
+
+    This is an adaptation cue, not permission to remove a required blank field
+    or a claim about rendered whitespace. Text editing still preserves layout.
+    """
+    groups = {}
+    for target, replacement in selected:
+        if target['scope'].get('kind') == 'cell':
+            key = (target['part'], tuple(target['paragraph_path']))
+            groups.setdefault(key, []).append((target, replacement))
+    follow_up = []
+    for edits in groups.values():
+        target = edits[0][0]
+        before = target['_paragraph_text']
+        after = before
+        for change, replacement in sorted(edits, key=lambda item: item[0]['start'], reverse=True):
+            after = after[:change['start']] + replacement + after[change['end']:]
+        if before.strip() and not after.strip():
+            follow_up.append({
+                'reason': 'newly_blank_cell_paragraph',
+                'scope': target['scope'],
+                'target_ids': [change['target_id'] for change, _ in edits],
+                'paragraph_and_cell_geometry': 'preserved',
+                'next_action': 'For template adaptation, review this cell only: retain intentional blank fields; otherwise use supported paragraph removal and reassess row height in the existing visual review.',
+            })
+    return follow_up
+
+
 def apply_plan(source, output, plan, *, dry_run=False):
     source = source_path(source)
     before = digest(source)
@@ -459,6 +549,7 @@ def apply_plan(source, output, plan, *, dry_run=False):
     result.update(schema='hwpx.selected-text-edit-receipt.v1', selected_edits=len(selected),
                   plan_sha256=hashlib.sha256(json.dumps(plan, ensure_ascii=False, sort_keys=True).encode('utf-8')).hexdigest(),
                   style_policy=POLICY,
+                  layout_follow_up=layout_follow_up(selected),
                   layout_risk=[{'target_id': t['target_id'], 'scope': t['scope'],
                                 'length_delta': len(replacement)-(t['end']-t['start'])}
                                for t, replacement in selected])
@@ -479,6 +570,10 @@ def main():
     for name in ('table', 'row', 'column', 'limit'):
         read.add_argument('--'+name, type=int, default=200 if name == 'limit' else None)
     read.add_argument('--output', required=True)
+    many = commands.add_parser('inspect-many')
+    many.add_argument('source')
+    many.add_argument('--queries', required=True)
+    many.add_argument('--output', required=True)
     plan_cmd = commands.add_parser('plan')
     plan_cmd.add_argument('--inspection', required=True)
     plan_cmd.add_argument('--target', action='append', required=True)
@@ -489,10 +584,16 @@ def main():
     apply_cmd.add_argument('output')
     apply_cmd.add_argument('--plan', required=True)
     apply_cmd.add_argument('--dry-run', action='store_true')
+    for command in (read, many, plan_cmd):
+        command.add_argument('--summary', action='store_true', help='Print a compact view; keep full JSON in --output')
     args = parser.parse_args()
     try:
         if args.command == 'inspect':
             result = inspect_targets(args.source, args.find, table=args.table, row=args.row, column=args.column, limit=args.limit)
+            write_new_json(args.output, result)
+        elif args.command == 'inspect-many':
+            queries = json.loads(Path(args.queries).read_text(encoding='utf-8-sig'))
+            result = inspect_many(args.source, queries)
             write_new_json(args.output, result)
         elif args.command == 'plan':
             inspection = json.loads(Path(args.inspection).read_text(encoding='utf-8-sig'))
@@ -501,6 +602,9 @@ def main():
         else:
             plan = json.loads(Path(args.plan).read_text(encoding='utf-8-sig'))
             result = apply_plan(args.source, args.output, plan, dry_run=args.dry_run)
+        if getattr(args, 'summary', False):
+            from inspection_summary import text_summary, plan_summary
+            result = (plan_summary if args.command == 'plan' else text_summary)(result, args.output)
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
     except Exception as exc:

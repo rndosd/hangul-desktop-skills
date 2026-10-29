@@ -1,0 +1,116 @@
+{
+  "outcome": "PASS_SAMPLE",
+  "templateSha256": "fbab78cf7a236f9da6950724166228bb8b8027c4feaf76e71819bb7629c42f37",
+  "sampleSha256": "e1c973f40884fa23d1676e60d9a551c4536e156bd9d16e88ac94bab1b3048d70",
+  "pdfSha256": "9d7d9a2e8d980b70e98b28d619d5e922b96426f3986ebb8bce53461baea3c92b",
+  "nativeReceipt": {
+    "path": "full-plans/plan-project/example-native.json",
+    "sha256": "4dced0d0f50b81a8c1f240c2d16752fcd9c181d0c4a6f1f097767437d07fabec"
+  },
+  "allSuppliedValuesPresentInHwpxAndPdf": true,
+  "visualReview": {
+    "scope": "2026-10-28 same-level yellow title gaps; prepared form and fresh garden fill output reviewed"
+  },
+  "examplePages": 7,
+  "headingSpacing": {
+    "current": {
+      "pages": 6,
+      "gaps": [
+        {
+          "page": 4,
+          "top": 241.66,
+          "gap": 21.94
+        },
+        {
+          "page": 4,
+          "top": 481.99,
+          "gap": 21.62
+        },
+        {
+          "page": 5,
+          "top": 132.82,
+          "gap": 22.73
+        },
+        {
+          "page": 5,
+          "top": 513.04,
+          "gap": 22.42
+        },
+        {
+          "page": 6,
+          "top": 227.63,
+          "gap": 21.94
+        }
+      ],
+      "nativePassed": true,
+      "allInputValuesPresent": true
+    },
+    "prepared": {
+      "pages": 5,
+      "gaps": [
+        {
+          "page": 3,
+          "top": 547.32,
+          "gap": 22.06
+        },
+        {
+          "page": 4,
+          "top": 80.07,
+          "gap": null
+        },
+        {
+          "page": 4,
+          "top": 162.06,
+          "gap": 21.66
+        },
+        {
+          "page": 4,
+          "top": 398.68,
+          "gap": 22.42
+        },
+        {
+          "page": 5,
+          "top": 227.63,
+          "gap": 21.94
+        }
+      ],
+      "nativePassed": true,
+      "allInputValuesPresent": false
+    },
+    "refill": {
+      "pages": 7,
+      "gaps": [
+        {
+          "page": 4,
+          "top": 293.08,
+          "gap": 21.94
+        },
+        {
+          "page": 4,
+          "top": 554.27,
+          "gap": 21.23
+        },
+        {
+          "page": 5,
+          "top": 264.31,
+          "gap": 22.45
+        },
+        {
+          "page": 6,
+          "top": 194.79,
+          "gap": 22.42
+        },
+        {
+          "page": 6,
+          "top": 588.2,
+          "gap": 22.06
+        }
+      ],
+      "nativePassed": true,
+      "allInputValuesPresent": true
+    }
+  },
+  "limits": [
+    "Page boundaries have no preceding content on the same page; future content still needs its normal layout review."
+  ]
+}

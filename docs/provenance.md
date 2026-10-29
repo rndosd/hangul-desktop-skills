@@ -18,8 +18,8 @@ vendor는 python-hwpx **6.3.0**의 수정 사본입니다. `skills/hwpx/vendor/P
 
 Python bootstrap은 [Astral uv 0.12.22](https://github.com/astral-sh/uv/releases/tag/0.12.22)의 x64 Windows 파일을 고정 해시로 받습니다. uv/Python을 저장소에 재배포하지 않습니다. uv는 MIT/Apache-2.0, Python은 PSF License로 제공됩니다. pip 설치 패키지의 라이선스는 각 배포판의 메타데이터를 따릅니다. [PyMuPDF는 AGPL 또는 상용 라이선스](https://pymupdf.readthedocs.io/en/latest/about.html#license-and-copyright)이므로 그 라이선스 조건도 확인해야 합니다. 코드 공개 라이선스가 외부 프로그램의 라이선스를 대체하지 않습니다.
 
-`assets/complex-structure/source.hwpx`와 `assets/mixed-runs/source.hwpx`는 이 개발 과정에서 만든 가상 회귀 문서입니다. 실제 업무 정보가 아니며 문서 내용도 검사 입력입니다. 2026-10-23 동기화에서 추가한 외부 기관 원본과 서식 견본의 출처·해시·이용조건 기록은 `assets/document-templates/catalog.json`에 따로 보존합니다. 저장소의 코드 라이선스를 외부 원본에 일괄 적용하지 않습니다.
+`assets/complex-structure/source.hwpx`와 `assets/mixed-runs/source.hwpx`는 이 개발 과정에서 만든 가상 회귀 문서입니다. 실제 업무 정보가 아니며 문서 내용도 검사 입력입니다. 완성형 3종의 기반 원본 출처·해시·이용조건은 `assets/document-templates/source-library/provenance.json`과 `full-plans.json`에 보존합니다. 저장소의 코드 라이선스를 외부 원본에 일괄 적용하지 않습니다.
 
 두 번째 GitHub 검사에서 영어 Windows PowerShell 5.1이 한국어 launcher의 BOM 없는 UTF-8을 ANSI로 읽는 차이를 재현했습니다. Invoke-HangulTask.ps1의 본문은 유지하고 UTF-8 BOM만 추가했으며, 공개 패키지 검사에 비ASCII PowerShell 인코딩 검사를 추가했습니다.
 
-2026-10-23 현재 설치본의 원본 기반 작성, 문서 기본 기준, 번호 체계, 선택적 강조, 표 가독성·여백 및 실제 출력 검수 지침과 관련 도구를 동기화했습니다. 사용자의 공개 배포 요청에 따라 현재 선택 대상으로 쓰는 원본·합본 16개와 PDF 미리보기도 포함했습니다. 이는 파일별 이용조건의 신규 검증을 뜻하지 않으며 목록에 남아 있는 미확인 사항도 유지합니다. [서식 구성과 다른 PC 이전](template-library.md)을 참고하세요. 과거 가상 문서 생성 엔진의 일부 내부 함수는 회귀 확인을 위해 남아 있지만 공통 `new` 및 빈 문서 생성 CLI는 제거된 상태입니다.
+2026-10-23 현재 설치본의 원본 기반 작성, 문서 기본 기준, 번호 체계, 선택적 강조, 표 가독성·여백 및 실제 출력 검수 지침과 관련 도구를 동기화했습니다. 당시 포함했던 원본·합본 16개와 부분 블록은 0.2.0-beta.1 정리에서 선택·배포 대상에서 제외했습니다. 현재는 완성형 계획서 3종과 그 검증 의존 자료만 제공합니다. 기존 원본 이용조건의 미확인 사항을 새 권리 확인으로 바꾸지 않습니다. [서식 구성과 다른 PC 이전](template-library.md)을 참고하세요. 과거 가상 문서 생성 엔진의 일부 내부 함수는 회귀 확인을 위해 남아 있지만 공통 `new` 및 빈 문서 생성 CLI는 제거된 상태입니다.

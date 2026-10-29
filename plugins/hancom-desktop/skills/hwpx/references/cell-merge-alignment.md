@@ -6,7 +6,7 @@ public core merge_cells/split_merged_cell/ensure_paragraph_format을 사용하�
 
 ## 현재 확인한 범위
 
-중첩/그림/필드/컨트롤이 없는 대상 표, 2~100행·1~12열, 셀마다 plain run 하나·문단 하나.
+중첩/그림/필드/컨트롤이 없는 대상 표, 2~100행·1~12열. merge/unmerge는 셀마다 plain run 하나·문단 하나인 표를 지원한다. align은 plain run과 문단이 여러 개인 셀도 지원한다.
 한글이 저장한 childless 빈 run도 지원한다. 다른 표나 대상 밖의 쪽 번호/머리말·꼬리말은 보존한다.
 
 - merge: 같은 행의 연속 2~12개 셀, 병합 전에는 모두 단일 셀이어야 한다.
@@ -17,8 +17,13 @@ public core merge_cells/split_merged_cell/ensure_paragraph_format을 사용하�
   내용은 왼쪽 셀에 남기고 새 셀은 비운다. 셀/문단/글자 서식은 유지한다.
 - align: 단일 셀로 구성된 직사각형 선택 범위의 기존 문단을 LEFT/CENTER/RIGHT로 맞춘다.
   원래 paraPr를 복제해 horizontal 값만 바꾸며 글꼴, 들여쓰기, 행간, 여백, 다른 문단을 유지한다.
-  여러 문단/run의 가로 정렬, 병합 셀 가로 정렬, 세로 병합·해제는 이 도구의 지원 범위에 없다.
+  선택 셀의 각 문단을 그 문단의 원래 서식에서 파생하며 run별 글자 서식과 문단 수를 유지한다.
+  병합 셀 가로 정렬과 세로 병합·해제는 지원 범위에 없다.
+  align은 원본의 문단 ID 값과 순서를 그대로 유지한다. 기존 중복 ID는 paragraphIdsUnique=false로 보고하며 새 ID로 바꾸지 않는다. merge/unmerge의 ID 충돌 검사는 유지한다.
   세로 정렬·안쪽 여백·일반 줄바꿈은 [별도 셀 배치 도구](cell-spacing-wrap.md)에서 제한적으로 지원한다.
+- align_many: 같은 표의 여러 범위에 서로 다른 가로 정렬을 한 요청으로 적용한다.
+  align과 같은 지원·보존 범위이며 모든 선택을 확인한 뒤 한 편집 문서에 적용한다.
+  같은 셀에 같은 정렬을 지정하면 중복을 합친다. 서로 다른 정렬이 겹치면 저장 전에 거부한다.
 
 split_merged_cell은 새 셀에 기본 paraPr를 주는 동작이 있다.
 이 경로는 새 셀의 public para/style 참조를 원래 셀로 복원한다. 새로 생성한 빈 셀의 empty t만
@@ -46,6 +51,27 @@ python -X utf8 scripts/safe_cell_layout.py apply source.hwpx new-candidate.hwpx 
 ```json
 {"schema":"hwpx.safe-cell-layout.v1","source_sha256":"실제 원본 해시","table":1,"operation":"align","range":[3,1,3,3],"alignment":"CENTER"}
 ```
+
+여러 열의 정렬을 바꿀 때는 셀별·열별 호출 대신 `align_many`를 사용한다.
+아래는 시간·담당 열을 가운데, 내용 열을 왼쪽으로 선택한 경우의 호출 예이며 기본 정렬 규칙이 아니다. [배치 기준](template-formatting.md#제목표강조)에 따라 표 안의 같은 역할에는 같은 정렬 기준을 적용하고, 선택한 방향을 해당 범위에 일괄 적용한다.
+
+```json
+{
+  "schema":"hwpx.safe-cell-layout.v1",
+  "source_sha256":"실제 원본 해시",
+  "table":1,
+  "operation":"align_many",
+  "alignments":[
+    {"range":[2,1,7,2],"alignment":"CENTER"},
+    {"range":[2,3,7,3],"alignment":"LEFT"},
+    {"range":[2,4,7,4],"alignment":"CENTER"}
+  ]
+}
+```
+
+`alignments`는 1~100개 범위를 받으며 최상위 `range`·`alignment`와 함께 쓰지 않는다.
+병합 셀은 선택 대상에서 제외한다. 제목·주석의 병합 셀이 표에 있어도 비대상으로 유지할 수 있다.
+기존 단일 범위 명령과 같은 inspect·apply·dry-run 경로를 사용한다.
 
 stdout 영수증의 PASS_STRUCTURE는 후보의 제한 보존 검사이며 native 완료가 아니다.
 표 크기/글자 배치가 바뀌므로 prepare → SaveAs → collect → 실제 전체 쪽 검토 → check를 연결한다.

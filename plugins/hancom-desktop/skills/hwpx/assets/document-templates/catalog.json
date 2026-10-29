@@ -1,414 +1,51 @@
 {
   "schema": "hwpx.source-templates.v2",
-  "updated": "2026-10-22",
-  "policy": "사용자 형식 지정 우선. 없으면 적합한 기존 원본을 선택해 변형. 빈 문서 생성 없음. active_source는 새 결과의 완성·배치 통과를 뜻하지 않음.",
+  "updated": "2026-10-29",
+  "policy": "기본 제공은 완성형 계획서 3종만. 사용자 원본·개인 등록 양식 우선. 옛 원본·합본·블록은 기본 선택에서 제외.",
   "groups": [
     {
       "id": "plan",
-      "title": "계획서",
-      "question": "앞으로 무엇을 어떻게 할까?",
-      "examples": "행사 운영 · 사업 추진 · 세부 실행",
-      "default": "source-A",
-      "related": [
-        "extra-03",
-        "extra-01",
-        "extra-05"
-      ]
-    },
-    {
-      "id": "report",
-      "title": "보고서",
-      "question": "무슨 상황이고, 무엇을 했을까?",
-      "examples": "검토·현황 · 운영 결과 · 긴 종합보고",
-      "default": "source-D",
-      "related": [
-        "style-03",
-        "extra-02",
-        "extra-03",
-        "source-D"
-      ]
-    },
-    {
-      "id": "notice",
-      "title": "안내·신청서",
-      "question": "알리고, 신청과 동의를 받을까?",
-      "examples": "가정통신문 · 참가 신청 · 보호자 동의",
-      "default": "extra-04",
-      "related": [
-        "extra-05"
-      ]
-    },
-    {
-      "id": "meeting",
-      "title": "회의문서",
-      "question": "논의하고 결정한 내용을 남길까?",
-      "examples": "회의록 · 학생대표 안건 제안",
-      "default": "extra-07",
-      "related": [
-        "extra-06"
-      ]
+      "title": "완성형 계획서",
+      "examples": "학교 교육활동 · 교육사업 · 종합사업",
+      "default": "plan-school"
     }
   ],
   "defaults": {
-    "plan": "source-A",
-    "report": "source-D",
-    "review": "source-D",
-    "result": "source-F",
-    "long_report": "source-D",
-    "notice": "extra-04",
-    "meeting": "extra-07",
-    "agenda": "extra-06",
-    "budget": "extra-03",
-    "settlement": "extra-02"
+    "plan": "plan-school"
   },
   "templates": [
     {
-      "id": "source-A",
-      "label": "경남교육청 · 행복마을학교 운영계획",
-      "groups": [
-        "plan"
-      ],
-      "role": "기존 원본",
+      "id": "plan-school",
+      "label": "학교 교육활동 운영계획",
       "status": "active_source",
-      "path": "source-library/source-A.hwpx",
-      "sha256": "10a2cd1337e373463faa906bd1a84c6fae18fd14debe88ead72939c814f3bd7d",
-      "preview": "source-library/source-A.pdf",
-      "readiness": "원본 또는 견본의 선택 가능 상태. 실제 내용 대체 후 검수 필요.",
-      "source_url": "https://www.gne.go.kr/haengbok/user/bbs/BD_selectBbs.do?q_bbsDocNo=20250124113011496&q_bbsSn=1190",
+      "path": "full-plans/plan-school/template.hwpx",
+      "sha256": "235656c75672cd9c9ffff45ad1dec0bd0f178507990562086ad65384402468a5",
+      "preview": "full-plans/plan-school/template.pdf",
       "limitations": [
-        "원본 분량에 맞춘 빈 공간이 있어 내용 교체 후 셀 높이·쪽 나눔 조정 필요."
-      ],
-      "checked_scope": "이 원본을 활용한 7쪽 계획서의 실제 편집·재열기·전 쪽 검수 완료."
+        "준비본 복사이며 새 내용 반영·실제 출력은 별도 확인. 채움은 full-plans.json 사용."
+      ]
     },
     {
-      "id": "source-B",
-      "label": "경남교육청 · 사회적경제 교육 추진계획",
-      "groups": [
-        "plan"
-      ],
-      "role": "기존 원본",
+      "id": "plan-education",
+      "label": "교육사업 추진계획 · 표지형",
       "status": "active_source",
-      "path": "source-library/source-B.hwpx",
-      "sha256": "c7fe68b0447a07efdd05832018dc87956339bc1829ca1a4c85b51d196958865b",
-      "preview": "source-library/source-B.pdf",
-      "readiness": "원본 또는 견본의 선택 가능 상태. 실제 내용 대체 후 검수 필요.",
-      "source_url": "https://www.gne.go.kr/haengbok/user/bbs/BD_selectBbs.do?q_bbsDocNo=20250617145628929&q_bbsSn=1193",
+      "path": "full-plans/plan-education/template.hwpx",
+      "sha256": "4d776ccfb915bf904fef9f96b7d241f77ca280bd888f1b896c6c78bd7aea4040",
+      "preview": "full-plans/plan-education/template.pdf",
       "limitations": [
-        "표지 포함 6쪽. 학교 행사에 불필요한 기관 사업 내용은 삭제·대체해야 함."
-      ],
-      "checked_scope": "원본 한글 열기·원본 보존·PDF 변환 확인. 내용 대체 실험 전."
+        "준비본 복사이며 새 내용 반영·실제 출력은 별도 확인. 채움은 full-plans.json 사용."
+      ]
     },
     {
-      "id": "source-C",
-      "label": "교육부 · 지역인재육성지원사업 추진계획",
-      "groups": [
-        "plan"
-      ],
-      "role": "기존 원본",
+      "id": "plan-project",
+      "label": "종합사업 추진계획 · 요약·상세형",
       "status": "active_source",
-      "path": "source-library/source-C.hwpx",
-      "sha256": "189acd8775c1d2e79a4e46f9ec137e55851613491e358472005f21c716daa4f7",
-      "preview": "source-library/source-C.pdf",
-      "readiness": "원본 또는 견본의 선택 가능 상태. 실제 내용 대체 후 검수 필요.",
-      "source_url": "https://www.moe.go.kr/boardCnts/viewRenew.do?boardID=294&boardSeq=103122&lev=0&m=020402&opType=N&page=1&s=moe&searchType=null&statusYN=W",
+      "path": "full-plans/plan-project/template.hwpx",
+      "sha256": "fbab78cf7a236f9da6950724166228bb8b8027c4feaf76e71819bb7629c42f37",
+      "preview": "full-plans/plan-project/template.pdf",
       "limitations": [
-        "현재 한글 PDF는 가로 한 장에 두 쪽씩 배치됨(총 9매). 요약·상세 구조 참고에 좋지만 일반 세로 문서의 기본 틀로 쓰기 전 조판 설정을 확인해야 함. 차례와 쪽 표기도 재작성 때 대조."
-      ],
-      "checked_scope": "원본 한글 열기·원본 보존·PDF 변환 확인. 내용 대체 실험 전."
-    },
-    {
-      "id": "source-D",
-      "label": "행정안전부 · 업무보고",
-      "groups": [
-        "report"
-      ],
-      "role": "기존 원본",
-      "status": "active_source",
-      "path": "source-library/source-D.hwpx",
-      "sha256": "e611af56a823b81a44f2f96cb3b79af73ccaaa326f234497e96e271267e554b4",
-      "preview": "source-library/source-D.pdf",
-      "readiness": "원본 또는 견본의 선택 가능 상태. 실제 내용 대체 후 검수 필요.",
-      "source_url": "https://www.mois.go.kr/frt/bbs/type001/commonSelectBoardArticle.do?bbsId=BBSMSTR_000000000245&nttId=126784",
-      "limitations": [
-        "23쪽 기관 업무보고이므로 학교 업무에는 필요한 구역만 활용. 파란색 강조가 강하고 본문 밀도가 높음. 원본 편집 적합성은 별도 검증 필요."
-      ],
-      "checked_scope": "공식 HWPX·동일 게시물 PDF 다운로드 확인. 한글 내용 대체 실험 전."
-    },
-    {
-      "id": "source-E",
-      "label": "국가데이터연구원 · 청년 삶의 질 주요 결과",
-      "groups": [
-        "report"
-      ],
-      "role": "기존 원본",
-      "status": "active_source",
-      "path": "source-library/source-E.hwpx",
-      "sha256": "76e691a4f4be9a05daecbd54bf0e8e4685a2b213e70b434f93d533abce1fd25f",
-      "preview": "source-library/source-E.pdf",
-      "readiness": "원본 또는 견본의 선택 가능 상태. 실제 내용 대체 후 검수 필요.",
-      "source_url": "https://mods.go.kr/board.es?act=view&bid=11477&list_no=442458&mainXml=Y&mid=a90401000000",
-      "limitations": [
-        "19쪽 주요 결과 보도자료 원본. 별도의 책형 본보고서 양식과 구별하며 일반 실적 보고에 그래프를 억지로 넣지 않음."
-      ],
-      "checked_scope": "공식 HWPX·동일 PDF, 선정 쪽 시각 확인. 한글 내용 대체 실험 전."
-    },
-    {
-      "id": "source-F",
-      "label": "경남대학교 · PBL 운영결과보고서",
-      "groups": [
-        "report"
-      ],
-      "role": "기존 원본",
-      "status": "active_source",
-      "path": "source-library/source-F.hwpx",
-      "sha256": "dab14a83a904363f5bc69328c739b57bfec0d771ee30273ff2287b5fbdce1238",
-      "preview": "source-library/source-F.pdf",
-      "readiness": "원본 또는 견본의 선택 가능 상태. 실제 내용 대체 후 검수 필요.",
-      "source_url": "https://kusw.kyungnam.ac.kr/bbs/board.php?bo_table=pds&wr_id=8",
-      "limitations": [
-        "교과 운영용 빈양식이므로 학점·주차·교수 활동 항목은 행사 목적에 맞게 변형 필요. 원본 전체는 6쪽."
-      ],
-      "checked_scope": "원본 한글 열기·원본 보존·6쪽 PDF 변환 확인. 내용 대체 실험 전."
-    },
-    {
-      "id": "style-01",
-      "label": "계획서 합본",
-      "groups": [
-        "plan"
-      ],
-      "role": "서식 견본 합본",
-      "status": "active_source",
-      "path": "source-library/style-01.hwpx",
-      "sha256": "6391d1acb96791d0cd2164e07ebfadf9dcfd5b755c509949920dbd86d7750dc6",
-      "preview": "source-library/style-01.pdf",
-      "readiness": "원본 또는 견본의 선택 가능 상태. 실제 내용 대체 후 검수 필요.",
-      "source_url": null,
-      "limitations": [
-        "서식 견본 합본. 원본 전체와 내부 정의가 완전히 동일한 파일이 아니며 필요한 부품만 변형 활용."
-      ],
-      "checked_scope": "기존 합본 검수와 실제 출력의 확인 범위는 작업 영수증에 기록됨."
-    },
-    {
-      "id": "style-02",
-      "label": "검토·설명 보고 합본",
-      "groups": [
-        "report"
-      ],
-      "role": "서식 견본 합본",
-      "status": "active_source",
-      "path": "source-library/style-02.hwpx",
-      "sha256": "f58a2a7561f5248c40737a739e8f44bf4f93f04cc1301896a064015dcc9e256c",
-      "preview": "source-library/style-02.pdf",
-      "readiness": "원본 또는 견본의 선택 가능 상태. 실제 내용 대체 후 검수 필요.",
-      "source_url": null,
-      "limitations": [
-        "서식 견본 합본. 원본 전체와 내부 정의가 완전히 동일한 파일이 아니며 필요한 부품만 변형 활용."
-      ],
-      "checked_scope": "기존 합본 검수와 실제 출력의 확인 범위는 작업 영수증에 기록됨."
-    },
-    {
-      "id": "style-03",
-      "label": "결과·기록 보고 합본",
-      "groups": [
-        "report"
-      ],
-      "role": "서식 견본 합본",
-      "status": "active_source",
-      "path": "source-library/style-03.hwpx",
-      "sha256": "93b3a3587d8b9482ed3376e4bfd645dd42619fdd4353e3575b107f190bbce60f",
-      "preview": "source-library/style-03.pdf",
-      "readiness": "원본 또는 견본의 선택 가능 상태. 실제 내용 대체 후 검수 필요.",
-      "source_url": null,
-      "limitations": [
-        "서식 견본 합본. 원본 전체와 내부 정의가 완전히 동일한 파일이 아니며 필요한 부품만 변형 활용."
-      ],
-      "checked_scope": "기존 합본 검수와 실제 출력의 확인 범위는 작업 영수증에 기록됨."
-    },
-    {
-      "id": "extra-01",
-      "label": "여러 재원·비목을 다루는 사업예산표",
-      "groups": [
-        "plan"
-      ],
-      "role": "관련 서식",
-      "status": "active_source",
-      "path": "source-library/extra-01.hwpx",
-      "sha256": "64b03a032200c9e151d24528a8c479f385e4e9d680c9c90e88084a71576a22bb",
-      "preview": "source-library/extra-01.pdf",
-      "readiness": "원본 또는 견본의 선택 가능 상태. 실제 내용 대체 후 검수 필요.",
-      "source_url": "https://www.jge.go.kr/jgemain/na/ntt/selectNttInfo.do?mi=2116&nttSn=5182673",
-      "limitations": [
-        "공고·작성지침·신청서 등이 묶인 파일이므로 서식2 예산 부분만 별도 후보로 선별할 것",
-        "이 사업의 비목·단가·편성금지 규정을 다른 학교 사업에 적용하지 말 것; 해당 기관 사업 지침 우선",
-        "원본 예시 중 자부담 강사비 5,100과 산출근거 합계 4,800이 일치하지 않아 예시 수치 재사용 금지",
-        "첨부별 재사용 라이선스 조건은 페이지에서 확인하지 못함; 공용 스킬 배포 전 이용조건 재확인"
-      ],
-      "preferred_pdf_pages": [
-        10
-      ],
-      "checked_scope": "한글 열기·PDF 출력·원본 해시 보존 확인; 지정한 미리보기 쪽 육안 검토",
-      "preview_sha256": "65d1713e9d292f76644a1d321edd240a9e0e6348b27b4053d9fad8e57bb8e6fa"
-    },
-    {
-      "id": "extra-02",
-      "label": "간단한 행사 집행·정산서",
-      "groups": [
-        "report"
-      ],
-      "role": "관련 서식",
-      "status": "active_source",
-      "path": "source-library/extra-02.hwpx",
-      "sha256": "921ce41707aa93e9fbf9066e67fcbe1bfa0daf5a1de2ac09c67f50acccbc401f",
-      "preview": "source-library/extra-02.pdf",
-      "readiness": "원본 또는 견본의 선택 가능 상태. 실제 내용 대체 후 검수 필요.",
-      "source_url": "https://www.gne.go.kr/user/bbs/BD_selectBbs.do?q_bbsDocNo=20260402103115909&q_bbsSn=1464",
-      "limitations": [
-        "서식은 문화예술단체의 해당사업 정산용; 학교 내부 예산편성이나 다른 사업의 허용 지출 근거가 되지 않음",
-        "원본의 잔액 없이 집행 문구는 해당사업 지침으로, 범용 양식 작성 시 지침 문구를 그대로 옮기지 말 것",
-        "예시 250만원·강사비·음향 대여 등 수치는 다른 사업에 재사용 금지",
-        "페이지 공공누리 출처표시+상업적이용금지 표시; 출처와 비상업 조건 유지"
-      ],
-      "preferred_pdf_pages": [
-        2
-      ],
-      "checked_scope": "한글 열기·PDF 출력·원본 해시 보존 확인; 지정한 미리보기 쪽 육안 검토",
-      "preview_sha256": "0792a00381ee6c55ae6bb827c44332106d8ac07fd832b38dbac644cfa246ad9c"
-    },
-    {
-      "id": "extra-03",
-      "label": "물품 산출내역과 상세 정산·증빙",
-      "groups": [
-        "plan",
-        "report"
-      ],
-      "role": "관련 서식",
-      "status": "active_source",
-      "path": "source-library/extra-03.hwpx",
-      "sha256": "5512c74ea8e754499c4122e2d60e1286d3bd7c4058b160cbb33226c733f0c8cd",
-      "preview": "source-library/extra-03.pdf",
-      "readiness": "원본 또는 견본의 선택 가능 상태. 실제 내용 대체 후 검수 필요.",
-      "source_url": "https://www.jinju.go.kr/06189.web?amode=view&idx=39582264",
-      "limitations": [
-        "기관이 공개한 가상 작성 예시와 빈칸 혼합 자료이며 실제 제출 완료본이 아님",
-        "전체는 지침과 여러 서식을 묶은 장문 파일; 학교에서 필요한 정산/산출표만 후보로 분리할 것",
-        "표지 예산과 정산 예시 등 금액이 일치하지 않는 부분이 있어 원본 수치 재사용 금지",
-        "진주시 해당사업의 지출기준·의무서류는 다른 사업에 일반화하지 말 것; 해당 사업 지침 우선",
-        "첨부별 재사용 라이선스 조건은 페이지에서 확인하지 못함; 공용 스킬 배포 전 이용조건 재확인"
-      ],
-      "preferred_pdf_pages": [
-        10,
-        11,
-        34
-      ],
-      "checked_scope": "한글 열기·PDF 출력·원본 해시 보존 확인; 지정한 미리보기 쪽 육안 검토",
-      "preview_sha256": "d4f6eac0960cb8cdb598b5664d79fc985e08f09256b7315fd2de980a115be33b"
-    },
-    {
-      "id": "extra-04",
-      "label": "한 장형 행사 안내·신청·보호자 서명",
-      "groups": [
-        "notice"
-      ],
-      "role": "기존 원본",
-      "status": "active_source",
-      "path": "source-library/extra-04.hwpx",
-      "sha256": "6a804e5ec0a77695d1a26c4fac43a8f7fba1b1ff305448236eaf26303a5e4940",
-      "preview": "source-library/extra-04.pdf",
-      "readiness": "원본 또는 견본의 선택 가능 상태. 실제 내용 대체 후 검수 필요.",
-      "source_url": "https://www.gne.go.kr/fieldtrip/user/bbs/BD_selectBbs.do?q_bbsDocNo=20260612085748722&q_bbsSn=1354",
-      "limitations": [
-        "원본은 해당 야영대회 문서다. 기관 원본이라는 이유로 다른 업무의 법적 요건을 충족한다고 볼 수 없다.",
-        "개인정보와 초상권 동의가 한 체크란에 묶여 있다. 실제 업무의 수집 목적·필수/선택·공개 범위에 맞는 별도 검토가 필요하다.",
-        "생년월일·성별·연락처·보유기간 1년 등을 일반 행사에 일괄 복사하지 말고 실제 필요성에 따라 정한다.",
-        "취합표의 000·0000학교·010-1234-5678 등은 원본 서식 예시다. 제출된 학생 개인정보 문서는 아니다.",
-        "참가/불참 선택란과 비상연락처라는 독립 필드명은 없다. 원본 본인/법정대리인 연락처 필드를 비상연락처로 단정하지 않는다."
-      ],
-      "preferred_pdf_pages": [
-        1
-      ],
-      "checked_scope": "한글 열기·PDF 출력·원본 해시 보존 확인; 지정한 미리보기 쪽 육안 검토",
-      "preview_sha256": "d399c04fac02af389f28e09fb7a2a3b330215a60b3ac54363b847ce6120f34f4"
-    },
-    {
-      "id": "extra-05",
-      "label": "여러 쪽 행사 안내·시간표·신청서",
-      "groups": [
-        "notice",
-        "plan"
-      ],
-      "role": "기존 원본",
-      "status": "active_source",
-      "path": "source-library/extra-05.hwpx",
-      "sha256": "146afab5456f2774459acfc7dcd41ea142949491f5b145cd192271e951edad0f",
-      "preview": "source-library/extra-05.pdf",
-      "readiness": "원본 또는 견본의 선택 가능 상태. 실제 내용 대체 후 검수 필요.",
-      "source_url": "https://www.weather.go.kr/kma/news/notice.jsp?mode=view&num=1193907",
-      "limitations": [
-        "교육청/학교가 아닌 기상청의 고등학생 체험캠프 공개 원본이다. 교육기관 행사 문서 비교용 보조 후보로 구분한다.",
-        "신청인 및 학교장 서명·직인은 있지만 보호자 서명란은 없다.",
-        "원본 보험 안내에 선정 후 주민등록번호 관련 별도 동의서 작성이 언급되어 있다. 일반 행사의 표준 수집항목으로 복사하면 안 된다.",
-        "원본 개인정보 수집·보유·거부 안내는 이 행사 목적에 한정된다. 다른 업무의 법적 충족을 의미하지 않는다.",
-        "참가/불참 선택 및 독립적인 비상연락처 필드는 확인되지 않았다."
-      ],
-      "preferred_pdf_pages": [
-        1,
-        2
-      ],
-      "checked_scope": "한글 열기·PDF 출력·원본 해시 보존 확인; 지정한 미리보기 쪽 육안 검토",
-      "preview_sha256": "fedf7e470b9c0205f8f54bd17bdda0dadfa37793077b588da4239baf1d20dbb4"
-    },
-    {
-      "id": "extra-06",
-      "label": "학생대표 안건제안서와 서명부",
-      "groups": [
-        "meeting"
-      ],
-      "role": "기존 원본",
-      "status": "active_source",
-      "path": "source-library/extra-06.hwp",
-      "sha256": "082b01c684324cd2b76bde8feecbb9dc49c6af4505214112dc3f3c73dc0d0479",
-      "preview": "source-library/extra-06.pdf",
-      "readiness": "원본 또는 견본의 선택 가능 상태. 실제 내용 대체 후 검수 필요.",
-      "source_url": "https://www.goegh.kr/gibj-m/na/ntt/selectNttInfo.do?bbsId=5383&mi=9293&nttSn=1115690",
-      "limitations": [
-        "학교운영위원회 제출용이므로 일반 회의 안건지와 용도가 다름",
-        "주요내용/검토의견/의결사항의 독립 칸 없음",
-        "원문에 특정 학교명과 당시 규정 인용이 있으므로 현행 소속 학교 규정 확인 없이 그대로 제출하지 않음",
-        "공개 원본이며 별도 재배포 라이선스는 확인되지 않음"
-      ],
-      "preferred_pdf_pages": [
-        1,
-        2
-      ],
-      "checked_scope": "한글 열기·PDF 출력·원본 해시 보존 확인; 지정한 미리보기 쪽 육안 검토",
-      "preview_sha256": "c9fcad438ae3da2d9a8a8edc1ef24bac6db443b3d23f9f44685476f0c3a357e5"
-    },
-    {
-      "id": "extra-07",
-      "label": "논의·결정·후속 계획을 나눈 회의록",
-      "groups": [
-        "meeting"
-      ],
-      "role": "기존 원본",
-      "status": "active_source",
-      "path": "source-library/extra-07.hwp",
-      "sha256": "4c6be0143eaf2497f4e1fe2730359925c9f90e1d36cd15e95b38b1584c47f8d2",
-      "preview": "source-library/extra-07.pdf",
-      "readiness": "원본 또는 견본의 선택 가능 상태. 실제 내용 대체 후 검수 필요.",
-      "source_url": "https://www.gne.go.kr/user/bbs/BD_selectBbs.do?q_bbsDocNo=20260308081241101&q_bbsSn=1576",
-      "limitations": [
-        "파일 전체는 학생맞춤통합지원 전문 업무용 복합 서식으로 시나리오/신청서/동의서 등을 포함",
-        "기본 후보는 7장 예시1 빈 회의록만; 가상 사례가 들어간 예시2나 시나리오는 일반 학생회 양식에 복제하지 않음",
-        "공식 페이지는 학교 실정에 맞게 자유롭게 수정·선별 활용 가능하다고 명시하지만 현재 안내서는 검토 중인 안으로 추후 변경 가능",
-        "원본 내 회의록 출처는 교육부(2025), 학생맞춤통합지원체계구축 가이드북이라고 표기",
-        "내장 첫 쪽 이미지는 문서 앞부분이므로 회의록 해당 쪽의 실제 페이지 배치는 Hancom 렌더링 후 확인 필요"
-      ],
-      "preferred_pdf_pages": [
-        22
-      ],
-      "checked_scope": "한글 열기·PDF 출력·원본 해시 보존 확인; 지정한 미리보기 쪽 육안 검토",
-      "preview_sha256": "ffb8de511e3d2b60c6a5e53c25853ad3577c42b3e603201e0bacd647eda75575"
+        "준비본 복사이며 새 내용 반영·실제 출력은 별도 확인. 채움은 full-plans.json 사용."
+      ]
     }
-  ],
-  "legacy_synthetic_templates": "removed_from_selection; originals retained and previous catalog archived in workspace backup"
+  ]
 }

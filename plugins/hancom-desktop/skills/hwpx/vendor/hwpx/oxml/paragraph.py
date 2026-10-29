@@ -355,23 +355,26 @@ class HwpxOxmlParagraph:
         self.section.mark_dirty()
 
     def remove(self) -> None:
-        """Remove this paragraph from its parent section.
+        """Remove this paragraph from its owning section or sublist.
 
         After removal, the paragraph wrapper should no longer be used.
-        Raises ``ValueError`` if the section would become empty (HWPX
-        requires at least one ``<hp:p>`` per section).
+        Raises ``ValueError`` for a detached paragraph or if its owner
+        would lose its last paragraph.
         """
-        parent = self.section.element
+        parent = next(
+            (node for node in self.section.element.iter()
+             if any(child is self.element for child in node)),
+            None,
+        )
+        if parent is None:
+            raise ValueError("Paragraph is no longer attached to its section.")
         siblings = parent.findall(f"{_HP}p")
         if len(siblings) <= 1:
             raise ValueError(
-                "섹션에는 최소 하나의 단락이 필요합니다. "
+                "문단 컨테이너에는 최소 하나의 단락이 필요합니다. "
                 "마지막 단락은 삭제할 수 없습니다."
             )
-        try:
-            parent.remove(self.element)
-        except ValueError:  # pragma: no cover – defensive
-            return
+        parent.remove(self.element)
         self.section.mark_dirty()
 
     def _create_run_for_object(

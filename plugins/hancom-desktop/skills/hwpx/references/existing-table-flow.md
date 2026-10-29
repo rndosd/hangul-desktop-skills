@@ -6,9 +6,9 @@
 ## 지원 경계
 
 python-hwpx 6.3.0 전용, 평면 **미병합** 표 2~100행·1~12열. 셀당 기존 1~20문단·문단당 1~20 plain run과 native lineBreak tail을 보존한다.
-중첩 표·그림·필드·컨트롤·세로 쓰기 셀, 잠금·고정 크기 표, 글자처럼 취급한 표는 거부한다.
+중첩 표·그림·필드·컨트롤·세로 쓰기 셀과 잠금/보호 표는 거부한다. `noAdjust=1` 크기 고정 표는 크기·나눔을 그대로 두는 `outer_spacing_pt` 단독 요청만 지원한다.
 본문 직접 문단에 담긴 표만 선택한다. 병합 제목행과 쪽보다 큰 한 행의 정상 출력은 이번 검증에 포함하지 않았다.
-글자처럼 취급을 자동 해제하거나 표를 다시 만드는 폴백은 없다.
+글자처럼 취급을 자동 해제하거나 표를 다시 만드는 폴백은 없다. 명시적인 `inline_to_flow:true`는 표만 담긴 본문 문단, 미병합·가로쓰기·비고정 표, 문단 기준 왼쪽/위 정렬·오프셋 0·겹침 없음일 때만 지원한다. `treatAsChar=0`, 가로 기준 COLUMN으로 바꾸고 나머지 내용·셀·선은 보존한다. `anchor_same_page`와 함께 요청하지 않는다. 문단/단 왼쪽 경계가 다른 원본은 변환 후 실제 위치를 확인한다.
 
 - `page_break`: CELL(셀 내용의 줄도 다음 쪽으로 이어짐) / TABLE(행/셀 사이에서 나눔).
   TABLE은 행을 통째로 옮기므로 앞쪽의 빈 공간이 더 커질 수 있다. 쪽보다 큰 행을 모두 담는다는 뜻은 아니다.
@@ -87,3 +87,5 @@ public document/table 바인딩으로 pageBreak/repeatHeader, 지정 첫 행 hea
 [한컴 여러 쪽 지원 안내](https://help.hancom.com/hoffice130_assistant/ko-KR/Hwp/table/tableattribute/table%28table%29.htm),
 [한컴 표 위치·조판 부호 안내](https://help.hancom.com/hoffice130/ko-KR/Hwp/table/tableattribute/table%28position%29.htm).
 보안 DLL·레지스트리·실행 정책은 이 편집 도구에서 변경하지 않는다.
+
+2026-10-28 준비 양식 적용: 표 외부 여백 단독 조정과 명시적 inline 전환을 실제 완성형 양식에서 검증했다. 같은 입력의 3번 일정표가 2쪽에 행 단위로 이어지고 제목행이 반복됨을 확인했다. 적용 범위 밖 표는 기존 거부를 유지한다.

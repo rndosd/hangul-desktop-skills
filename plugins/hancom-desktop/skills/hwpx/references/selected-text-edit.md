@@ -1,4 +1,4 @@
-# 지정 위치 텍스트 편집 — 0.1.0 기능, 현재 로컬 CLI 0.3.1
+# 지정 위치 텍스트 편집 — 0.1.0 기능, 현재 로컬 CLI 0.3.2
 
 기존 HWPX 문서의 지정 내용만 바꾼다. 설치된 로컬 CLI 기능이며
 python-hwpx **6.3.0** public `HwpxOxmlRun.replace_text`를 사용한다.
@@ -8,7 +8,10 @@ ZIP/XML을 읽어서 대상과 보존 조건을 검사하지만 직접 XML을 �
 
 ## 지원 범위
 
-- 한 문단 안의 여러 run에 나뉜 문구. 각 run은 자식 없는 plain t 하나여야 한다.
+- 한 문단 안의 여러 run에 나뉜 문구. 텍스트가 있는 각 run은 자식 없는 plain t 하나여야 한다.
+- 0.3.2는 자식과 직접 텍스트가 없고 charPrIDRef가 있는 빈 서식 run을 그대로 보존하고 건너뛴다.
+  문단의 처음·중간·끝 어디에 있어도 텍스트 위치와 원래 run 인덱스를 유지한다.
+  선택 편집은 빈 run에 t를 만들거나 내용을 넣지 않는다. 컨트롤·혼합 텍스트 거부는 유지한다.
 - 0.3.0은 각 section의 첫 직접 본문 문단에 있는 선행 무텍스트 secPr/colPr 메타데이터 run만
   그대로 보존하고 건너뛴다. secPr 또는 colPr만 든 ctrl 외의 자식, p/t/tbl/pic/필드가 포함되면 거부한다.
   텍스트와 컨트롤이 같은 run에 섞인 문단으로 지원을 넓힌 것은 아니다.
@@ -28,11 +31,12 @@ ZIP/XML을 읽어서 대상과 보존 조건을 검사하지만 직접 XML을 �
 
 ## 작업 순서
 
+일반적인 다중 수정은 [공통 조회→편집](simple-entry.md#조회-결과를-편집에-이어-쓰기)으로 아래 엔진을 연결한다. 직접 CLI의 inspect/inspect-many/plan에는 `--summary`를 붙이면 상세 JSON은 출력 파일에 유지하고 화면 중복 출력을 줄인다. Python API와 기본 CLI 출력은 그대로다.
+
 작업 폴더의 Python에서 작업본 scripts를 지정한다. 아래 scripts 경로는 이 스킬 기준이며
 JSON/HWPX 출력은 항상 새로운 파일 이름을 쓴다. CLI는 실제 쓰기를 하는 MCP에 주입되지 않는다.
 
 ```powershell
-python -X utf8 scripts/diagnose_edit.py source.hwpx --operation selected_text --find "기존문구"
 python -X utf8 scripts/safe_edit.py inspect source.hwpx --find "기존문구" --output new-targets.json
 # 특정 셀로 후보를 좁힐 경우:
 python -X utf8 scripts/safe_edit.py inspect source.hwpx --find "기존문구" --table 2 --row 1 --column 2 --output new-cell-targets.json
@@ -40,6 +44,26 @@ python -X utf8 scripts/safe_edit.py plan --inspection new-cell-targets.json --ta
 python -X utf8 scripts/safe_edit.py apply source.hwpx new-candidate.hwpx --plan new-plan.json --dry-run
 python -X utf8 scripts/safe_edit.py apply source.hwpx new-candidate.hwpx --plan new-plan.json
 ```
+
+지원 경로가 불명확하거나 실패 원인을 확인할 때 `diagnose_edit.py source.hwpx --operation selected_text --find "기존문구"`를 실행한다.
+진단 결과에 같은 문구의 후보가 이미 있으면 해당 결과를 검토한다. 같은 inspect를 자동으로 반복하지 않는다.
+
+같은 원본에서 여러 문구를 찾을 때는 요청 배열을 `queries.json`에 저장한다.
+
+```json
+[
+  {"find": "기존 제목"},
+  {"find": "기존 일정", "table": 1, "row": 2, "column": 1, "limit": 20}
+]
+```
+
+```powershell
+python -X utf8 scripts/safe_edit.py inspect-many source.hwpx --queries queries.json --output new-targets-many.json
+```
+
+결과는 요청 순서의 inspection 배열이다. 각 항목은 단일 inspect와 같은 형식이며, 요청별 좌표와 limit을 적용한다.
+Python에서는 `inspect_many(source, queries)`를 사용한다. 한 호출의 원본 바이트와 문단 뷰를 공유하고 호출 뒤 폐기한다.
+일괄 결과에서 검토한 target_id/find/replace를 하나의 plan.edits에 모아 적용한다.
 
 inspect 결과의 `scope`, 문맥, 문자 범위와 `supported`를 확인한다. 같은 문구 중 첫 항목을
 자동 선택하지 않는다. plan의 `--target`을 반복하면 같은 치환을 명시한 여러 위치에 적용한다.
@@ -66,7 +90,9 @@ Preview와 **선택한 문단만**의 lineSegArray 캐시는 제외하고 영수
 
 `PASS_STRUCTURE`는 변경 후보의 구조 검사 완료다. receipt에는 native_open/native_render가
 not_checked, visual_review가 not_performed, completion이 edited_candidate_native_pending으로 남는다.
-길이 변화량도 기록하지만 줄바꿈·잘림의 실제 판정이 아니다. 내용 누락, 요청하지 않은 변경,
+길이 변화량도 기록하지만 줄바꿈·잘림의 실제 판정이 아니다. `layout_follow_up`은 같은 문단의 치환을 합쳐 **새로 공백만 남은 셀 문단**에만 위치와 후속 조정을 알린다. 기존 분석 결과를 재사용하며 문단·행 높이를 자동 변경하지 않는다. adapt 작업이면 해당 셀의 빈 문단이 필요한 입력란인지 판단하고, 불필요하면 지원되는 문단 삭제·높이 조정을 편집 계획에 연결한다. 필요한 빈 칸과 마지막 셀 문단은 보존한다. 여백 결과는 기존 출력 검토에서 확인하며 별도 전 문서 검사나 추가 출력 단계를 만들지 않는다.
+
+내용 누락, 요청하지 않은 변경,
 파일 손상은 필수 탈락 조건이며 점수나 시각 검증 미실행으로 가리지 않는다.
 
 인쇄/실사용 완료에는 기존 `hwpx-windows-finalize`의 정확한 후보 열기·필요한 출력/재저장과
@@ -76,7 +102,7 @@ COM 정책·보안 모듈·권한 때문에 막히면 그대로 미검증을 보
 ## 검증과 근거
 
 ```powershell
-python -X utf8 -B -m unittest -v test_safe_edit test_safe_replace test_diagnose_edit
+python -X utf8 -B -m unittest -v test_safe_edit test_selected_empty_runs test_safe_replace test_diagnose_edit
 ```
 
 명령은 scripts 폴더에서 실행한다. tests는 모두 합성 파일이며 실제 한글 조판의 증거가 아니다.

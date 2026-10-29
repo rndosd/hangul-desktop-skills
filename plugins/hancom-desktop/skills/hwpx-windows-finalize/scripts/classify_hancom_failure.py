@@ -7,6 +7,8 @@ def classify(v):
  evidence={k:v.get(k,'NOT_RECORDED') for k in ['status','comCreated','registerModuleCalled','securityModuleRegistered','firstOpen','saveAs','reopen','pdfExport']}
  if 'process_conflict' in low or 'lock_conflict' in low:
   stage='PRE_COM_CONFLICT';action='Wait for the existing user session or automation owner; do not kill user Hwp or reinstall DLL.'
+ elif v.get('interrupted') is True:
+  stage='INTERRUPTED_NATIVE_CALL';evidence['progress']=v.get('progress');evidence['worker']=v.get('worker');action='Inspect the last recorded stage, worker exit, owned Hwp and partial artifacts. A pending COM call has an unknown outcome; do not retry writes or force termination.'
  elif 'dictionary' in low and 'path' in low and 'Start-Process' in error:
   stage='CONTROLLER_PROCESS_LAUNCH';action='Check inherited child environment name collisions. Explicit environment serialization is a scoped candidate; preserve original failure and verify it. No COM/module failure inferred.'
  elif v.get('comCreated') is False:

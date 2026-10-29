@@ -1,0 +1,3329 @@
+{
+  "schemaVersion": "hwpx.agent-batch-result/v1",
+  "ok": true,
+  "rolledBack": false,
+  "dryRun": false,
+  "inputRevision": "sha256:2c68b70f5b214c9db8201e07f65e1d506d5b5b83c3fca1c63c7121b6751bbf28",
+  "documentRevision": "sha256:49d8870c40c8a7c389fe7eeafbe5429d0265c5c70b42657316a4870b38fab48c",
+  "output": {
+    "filename": "<local-path>"
+  },
+  "commandResults": [
+    {
+      "commandId": "fill-1",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"2757524817\"]/table[@id=\"1727094106\"]/row[3]/cell[1]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[@id=\"2757524817\"]/table[@id=\"1727094106\"]/row[3]/cell[1]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "[종합 계획 제목]",
+          "after": "학교 독서·책놀이 주간 운영계획(안)"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-2",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"2757524817\"]/table[@id=\"1727094106\"]/row[3]/cell[1]/paragraph[2]/run[1]",
+      "parentPath": "/section[1]/paragraph[@id=\"2757524817\"]/table[@id=\"1727094106\"]/row[3]/cell[1]/paragraph[2]",
+      "changedProperties": {
+        "text": {
+          "before": "[종합 계획 부제]",
+          "after": "책을 고르고, 놀고, 나누는 전교생 5일 활동"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-3",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"2757524817\"]/table[@id=\"1727094106\"]/row[6]/cell[1]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[@id=\"2757524817\"]/table[@id=\"1727094106\"]/row[6]/cell[1]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "[종합 계획 작성 연월]",
+          "after": "작성 연월 미정"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-4",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"2757524817\"]/table[@id=\"1727094106\"]/row[8]/cell[1]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[@id=\"2757524817\"]/table[@id=\"1727094106\"]/row[8]/cell[1]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "[종합 계획 작성 기관]",
+          "after": "학교명 미정"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-5",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"2757524817\"]/table[@id=\"1727094106\"]/row[8]/cell[1]/paragraph[2]/run[1]",
+      "parentPath": "/section[1]/paragraph[@id=\"2757524817\"]/table[@id=\"1727094106\"]/row[8]/cell[1]/paragraph[2]",
+      "changedProperties": {
+        "text": {
+          "before": "[종합 계획 작성 부서]",
+          "after": "담당 부서 미정"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-6",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[2]/table[@id=\"1809160010\"]/row[1]/cell[1]/paragraph[1]/run[2]",
+      "parentPath": "/section[1]/paragraph[2]/table[@id=\"1809160010\"]/row[1]/cell[1]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "[요약] [요약 계획 제목]",
+          "after": "[요약] 학교 독서·책놀이 주간 운영계획(안)"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-7",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[4]/run[2]",
+      "parentPath": "/section[1]/paragraph[4]",
+      "changedProperties": {
+        "text": {
+          "before": "[요약 추진 배경]",
+          "after": "전교생이 책을 매개로 즐겁게 만나고 생각을 표현할 수 있도록, 5일간 독서와 책놀이를 연결한 활동을 제안한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-8",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[6]/run[2]",
+      "parentPath": "/section[1]/paragraph[6]",
+      "changedProperties": {
+        "text": {
+          "before": "현재: [현재 상황]",
+          "after": "현재: 학교별 독서 환경과 학생의 관심·읽기 수준은 사전 확인이 필요함."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-9",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[7]/run[2]",
+      "parentPath": "/section[1]/paragraph[7]",
+      "changedProperties": {
+        "text": {
+          "before": "개선: [개선 방향]",
+          "after": "개선: 읽기에서 놀이·대화·추천으로 이어지는 참여 기회를 학급별로 제공함."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-10",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[9]/run[2]",
+      "parentPath": "/section[1]/paragraph[9]",
+      "changedProperties": {
+        "text": {
+          "before": "(사업내용) [요약 사업 내용]",
+          "after": "(사업내용) 전교생이 5일간 책 고르기·함께 읽기, 장면 책놀이, 책 대화, 추천 카드, 공유·돌아보기에 참여하는 학교 독서 주간을 운영한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-11",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[10]/run[2]",
+      "parentPath": "/section[1]/paragraph[10]",
+      "changedProperties": {
+        "text": {
+          "before": "(사업기간) [요약 사업 기간]",
+          "after": "(사업기간) 월요일~금요일 5일간(실시 날짜 미정). 일별 활동 시간은 학사 일정과 학년 여건에 따라 정한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-12",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[11]/run[2]",
+      "parentPath": "/section[1]/paragraph[11]",
+      "changedProperties": {
+        "text": {
+          "before": "(사업예산) [요약 사업 예산]",
+          "after": "(사업예산) 미정. 보유 도서·재료를 우선 활용하고 추가 도서·활동 재료비는 소요 조사 후 학교 절차에 따라 확정한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-13",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[12]/run[2]",
+      "parentPath": "/section[1]/paragraph[12]",
+      "changedProperties": {
+        "text": {
+          "before": "(사업대상) [요약 사업 대상]",
+          "after": "(사업대상) 전교생(학교명·참여 인원 미정). 학급 단위 운영을 기본으로 하며 세부 편성은 사전 협의한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-14",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[13]/run[2]",
+      "parentPath": "/section[1]/paragraph[13]",
+      "changedProperties": {
+        "text": {
+          "before": "(성과관리) [요약 성과 관리]",
+          "after": "(성과관리) 참여 과정과 학생의 목소리를 기록하여 운영을 돌아본다. 참여 인원·산출물·의견은 실제 확인 자료로만 정리한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-15",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[15]/run[1]",
+      "parentPath": "/section[1]/paragraph[15]",
+      "changedProperties": {
+        "text": {
+          "before": "󰊱 [요약 과제 1 제목]",
+          "after": "󰊱 책과 만나 함께 읽기"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-16",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[16]/run[1]",
+      "parentPath": "/section[1]/paragraph[16]",
+      "changedProperties": {
+        "text": {
+          "before": "󰊲 [요약 과제 2 제목]",
+          "after": "󰊲 책으로 대화하고 추천하기"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-17",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[17]/run[1]",
+      "parentPath": "/section[1]/paragraph[17]",
+      "changedProperties": {
+        "text": {
+          "before": "󰊳 [요약 과제 3 제목]",
+          "after": "󰊳 경험을 공유하고 독서 이어가기"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-18",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[19]/run[1]",
+      "parentPath": "/section[1]/paragraph[19]",
+      "changedProperties": {
+        "text": {
+          "before": "  ◦ [요약 추진 일정]",
+          "after": "  ◦ 사전 도서·공간 점검 → 월~금 활동 → 운영 기록 검토와 후속 독서 연결"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-19",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[22]/run[2]",
+      "parentPath": "/section[1]/paragraph[22]",
+      "changedProperties": {
+        "text": {
+          "before": "[상세 추진 배경]",
+          "after": "전교생이 책을 매개로 즐겁게 만나고 생각을 표현할 수 있도록, 5일간 독서와 책놀이를 연결한 활동을 제안한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-20",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[25]/run[1]",
+      "parentPath": "/section[1]/paragraph[25]",
+      "changedProperties": {
+        "text": {
+          "before": "󰊱 [중점 과제 1 제목]",
+          "after": "󰊱 책과 만나 함께 읽기"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-21",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[26]/run[1]",
+      "parentPath": "/section[1]/paragraph[26]",
+      "changedProperties": {
+        "text": {
+          "before": " ◦ (목표) [중점 과제 1 목표]",
+          "after": " ◦ (목표) 관심에 맞는 책을 고르고 서로의 읽기 경험을 존중한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-22",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[27]/run[1]",
+      "parentPath": "/section[1]/paragraph[27]",
+      "changedProperties": {
+        "text": {
+          "before": " ◦ (추진내용) [중점 과제 1 내용]",
+          "after": " ◦ (추진내용) 월요일에는 표지·제목을 살펴 책을 고르고 함께 읽는다. 화요일에는 기억에 남은 장면을 몸짓·그림·역할놀이로 표현한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-23",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[29]/run[1]",
+      "parentPath": "/section[1]/paragraph[29]",
+      "changedProperties": {
+        "text": {
+          "before": "󰊲 [중점 과제 2 제목]",
+          "after": "󰊲 책으로 대화하고 추천하기"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-24",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[30]/run[1]",
+      "parentPath": "/section[1]/paragraph[30]",
+      "changedProperties": {
+        "text": {
+          "before": " ◦ (목표) [중점 과제 2 목표]",
+          "after": " ◦ (목표) 책 속 장면에 대한 생각을 말하고 친구의 해석을 경청한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-25",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[31]/run[1]",
+      "parentPath": "/section[1]/paragraph[31]",
+      "changedProperties": {
+        "text": {
+          "before": " ◦ (추진내용) [중점 과제 2 내용]",
+          "after": " ◦ (추진내용) 수요일에는 인상 깊은 장면과 궁금한 점으로 책 대화를 한다. 목요일에는 추천 대상과 이유를 담은 책 추천 카드를 만든다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-26",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[33]/run[1]",
+      "parentPath": "/section[1]/paragraph[33]",
+      "changedProperties": {
+        "text": {
+          "before": "󰊳 [중점 과제 3 제목]",
+          "after": "󰊳 경험을 공유하고 독서 이어가기"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-27",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[34]/run[1]",
+      "parentPath": "/section[1]/paragraph[34]",
+      "changedProperties": {
+        "text": {
+          "before": " ◦ (목표) [중점 과제 3 목표]",
+          "after": " ◦ (목표) 한 주의 경험을 돌아보고 다음에 읽을 책을 스스로 정한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-28",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[35]/run[1]",
+      "parentPath": "/section[1]/paragraph[35]",
+      "changedProperties": {
+        "text": {
+          "before": " ◦ (추진내용) [중점 과제 3 내용]",
+          "after": " ◦ (추진내용) 금요일에는 장면 표현과 추천 카드를 공유하고, 즐거웠던 활동·도움이 필요한 점·다음에 읽고 싶은 책을 나눈다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-29",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[39]/run[2]",
+      "parentPath": "/section[1]/paragraph[39]",
+      "changedProperties": {
+        "text": {
+          "before": "(사업목표) [사업 개요]",
+          "after": "(사업목표) 전교생이 5일간 책 고르기·함께 읽기, 장면 책놀이, 책 대화, 추천 카드, 공유·돌아보기에 참여하는 학교 독서 주간을 운영한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-30",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[40]/run[2]",
+      "parentPath": "/section[1]/paragraph[40]",
+      "changedProperties": {
+        "text": {
+          "before": "(사업예산) [사업 예산]",
+          "after": "(사업예산) 미정. 보유 도서·재료를 우선 활용하고 추가 도서·활동 재료비는 소요 조사 후 학교 절차에 따라 확정한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-31",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[41]/run[2]",
+      "parentPath": "/section[1]/paragraph[41]",
+      "changedProperties": {
+        "text": {
+          "before": "(사업기간) [사업 기간]",
+          "after": "(사업기간) 월요일~금요일 5일간(실시 날짜 미정). 일별 활동 시간은 학사 일정과 학년 여건에 따라 정한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-32",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[42]/run[2]",
+      "parentPath": "/section[1]/paragraph[42]",
+      "changedProperties": {
+        "text": {
+          "before": "(사업대상) [사업 대상]",
+          "after": "(사업대상) 전교생(학교명·참여 인원 미정). 학급 단위 운영을 기본으로 하며 세부 편성은 사전 협의한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-33",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[43]/run[2]",
+      "parentPath": "/section[1]/paragraph[43]",
+      "changedProperties": {
+        "text": {
+          "before": "(참여조건) [참여 조건]",
+          "after": "(참여조건) 읽기 수준과 표현 방식의 차이를 고려하여 듣기·그림·말하기 등으로 참여하며, 활동 결과의 우열을 매기지 않는다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-34",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[52]/table[@id=\"1796201547\"]/row[1]/cell[1]/paragraph[1]/run[2]",
+      "parentPath": "/section[1]/paragraph[52]/table[@id=\"1796201547\"]/row[1]/cell[1]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "[평가·환류 개요]",
+          "after": "참여 과정과 학생의 목소리를 기록하여 운영을 돌아본다. 참여 인원·산출물·의견은 실제 확인 자료로만 정리한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-35",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[55]/run[2]",
+      "parentPath": "/section[1]/paragraph[55]",
+      "changedProperties": {
+        "text": {
+          "before": "(평가주체) [평가 담당]",
+          "after": "(평가주체) 학급 운영 담당과 업무 담당(담당자 미정)이 기록을 함께 검토하고 학생의 의견을 반영한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-36",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[2]/cell[1]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "[지표 표 과제 1]",
+          "after": "책과 만나 함께 읽기"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-37",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[2]/cell[2]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "[과제 1 성과 지표 1]",
+          "after": "책 선택·함께 읽기 참여 모습(관찰 기록)"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-38",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[3]/cell[1]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[3]/cell[1]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "[과제 1 성과 지표 2]",
+          "after": "장면 표현의 참여 방식과 지원 필요 사항"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-39",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[4]/cell[1]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[4]/cell[1]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "[지표 표 과제 2]",
+          "after": "책으로 대화하고 추천하기"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-40",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[4]/cell[2]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[4]/cell[2]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "[과제 2 성과 지표 1]",
+          "after": "책 대화에서 나타난 질문·경청 사례"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-41",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[5]/cell[1]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[5]/cell[1]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "[과제 2 성과 지표 2]",
+          "after": "추천 카드에 담긴 추천 이유(실제 산출물)"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-42",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[6]/cell[1]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[6]/cell[1]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "[지표 표 과제 3]",
+          "after": "경험을 공유하고 독서 이어가기"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-43",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[6]/cell[2]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[6]/cell[2]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "[과제 3 성과 지표 1]",
+          "after": "학생이 제시한 다음 독서 희망과 소감"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-44",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[7]/cell[1]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[7]/cell[1]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "[과제 3 성과 지표 2]",
+          "after": "운영 개선 의견과 후속 조치 기록"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-45",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"981339477\"]/run[1]",
+      "parentPath": "/section[1]/paragraph[@id=\"981339477\"]",
+      "changedProperties": {
+        "text": {
+          "before": " ◦ 총괄: [총괄 담당·역할]",
+          "after": " ◦ 총괄: 업무 담당(미정)이 전체 일정·학년 협의와 운영안을 조정한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-46",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"1237863592\"]/run[1]",
+      "parentPath": "/section[1]/paragraph[@id=\"1237863592\"]",
+      "changedProperties": {
+        "text": {
+          "before": " ◦ 운영: [운영 담당·역할]",
+          "after": " ◦ 운영: 학급 담당(미정)이 일별 활동을 진행하고 학생의 참여를 돕는다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-47",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"160119256\"]/run[1]",
+      "parentPath": "/section[1]/paragraph[@id=\"160119256\"]",
+      "changedProperties": {
+        "text": {
+          "before": " ◦ 지원: [지원 담당·역할]",
+          "after": " ◦ 지원: 도서·공간 담당(미정)이 도서 확보와 대출·반납, 이용 동선을 지원한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-48",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"12514297\"]/run[1]",
+      "parentPath": "/section[1]/paragraph[@id=\"12514297\"]",
+      "changedProperties": {
+        "text": {
+          "before": " ◦ 협력: [협력 담당·역할]",
+          "after": " ◦ 협력: 학년 협의 담당(미정)이 읽기 수준과 지원 필요에 맞게 활동을 조정한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-49",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"1819313299\"]/run[1]",
+      "parentPath": "/section[1]/paragraph[@id=\"1819313299\"]",
+      "changedProperties": {
+        "text": {
+          "before": " ◦ 자료: [자료 담당·역할]",
+          "after": " ◦ 자료: 자료 담당(미정)이 추천 카드 양식과 운영 기록을 정리한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-50",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"1109659380\"]/run[1]",
+      "parentPath": "/section[1]/paragraph[@id=\"1109659380\"]",
+      "changedProperties": {
+        "text": {
+          "before": " ◦ 연락: [연락 담당·역할]",
+          "after": " ◦ 연락: 안내 담당(미정)이 확정된 일정·준비물·참여 방법을 안내한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-51",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"2037404750\"]/run[1]",
+      "parentPath": "/section[1]/paragraph[@id=\"2037404750\"]",
+      "changedProperties": {
+        "text": {
+          "before": " ◦ 확인·승인: [확인·승인 담당·역할]",
+          "after": " ◦ 확인·승인: 학교 내부 절차에 따라 계획·예산·공개 범위를 확인한다(담당자 미정)."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-52",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[56]/run[3]",
+      "parentPath": "/section[1]/paragraph[56]",
+      "changedProperties": {
+        "text": {
+          "before": "[환류·후속 조치]",
+          "after": "학생이 제안한 책과 활동을 다음 독서 시간에 반영하고, 도서 부족·시간 배분·참여 지원의 개선 사항을 학년 협의에 공유한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-53",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[54]/run[3]",
+      "parentPath": "/section[1]/paragraph[54]",
+      "changedProperties": {
+        "text": {
+          "before": "[평가 운영 내용]",
+          "after": "기록할 수 없는 항목은 미확인으로 남기고, 수치와 우수 사례는 실제 근거가 확보된 경우에만 결과에 반영한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-54",
+      "op": "copy",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"2757524818\"]",
+      "parentPath": "/section[1]",
+      "changedProperties": {},
+      "generatedIdentities": [
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "0",
+          "new": "2757524818"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-55",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[54]/run[3]",
+      "parentPath": "/section[1]/paragraph[54]",
+      "changedProperties": {
+        "text": {
+          "before": "기록할 수 없는 항목은 미확인으로 남기고, 수치와 우수 사례는 실제 근거가 확보된 경우에만 결과에 반영한다.",
+          "after": "학급별 활동 기록과 추천 카드, 학생의 구술·그림 소감을 살펴 참여 기회와 활동 난도가 적절했는지 확인한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-56",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "[일정 표 단계]",
+          "after": "책 만나기"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-57",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "[일정 표 추진 내용]",
+          "after": "책 고르기·함께 읽기, 선택 이유와 기억나는 장면 나누기"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-58",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "[일정 표 시기]",
+          "after": "월요일"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-59",
+      "op": "copy",
+      "ok": true,
+      "path": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[3]",
+      "parentPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]",
+      "changedProperties": {},
+      "generatedIdentities": [
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524819"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "0",
+          "new": "2757524820"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524821"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524822"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "0",
+          "new": "2757524823"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524824"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-60",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "책 만나기",
+          "after": "장면 책놀이"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-61",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "책 고르기·함께 읽기, 선택 이유와 기억나는 장면 나누기",
+          "after": "인상 깊은 장면을 몸짓·그림·역할놀이로 표현하기"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-62",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "월요일",
+          "after": "화요일"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-63",
+      "op": "copy",
+      "ok": true,
+      "path": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[4]",
+      "parentPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]",
+      "changedProperties": {},
+      "generatedIdentities": [
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524825"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "0",
+          "new": "2757524826"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524827"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524828"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "0",
+          "new": "2757524829"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524830"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-64",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "장면 책놀이",
+          "after": "책 대화"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-65",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "인상 깊은 장면을 몸짓·그림·역할놀이로 표현하기",
+          "after": "장면과 질문을 나누고 친구의 생각 경청하기"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-66",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "화요일",
+          "after": "수요일"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-67",
+      "op": "copy",
+      "ok": true,
+      "path": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[5]",
+      "parentPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]",
+      "changedProperties": {},
+      "generatedIdentities": [
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524831"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "0",
+          "new": "2757524832"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524833"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524834"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "0",
+          "new": "2757524835"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524836"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-68",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "책 대화",
+          "after": "추천 카드"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-69",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "장면과 질문을 나누고 친구의 생각 경청하기",
+          "after": "추천 대상과 이유를 담은 카드 만들기"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-70",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "수요일",
+          "after": "목요일"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-71",
+      "op": "copy",
+      "ok": true,
+      "path": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[6]",
+      "parentPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]",
+      "changedProperties": {},
+      "generatedIdentities": [
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524837"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "0",
+          "new": "2757524838"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524839"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524840"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "0",
+          "new": "2757524841"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524842"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-72",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "추천 카드",
+          "after": "공유·돌아보기"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-73",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "추천 대상과 이유를 담은 카드 만들기",
+          "after": "표현 자료·카드 공유, 소감과 다음 읽기 계획 나누기"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-74",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "목요일",
+          "after": "금요일"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-75",
+      "op": "copy",
+      "ok": true,
+      "path": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[7]",
+      "parentPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]",
+      "changedProperties": {},
+      "generatedIdentities": [
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524843"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "0",
+          "new": "2757524844"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524845"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524846"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "0",
+          "new": "2757524847"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524848"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-76",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "공유·돌아보기",
+          "after": "정리·환류"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-77",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "표현 자료·카드 공유, 소감과 다음 읽기 계획 나누기",
+          "after": "도서·공간 정리, 실제 기록 검토, 후속 독서 활동 조정"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-78",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "금요일",
+          "after": "운영 후(미정)"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-79",
+      "op": "copy",
+      "ok": true,
+      "path": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[8]",
+      "parentPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]",
+      "changedProperties": {},
+      "generatedIdentities": [
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524849"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "0",
+          "new": "2757524850"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524851"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524852"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "0",
+          "new": "2757524853"
+        },
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524854"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-80",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "정리·환류",
+          "after": "사전 준비"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-81",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "도서·공간 정리, 실제 기록 검토, 후속 독서 활동 조정",
+          "after": "일정 협의, 도서·공간·재료 점검, 참여 지원과 안전 약속 안내"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-82",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]/run[1]",
+      "parentPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]",
+      "changedProperties": {
+        "text": {
+          "before": "운영 후(미정)",
+          "after": "운영 전(미정)"
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-83",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[48]/run[2]",
+      "parentPath": "/section[1]/paragraph[48]",
+      "changedProperties": {
+        "text": {
+          "before": "[추진 일정 안내]",
+          "after": "아래 일정은 활동 순서 제안이다. 날짜와 차시는 학교 교육과정 및 도서관 이용 여건을 확인하여 확정한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-84",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[45]/run[1]",
+      "parentPath": "/section[1]/paragraph[45]",
+      "changedProperties": {
+        "text": {
+          "before": " ◦ [사업 운영 방향]",
+          "after": " ◦ 낭독·그림·구술·짝 활동 등 다양한 참여 경로를 제공한다. 준비물과 이동 동선을 점검하여 안전하게 운영한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-85",
+      "op": "copy",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"2757524855\"]",
+      "parentPath": "/section[1]",
+      "changedProperties": {},
+      "generatedIdentities": [
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524855"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-86",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[45]/run[1]",
+      "parentPath": "/section[1]/paragraph[45]",
+      "changedProperties": {
+        "text": {
+          "before": " ◦ 낭독·그림·구술·짝 활동 등 다양한 참여 경로를 제공한다. 준비물과 이동 동선을 점검하여 안전하게 운영한다.",
+          "after": " ◦ 정량 목표와 실적은 임의로 설정하거나 확정하지 않으며, 실제 참여 기록과 의견을 근거로 운영 결과를 정리한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-87",
+      "op": "copy",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"2757524856\"]",
+      "parentPath": "/section[1]",
+      "changedProperties": {},
+      "generatedIdentities": [
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524856"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-88",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[45]/run[1]",
+      "parentPath": "/section[1]/paragraph[45]",
+      "changedProperties": {
+        "text": {
+          "before": " ◦ 정량 목표와 실적은 임의로 설정하거나 확정하지 않으며, 실제 참여 기록과 의견을 근거로 운영 결과를 정리한다.",
+          "after": " ◦ 학급별 기존 도서와 공간을 우선 활용하고, 도서 부족 시 함께 읽기와 순환 이용으로 참여 기회를 마련한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-89",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[36]/run[1]",
+      "parentPath": "/section[1]/paragraph[36]",
+      "changedProperties": {
+        "text": {
+          "before": "   - [과제 3 실행 절차]",
+          "after": "   - 활동 후: 도서를 반납하고 공간을 정리한다. 공개 전 학생 정보와 자료 사용 범위를 확인하며 다음 독서 활동에 연결한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-90",
+      "op": "copy",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"2757524857\"]",
+      "parentPath": "/section[1]",
+      "changedProperties": {},
+      "generatedIdentities": [
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524857"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-91",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[36]/run[1]",
+      "parentPath": "/section[1]/paragraph[36]",
+      "changedProperties": {
+        "text": {
+          "before": "   - 활동 후: 도서를 반납하고 공간을 정리한다. 공개 전 학생 정보와 자료 사용 범위를 확인하며 다음 독서 활동에 연결한다.",
+          "after": "   - 금: 학급에서 표현 자료와 추천 카드를 소개하고 한 주의 변화와 다음 읽기 계획을 나눈다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-92",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[32]/run[1]",
+      "parentPath": "/section[1]/paragraph[32]",
+      "changedProperties": {
+        "text": {
+          "before": "   - [과제 2 실행 절차]",
+          "after": "   - 목: 책 제목, 추천하고 싶은 사람, 추천 이유를 카드에 담는다. 글쓰기가 어려우면 그림이나 구술로 표현한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-93",
+      "op": "copy",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"2757524858\"]",
+      "parentPath": "/section[1]",
+      "changedProperties": {},
+      "generatedIdentities": [
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524858"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-94",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[32]/run[1]",
+      "parentPath": "/section[1]/paragraph[32]",
+      "changedProperties": {
+        "text": {
+          "before": "   - 목: 책 제목, 추천하고 싶은 사람, 추천 이유를 카드에 담는다. 글쓰기가 어려우면 그림이나 구술로 표현한다.",
+          "after": "   - 수: 짝이나 소집단으로 장면과 질문을 나눈다. 말할 차례를 지키고 서로 다른 생각을 인정한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-95",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[28]/run[2]",
+      "parentPath": "/section[1]/paragraph[28]",
+      "changedProperties": {
+        "text": {
+          "before": "[과제 1 실행 절차]",
+          "after": "화: 장면을 골라 역할·몸짓·그림으로 표현한다. 뛰거나 밀지 않는 약속을 확인하고 관람과 참여 방식을 함께 선택한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-96",
+      "op": "copy",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"2757524859\"]",
+      "parentPath": "/section[1]",
+      "changedProperties": {},
+      "generatedIdentities": [
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "2147483648",
+          "new": "2757524859"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-97",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[28]/run[2]",
+      "parentPath": "/section[1]/paragraph[28]",
+      "changedProperties": {
+        "text": {
+          "before": "화: 장면을 골라 역할·몸짓·그림으로 표현한다. 뛰거나 밀지 않는 약속을 확인하고 관람과 참여 방식을 함께 선택한다.",
+          "after": "월: 여러 책을 살펴 한 권을 고르고 함께 읽은 뒤 선택 이유나 기억나는 장면을 말·그림으로 나눈다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-98",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[23]/run[2]",
+      "parentPath": "/section[1]/paragraph[23]",
+      "changedProperties": {
+        "text": {
+          "before": "[추진 배경 보완]",
+          "after": "학교명·날짜·인원·예산은 미정이다. 사전 협의에서 도서 수량, 이용 공간, 지원 필요를 확인한 뒤 세부 운영을 확정한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-99",
+      "op": "copy",
+      "ok": true,
+      "path": "/section[1]/paragraph[@id=\"2757524860\"]",
+      "parentPath": "/section[1]",
+      "changedProperties": {},
+      "generatedIdentities": [
+        {
+          "kind": "paragraph",
+          "attribute": "id",
+          "old": "0",
+          "new": "2757524860"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "commandId": "fill-100",
+      "op": "set",
+      "ok": true,
+      "path": "/section[1]/paragraph[23]/run[2]",
+      "parentPath": "/section[1]/paragraph[23]",
+      "changedProperties": {
+        "text": {
+          "before": "학교명·날짜·인원·예산은 미정이다. 사전 협의에서 도서 수량, 이용 공간, 지원 필요를 확인한 뒤 세부 운영을 확정한다.",
+          "after": "책의 완독량이나 활동지 수보다 책에 대한 흥미와 함께 참여하는 경험을 우선하며, 학년별로 책의 길이와 표현 난도를 조정한다."
+        }
+      },
+      "generatedIdentities": [],
+      "warnings": []
+    }
+  ],
+  "semanticDiff": {
+    "schemaVersion": "hwpx.agent-semantic-diff/v1",
+    "inputRevision": "sha256:2c68b70f5b214c9db8201e07f65e1d506d5b5b83c3fca1c63c7121b6751bbf28",
+    "candidateRevision": "sha256:49d8870c40c8a7c389fe7eeafbe5429d0265c5c70b42657316a4870b38fab48c",
+    "changes": [
+      {
+        "commandId": "fill-1",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[@id=\"2757524817\"]/table[@id=\"1727094106\"]/row[3]/cell[1]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[@id=\"2757524817\"]/table[@id=\"1727094106\"]/row[3]/cell[1]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "[종합 계획 제목]",
+            "after": "학교 독서·책놀이 주간 운영계획(안)"
+          }
+        }
+      },
+      {
+        "commandId": "fill-2",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[@id=\"2757524817\"]/table[@id=\"1727094106\"]/row[3]/cell[1]/paragraph[2]/run[1]",
+        "afterPath": "/section[1]/paragraph[@id=\"2757524817\"]/table[@id=\"1727094106\"]/row[3]/cell[1]/paragraph[2]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "[종합 계획 부제]",
+            "after": "책을 고르고, 놀고, 나누는 전교생 5일 활동"
+          }
+        }
+      },
+      {
+        "commandId": "fill-3",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[@id=\"2757524817\"]/table[@id=\"1727094106\"]/row[6]/cell[1]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[@id=\"2757524817\"]/table[@id=\"1727094106\"]/row[6]/cell[1]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "[종합 계획 작성 연월]",
+            "after": "작성 연월 미정"
+          }
+        }
+      },
+      {
+        "commandId": "fill-4",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[@id=\"2757524817\"]/table[@id=\"1727094106\"]/row[8]/cell[1]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[@id=\"2757524817\"]/table[@id=\"1727094106\"]/row[8]/cell[1]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "[종합 계획 작성 기관]",
+            "after": "학교명 미정"
+          }
+        }
+      },
+      {
+        "commandId": "fill-5",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[@id=\"2757524817\"]/table[@id=\"1727094106\"]/row[8]/cell[1]/paragraph[2]/run[1]",
+        "afterPath": "/section[1]/paragraph[@id=\"2757524817\"]/table[@id=\"1727094106\"]/row[8]/cell[1]/paragraph[2]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "[종합 계획 작성 부서]",
+            "after": "담당 부서 미정"
+          }
+        }
+      },
+      {
+        "commandId": "fill-6",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[2]/table[@id=\"1809160010\"]/row[1]/cell[1]/paragraph[1]/run[2]",
+        "afterPath": "/section[1]/paragraph[2]/table[@id=\"1809160010\"]/row[1]/cell[1]/paragraph[1]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": "[요약] [요약 계획 제목]",
+            "after": "[요약] 학교 독서·책놀이 주간 운영계획(안)"
+          }
+        }
+      },
+      {
+        "commandId": "fill-7",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[4]/run[2]",
+        "afterPath": "/section[1]/paragraph[4]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": "[요약 추진 배경]",
+            "after": "전교생이 책을 매개로 즐겁게 만나고 생각을 표현할 수 있도록, 5일간 독서와 책놀이를 연결한 활동을 제안한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-8",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[6]/run[2]",
+        "afterPath": "/section[1]/paragraph[6]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": "현재: [현재 상황]",
+            "after": "현재: 학교별 독서 환경과 학생의 관심·읽기 수준은 사전 확인이 필요함."
+          }
+        }
+      },
+      {
+        "commandId": "fill-9",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[7]/run[2]",
+        "afterPath": "/section[1]/paragraph[7]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": "개선: [개선 방향]",
+            "after": "개선: 읽기에서 놀이·대화·추천으로 이어지는 참여 기회를 학급별로 제공함."
+          }
+        }
+      },
+      {
+        "commandId": "fill-10",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[9]/run[2]",
+        "afterPath": "/section[1]/paragraph[9]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": "(사업내용) [요약 사업 내용]",
+            "after": "(사업내용) 전교생이 5일간 책 고르기·함께 읽기, 장면 책놀이, 책 대화, 추천 카드, 공유·돌아보기에 참여하는 학교 독서 주간을 운영한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-11",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[10]/run[2]",
+        "afterPath": "/section[1]/paragraph[10]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": "(사업기간) [요약 사업 기간]",
+            "after": "(사업기간) 월요일~금요일 5일간(실시 날짜 미정). 일별 활동 시간은 학사 일정과 학년 여건에 따라 정한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-12",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[11]/run[2]",
+        "afterPath": "/section[1]/paragraph[11]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": "(사업예산) [요약 사업 예산]",
+            "after": "(사업예산) 미정. 보유 도서·재료를 우선 활용하고 추가 도서·활동 재료비는 소요 조사 후 학교 절차에 따라 확정한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-13",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[12]/run[2]",
+        "afterPath": "/section[1]/paragraph[12]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": "(사업대상) [요약 사업 대상]",
+            "after": "(사업대상) 전교생(학교명·참여 인원 미정). 학급 단위 운영을 기본으로 하며 세부 편성은 사전 협의한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-14",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[13]/run[2]",
+        "afterPath": "/section[1]/paragraph[13]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": "(성과관리) [요약 성과 관리]",
+            "after": "(성과관리) 참여 과정과 학생의 목소리를 기록하여 운영을 돌아본다. 참여 인원·산출물·의견은 실제 확인 자료로만 정리한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-15",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[15]/run[1]",
+        "afterPath": "/section[1]/paragraph[15]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "󰊱 [요약 과제 1 제목]",
+            "after": "󰊱 책과 만나 함께 읽기"
+          }
+        }
+      },
+      {
+        "commandId": "fill-16",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[16]/run[1]",
+        "afterPath": "/section[1]/paragraph[16]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "󰊲 [요약 과제 2 제목]",
+            "after": "󰊲 책으로 대화하고 추천하기"
+          }
+        }
+      },
+      {
+        "commandId": "fill-17",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[17]/run[1]",
+        "afterPath": "/section[1]/paragraph[17]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "󰊳 [요약 과제 3 제목]",
+            "after": "󰊳 경험을 공유하고 독서 이어가기"
+          }
+        }
+      },
+      {
+        "commandId": "fill-18",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[19]/run[1]",
+        "afterPath": "/section[1]/paragraph[19]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "  ◦ [요약 추진 일정]",
+            "after": "  ◦ 사전 도서·공간 점검 → 월~금 활동 → 운영 기록 검토와 후속 독서 연결"
+          }
+        }
+      },
+      {
+        "commandId": "fill-19",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[22]/run[2]",
+        "afterPath": "/section[1]/paragraph[22]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": "[상세 추진 배경]",
+            "after": "전교생이 책을 매개로 즐겁게 만나고 생각을 표현할 수 있도록, 5일간 독서와 책놀이를 연결한 활동을 제안한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-20",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[25]/run[1]",
+        "afterPath": "/section[1]/paragraph[25]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "󰊱 [중점 과제 1 제목]",
+            "after": "󰊱 책과 만나 함께 읽기"
+          }
+        }
+      },
+      {
+        "commandId": "fill-21",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[26]/run[1]",
+        "afterPath": "/section[1]/paragraph[26]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": " ◦ (목표) [중점 과제 1 목표]",
+            "after": " ◦ (목표) 관심에 맞는 책을 고르고 서로의 읽기 경험을 존중한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-22",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[27]/run[1]",
+        "afterPath": "/section[1]/paragraph[27]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": " ◦ (추진내용) [중점 과제 1 내용]",
+            "after": " ◦ (추진내용) 월요일에는 표지·제목을 살펴 책을 고르고 함께 읽는다. 화요일에는 기억에 남은 장면을 몸짓·그림·역할놀이로 표현한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-23",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[29]/run[1]",
+        "afterPath": "/section[1]/paragraph[29]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "󰊲 [중점 과제 2 제목]",
+            "after": "󰊲 책으로 대화하고 추천하기"
+          }
+        }
+      },
+      {
+        "commandId": "fill-24",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[30]/run[1]",
+        "afterPath": "/section[1]/paragraph[30]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": " ◦ (목표) [중점 과제 2 목표]",
+            "after": " ◦ (목표) 책 속 장면에 대한 생각을 말하고 친구의 해석을 경청한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-25",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[31]/run[1]",
+        "afterPath": "/section[1]/paragraph[31]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": " ◦ (추진내용) [중점 과제 2 내용]",
+            "after": " ◦ (추진내용) 수요일에는 인상 깊은 장면과 궁금한 점으로 책 대화를 한다. 목요일에는 추천 대상과 이유를 담은 책 추천 카드를 만든다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-26",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[33]/run[1]",
+        "afterPath": "/section[1]/paragraph[33]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "󰊳 [중점 과제 3 제목]",
+            "after": "󰊳 경험을 공유하고 독서 이어가기"
+          }
+        }
+      },
+      {
+        "commandId": "fill-27",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[34]/run[1]",
+        "afterPath": "/section[1]/paragraph[34]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": " ◦ (목표) [중점 과제 3 목표]",
+            "after": " ◦ (목표) 한 주의 경험을 돌아보고 다음에 읽을 책을 스스로 정한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-28",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[35]/run[1]",
+        "afterPath": "/section[1]/paragraph[35]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": " ◦ (추진내용) [중점 과제 3 내용]",
+            "after": " ◦ (추진내용) 금요일에는 장면 표현과 추천 카드를 공유하고, 즐거웠던 활동·도움이 필요한 점·다음에 읽고 싶은 책을 나눈다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-29",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[39]/run[2]",
+        "afterPath": "/section[1]/paragraph[39]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": "(사업목표) [사업 개요]",
+            "after": "(사업목표) 전교생이 5일간 책 고르기·함께 읽기, 장면 책놀이, 책 대화, 추천 카드, 공유·돌아보기에 참여하는 학교 독서 주간을 운영한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-30",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[40]/run[2]",
+        "afterPath": "/section[1]/paragraph[40]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": "(사업예산) [사업 예산]",
+            "after": "(사업예산) 미정. 보유 도서·재료를 우선 활용하고 추가 도서·활동 재료비는 소요 조사 후 학교 절차에 따라 확정한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-31",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[41]/run[2]",
+        "afterPath": "/section[1]/paragraph[41]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": "(사업기간) [사업 기간]",
+            "after": "(사업기간) 월요일~금요일 5일간(실시 날짜 미정). 일별 활동 시간은 학사 일정과 학년 여건에 따라 정한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-32",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[42]/run[2]",
+        "afterPath": "/section[1]/paragraph[42]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": "(사업대상) [사업 대상]",
+            "after": "(사업대상) 전교생(학교명·참여 인원 미정). 학급 단위 운영을 기본으로 하며 세부 편성은 사전 협의한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-33",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[43]/run[2]",
+        "afterPath": "/section[1]/paragraph[43]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": "(참여조건) [참여 조건]",
+            "after": "(참여조건) 읽기 수준과 표현 방식의 차이를 고려하여 듣기·그림·말하기 등으로 참여하며, 활동 결과의 우열을 매기지 않는다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-34",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[52]/table[@id=\"1796201547\"]/row[1]/cell[1]/paragraph[1]/run[2]",
+        "afterPath": "/section[1]/paragraph[52]/table[@id=\"1796201547\"]/row[1]/cell[1]/paragraph[1]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": "[평가·환류 개요]",
+            "after": "참여 과정과 학생의 목소리를 기록하여 운영을 돌아본다. 참여 인원·산출물·의견은 실제 확인 자료로만 정리한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-35",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[55]/run[2]",
+        "afterPath": "/section[1]/paragraph[55]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": "(평가주체) [평가 담당]",
+            "after": "(평가주체) 학급 운영 담당과 업무 담당(담당자 미정)이 기록을 함께 검토하고 학생의 의견을 반영한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-36",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "[지표 표 과제 1]",
+            "after": "책과 만나 함께 읽기"
+          }
+        }
+      },
+      {
+        "commandId": "fill-37",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "[과제 1 성과 지표 1]",
+            "after": "책 선택·함께 읽기 참여 모습(관찰 기록)"
+          }
+        }
+      },
+      {
+        "commandId": "fill-38",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[3]/cell[1]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[3]/cell[1]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "[과제 1 성과 지표 2]",
+            "after": "장면 표현의 참여 방식과 지원 필요 사항"
+          }
+        }
+      },
+      {
+        "commandId": "fill-39",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[4]/cell[1]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[4]/cell[1]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "[지표 표 과제 2]",
+            "after": "책으로 대화하고 추천하기"
+          }
+        }
+      },
+      {
+        "commandId": "fill-40",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[4]/cell[2]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[4]/cell[2]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "[과제 2 성과 지표 1]",
+            "after": "책 대화에서 나타난 질문·경청 사례"
+          }
+        }
+      },
+      {
+        "commandId": "fill-41",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[5]/cell[1]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[5]/cell[1]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "[과제 2 성과 지표 2]",
+            "after": "추천 카드에 담긴 추천 이유(실제 산출물)"
+          }
+        }
+      },
+      {
+        "commandId": "fill-42",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[6]/cell[1]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[6]/cell[1]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "[지표 표 과제 3]",
+            "after": "경험을 공유하고 독서 이어가기"
+          }
+        }
+      },
+      {
+        "commandId": "fill-43",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[6]/cell[2]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[6]/cell[2]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "[과제 3 성과 지표 1]",
+            "after": "학생이 제시한 다음 독서 희망과 소감"
+          }
+        }
+      },
+      {
+        "commandId": "fill-44",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[7]/cell[1]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[57]/table[@id=\"1809160020\"]/row[7]/cell[1]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "[과제 3 성과 지표 2]",
+            "after": "운영 개선 의견과 후속 조치 기록"
+          }
+        }
+      },
+      {
+        "commandId": "fill-45",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[@id=\"981339477\"]/run[1]",
+        "afterPath": "/section[1]/paragraph[@id=\"981339477\"]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": " ◦ 총괄: [총괄 담당·역할]",
+            "after": " ◦ 총괄: 업무 담당(미정)이 전체 일정·학년 협의와 운영안을 조정한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-46",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[@id=\"1237863592\"]/run[1]",
+        "afterPath": "/section[1]/paragraph[@id=\"1237863592\"]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": " ◦ 운영: [운영 담당·역할]",
+            "after": " ◦ 운영: 학급 담당(미정)이 일별 활동을 진행하고 학생의 참여를 돕는다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-47",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[@id=\"160119256\"]/run[1]",
+        "afterPath": "/section[1]/paragraph[@id=\"160119256\"]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": " ◦ 지원: [지원 담당·역할]",
+            "after": " ◦ 지원: 도서·공간 담당(미정)이 도서 확보와 대출·반납, 이용 동선을 지원한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-48",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[@id=\"12514297\"]/run[1]",
+        "afterPath": "/section[1]/paragraph[@id=\"12514297\"]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": " ◦ 협력: [협력 담당·역할]",
+            "after": " ◦ 협력: 학년 협의 담당(미정)이 읽기 수준과 지원 필요에 맞게 활동을 조정한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-49",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[@id=\"1819313299\"]/run[1]",
+        "afterPath": "/section[1]/paragraph[@id=\"1819313299\"]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": " ◦ 자료: [자료 담당·역할]",
+            "after": " ◦ 자료: 자료 담당(미정)이 추천 카드 양식과 운영 기록을 정리한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-50",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[@id=\"1109659380\"]/run[1]",
+        "afterPath": "/section[1]/paragraph[@id=\"1109659380\"]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": " ◦ 연락: [연락 담당·역할]",
+            "after": " ◦ 연락: 안내 담당(미정)이 확정된 일정·준비물·참여 방법을 안내한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-51",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[@id=\"2037404750\"]/run[1]",
+        "afterPath": "/section[1]/paragraph[@id=\"2037404750\"]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": " ◦ 확인·승인: [확인·승인 담당·역할]",
+            "after": " ◦ 확인·승인: 학교 내부 절차에 따라 계획·예산·공개 범위를 확인한다(담당자 미정)."
+          }
+        }
+      },
+      {
+        "commandId": "fill-52",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[56]/run[3]",
+        "afterPath": "/section[1]/paragraph[56]/run[3]",
+        "changedProperties": {
+          "text": {
+            "before": "[환류·후속 조치]",
+            "after": "학생이 제안한 책과 활동을 다음 독서 시간에 반영하고, 도서 부족·시간 배분·참여 지원의 개선 사항을 학년 협의에 공유한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-53",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[54]/run[3]",
+        "afterPath": "/section[1]/paragraph[54]/run[3]",
+        "changedProperties": {
+          "text": {
+            "before": "[평가 운영 내용]",
+            "after": "기록할 수 없는 항목은 미확인으로 남기고, 수치와 우수 사례는 실제 근거가 확보된 경우에만 결과에 반영한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-54",
+        "op": "copy",
+        "beforePath": "/section[1]/paragraph[54]",
+        "afterPath": "/section[1]/paragraph[@id=\"2757524818\"]",
+        "changedProperties": {}
+      },
+      {
+        "commandId": "fill-55",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[54]/run[3]",
+        "afterPath": "/section[1]/paragraph[54]/run[3]",
+        "changedProperties": {
+          "text": {
+            "before": "기록할 수 없는 항목은 미확인으로 남기고, 수치와 우수 사례는 실제 근거가 확보된 경우에만 결과에 반영한다.",
+            "after": "학급별 활동 기록과 추천 카드, 학생의 구술·그림 소감을 살펴 참여 기회와 활동 난도가 적절했는지 확인한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-56",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "[일정 표 단계]",
+            "after": "책 만나기"
+          }
+        }
+      },
+      {
+        "commandId": "fill-57",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "[일정 표 추진 내용]",
+            "after": "책 고르기·함께 읽기, 선택 이유와 기억나는 장면 나누기"
+          }
+        }
+      },
+      {
+        "commandId": "fill-58",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "[일정 표 시기]",
+            "after": "월요일"
+          }
+        }
+      },
+      {
+        "commandId": "fill-59",
+        "op": "copy",
+        "beforePath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]",
+        "afterPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[3]",
+        "changedProperties": {}
+      },
+      {
+        "commandId": "fill-60",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "책 만나기",
+            "after": "장면 책놀이"
+          }
+        }
+      },
+      {
+        "commandId": "fill-61",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "책 고르기·함께 읽기, 선택 이유와 기억나는 장면 나누기",
+            "after": "인상 깊은 장면을 몸짓·그림·역할놀이로 표현하기"
+          }
+        }
+      },
+      {
+        "commandId": "fill-62",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "월요일",
+            "after": "화요일"
+          }
+        }
+      },
+      {
+        "commandId": "fill-63",
+        "op": "copy",
+        "beforePath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]",
+        "afterPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[4]",
+        "changedProperties": {}
+      },
+      {
+        "commandId": "fill-64",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "장면 책놀이",
+            "after": "책 대화"
+          }
+        }
+      },
+      {
+        "commandId": "fill-65",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "인상 깊은 장면을 몸짓·그림·역할놀이로 표현하기",
+            "after": "장면과 질문을 나누고 친구의 생각 경청하기"
+          }
+        }
+      },
+      {
+        "commandId": "fill-66",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "화요일",
+            "after": "수요일"
+          }
+        }
+      },
+      {
+        "commandId": "fill-67",
+        "op": "copy",
+        "beforePath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]",
+        "afterPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[5]",
+        "changedProperties": {}
+      },
+      {
+        "commandId": "fill-68",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "책 대화",
+            "after": "추천 카드"
+          }
+        }
+      },
+      {
+        "commandId": "fill-69",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "장면과 질문을 나누고 친구의 생각 경청하기",
+            "after": "추천 대상과 이유를 담은 카드 만들기"
+          }
+        }
+      },
+      {
+        "commandId": "fill-70",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "수요일",
+            "after": "목요일"
+          }
+        }
+      },
+      {
+        "commandId": "fill-71",
+        "op": "copy",
+        "beforePath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]",
+        "afterPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[6]",
+        "changedProperties": {}
+      },
+      {
+        "commandId": "fill-72",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "추천 카드",
+            "after": "공유·돌아보기"
+          }
+        }
+      },
+      {
+        "commandId": "fill-73",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "추천 대상과 이유를 담은 카드 만들기",
+            "after": "표현 자료·카드 공유, 소감과 다음 읽기 계획 나누기"
+          }
+        }
+      },
+      {
+        "commandId": "fill-74",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "목요일",
+            "after": "금요일"
+          }
+        }
+      },
+      {
+        "commandId": "fill-75",
+        "op": "copy",
+        "beforePath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]",
+        "afterPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[7]",
+        "changedProperties": {}
+      },
+      {
+        "commandId": "fill-76",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "공유·돌아보기",
+            "after": "정리·환류"
+          }
+        }
+      },
+      {
+        "commandId": "fill-77",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "표현 자료·카드 공유, 소감과 다음 읽기 계획 나누기",
+            "after": "도서·공간 정리, 실제 기록 검토, 후속 독서 활동 조정"
+          }
+        }
+      },
+      {
+        "commandId": "fill-78",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "금요일",
+            "after": "운영 후(미정)"
+          }
+        }
+      },
+      {
+        "commandId": "fill-79",
+        "op": "copy",
+        "beforePath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]",
+        "afterPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[8]",
+        "changedProperties": {}
+      },
+      {
+        "commandId": "fill-80",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[1]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "정리·환류",
+            "after": "사전 준비"
+          }
+        }
+      },
+      {
+        "commandId": "fill-81",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[2]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "도서·공간 정리, 실제 기록 검토, 후속 독서 활동 조정",
+            "after": "일정 협의, 도서·공간·재료 점검, 참여 지원과 안전 약속 안내"
+          }
+        }
+      },
+      {
+        "commandId": "fill-82",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]/run[1]",
+        "afterPath": "/section[1]/paragraph[50]/table[@id=\"1767702636\"]/row[2]/cell[3]/paragraph[1]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "운영 후(미정)",
+            "after": "운영 전(미정)"
+          }
+        }
+      },
+      {
+        "commandId": "fill-83",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[48]/run[2]",
+        "afterPath": "/section[1]/paragraph[48]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": "[추진 일정 안내]",
+            "after": "아래 일정은 활동 순서 제안이다. 날짜와 차시는 학교 교육과정 및 도서관 이용 여건을 확인하여 확정한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-84",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[45]/run[1]",
+        "afterPath": "/section[1]/paragraph[45]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": " ◦ [사업 운영 방향]",
+            "after": " ◦ 낭독·그림·구술·짝 활동 등 다양한 참여 경로를 제공한다. 준비물과 이동 동선을 점검하여 안전하게 운영한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-85",
+        "op": "copy",
+        "beforePath": "/section[1]/paragraph[45]",
+        "afterPath": "/section[1]/paragraph[@id=\"2757524855\"]",
+        "changedProperties": {}
+      },
+      {
+        "commandId": "fill-86",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[45]/run[1]",
+        "afterPath": "/section[1]/paragraph[45]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": " ◦ 낭독·그림·구술·짝 활동 등 다양한 참여 경로를 제공한다. 준비물과 이동 동선을 점검하여 안전하게 운영한다.",
+            "after": " ◦ 정량 목표와 실적은 임의로 설정하거나 확정하지 않으며, 실제 참여 기록과 의견을 근거로 운영 결과를 정리한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-87",
+        "op": "copy",
+        "beforePath": "/section[1]/paragraph[45]",
+        "afterPath": "/section[1]/paragraph[@id=\"2757524856\"]",
+        "changedProperties": {}
+      },
+      {
+        "commandId": "fill-88",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[45]/run[1]",
+        "afterPath": "/section[1]/paragraph[45]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": " ◦ 정량 목표와 실적은 임의로 설정하거나 확정하지 않으며, 실제 참여 기록과 의견을 근거로 운영 결과를 정리한다.",
+            "after": " ◦ 학급별 기존 도서와 공간을 우선 활용하고, 도서 부족 시 함께 읽기와 순환 이용으로 참여 기회를 마련한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-89",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[36]/run[1]",
+        "afterPath": "/section[1]/paragraph[36]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "   - [과제 3 실행 절차]",
+            "after": "   - 활동 후: 도서를 반납하고 공간을 정리한다. 공개 전 학생 정보와 자료 사용 범위를 확인하며 다음 독서 활동에 연결한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-90",
+        "op": "copy",
+        "beforePath": "/section[1]/paragraph[36]",
+        "afterPath": "/section[1]/paragraph[@id=\"2757524857\"]",
+        "changedProperties": {}
+      },
+      {
+        "commandId": "fill-91",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[36]/run[1]",
+        "afterPath": "/section[1]/paragraph[36]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "   - 활동 후: 도서를 반납하고 공간을 정리한다. 공개 전 학생 정보와 자료 사용 범위를 확인하며 다음 독서 활동에 연결한다.",
+            "after": "   - 금: 학급에서 표현 자료와 추천 카드를 소개하고 한 주의 변화와 다음 읽기 계획을 나눈다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-92",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[32]/run[1]",
+        "afterPath": "/section[1]/paragraph[32]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "   - [과제 2 실행 절차]",
+            "after": "   - 목: 책 제목, 추천하고 싶은 사람, 추천 이유를 카드에 담는다. 글쓰기가 어려우면 그림이나 구술로 표현한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-93",
+        "op": "copy",
+        "beforePath": "/section[1]/paragraph[32]",
+        "afterPath": "/section[1]/paragraph[@id=\"2757524858\"]",
+        "changedProperties": {}
+      },
+      {
+        "commandId": "fill-94",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[32]/run[1]",
+        "afterPath": "/section[1]/paragraph[32]/run[1]",
+        "changedProperties": {
+          "text": {
+            "before": "   - 목: 책 제목, 추천하고 싶은 사람, 추천 이유를 카드에 담는다. 글쓰기가 어려우면 그림이나 구술로 표현한다.",
+            "after": "   - 수: 짝이나 소집단으로 장면과 질문을 나눈다. 말할 차례를 지키고 서로 다른 생각을 인정한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-95",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[28]/run[2]",
+        "afterPath": "/section[1]/paragraph[28]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": "[과제 1 실행 절차]",
+            "after": "화: 장면을 골라 역할·몸짓·그림으로 표현한다. 뛰거나 밀지 않는 약속을 확인하고 관람과 참여 방식을 함께 선택한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-96",
+        "op": "copy",
+        "beforePath": "/section[1]/paragraph[28]",
+        "afterPath": "/section[1]/paragraph[@id=\"2757524859\"]",
+        "changedProperties": {}
+      },
+      {
+        "commandId": "fill-97",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[28]/run[2]",
+        "afterPath": "/section[1]/paragraph[28]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": "화: 장면을 골라 역할·몸짓·그림으로 표현한다. 뛰거나 밀지 않는 약속을 확인하고 관람과 참여 방식을 함께 선택한다.",
+            "after": "월: 여러 책을 살펴 한 권을 고르고 함께 읽은 뒤 선택 이유나 기억나는 장면을 말·그림으로 나눈다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-98",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[23]/run[2]",
+        "afterPath": "/section[1]/paragraph[23]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": "[추진 배경 보완]",
+            "after": "학교명·날짜·인원·예산은 미정이다. 사전 협의에서 도서 수량, 이용 공간, 지원 필요를 확인한 뒤 세부 운영을 확정한다."
+          }
+        }
+      },
+      {
+        "commandId": "fill-99",
+        "op": "copy",
+        "beforePath": "/section[1]/paragraph[23]",
+        "afterPath": "/section[1]/paragraph[@id=\"2757524860\"]",
+        "changedProperties": {}
+      },
+      {
+        "commandId": "fill-100",
+        "op": "set",
+        "beforePath": "/section[1]/paragraph[23]/run[2]",
+        "afterPath": "/section[1]/paragraph[23]/run[2]",
+        "changedProperties": {
+          "text": {
+            "before": "학교명·날짜·인원·예산은 미정이다. 사전 협의에서 도서 수량, 이용 공간, 지원 필요를 확인한 뒤 세부 운영을 확정한다.",
+            "after": "책의 완독량이나 활동지 수보다 책에 대한 흥미와 함께 참여하는 경험을 우선하며, 학년별로 책의 길이와 표현 난도를 조정한다."
+          }
+        }
+      }
+    ],
+    "identityMap": [
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "0",
+        "new": "2757524818"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524819"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "0",
+        "new": "2757524820"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524821"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524822"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "0",
+        "new": "2757524823"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524824"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524825"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "0",
+        "new": "2757524826"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524827"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524828"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "0",
+        "new": "2757524829"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524830"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524831"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "0",
+        "new": "2757524832"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524833"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524834"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "0",
+        "new": "2757524835"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524836"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524837"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "0",
+        "new": "2757524838"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524839"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524840"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "0",
+        "new": "2757524841"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524842"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524843"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "0",
+        "new": "2757524844"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524845"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524846"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "0",
+        "new": "2757524847"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524848"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524849"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "0",
+        "new": "2757524850"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524851"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524852"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "0",
+        "new": "2757524853"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524854"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524855"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524856"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524857"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524858"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "2147483648",
+        "new": "2757524859"
+      },
+      {
+        "kind": "paragraph",
+        "attribute": "id",
+        "old": "0",
+        "new": "2757524860"
+      }
+    ]
+  },
+  "verificationReport": {
+    "schemaVersion": "hwpx.agent-batch/v1",
+    "catalogHash": "sha256:bef4d9c53240d62160365796ef02d49ba90aa85e7cdac97b42d3443b51a547fa",
+    "requirements": [
+      "package",
+      "reopen",
+      "openSafety",
+      "semanticDiff",
+      "bytePreservation"
+    ],
+    "idempotency": {
+      "keyProvided": true,
+      "requestHash": "sha256:b817146156330b20b726547405c62d09c867f16cf3c3404922ba3ffbd848adb9",
+      "replayed": false,
+      "store": "none"
+    },
+    "revision": {
+      "expected": "sha256:2c68b70f5b214c9db8201e07f65e1d506d5b5b83c3fca1c63c7121b6751bbf28",
+      "actual": "sha256:2c68b70f5b214c9db8201e07f65e1d506d5b5b83c3fca1c63c7121b6751bbf28",
+      "matched": true
+    },
+    "inputOpenSafety": {
+      "ok": true,
+      "summary": "editor-open safety verification passed",
+      "validatePackage": {
+        "ok": true,
+        "errors": [],
+        "warnings": [
+          "Contents/content.hpf: manifest does not reference a version part; engine will fall back to 'version.xml'"
+        ],
+        "blockingErrors": []
+      },
+      "validateDocument": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      },
+      "reopen": {
+        "ok": true,
+        "error": null
+      }
+    },
+    "candidateRevision": "sha256:49d8870c40c8a7c389fe7eeafbe5429d0265c5c70b42657316a4870b38fab48c",
+    "package": {
+      "ok": true,
+      "errors": [],
+      "warnings": [
+        "Contents/content.hpf: manifest does not reference a version part; engine will fall back to 'version.xml'"
+      ],
+      "blockingErrors": []
+    },
+    "reopen": {
+      "ok": true,
+      "error": null
+    },
+    "openSafety": {
+      "ok": true,
+      "summary": "editor-open safety verification passed",
+      "validatePackage": {
+        "ok": true,
+        "errors": [],
+        "warnings": [
+          "Contents/content.hpf: manifest does not reference a version part; engine will fall back to 'version.xml'"
+        ],
+        "blockingErrors": []
+      },
+      "validateDocument": {
+        "ok": true,
+        "errors": [],
+        "warnings": []
+      },
+      "reopen": {
+        "ok": true,
+        "error": null
+      }
+    },
+    "semanticDiff": {
+      "ok": true,
+      "changeCount": 100
+    },
+    "bytePreservation": {
+      "ok": true,
+      "changedMembers": [
+        "Contents/section0.xml"
+      ],
+      "addedMembers": [],
+      "removedMembers": [],
+      "unchangedMemberCount": 10,
+      "beforeMemberCount": 11,
+      "afterMemberCount": 11
+    },
+    "domain": {
+      "ok": null,
+      "status": "not-requested"
+    },
+    "savePipeline": {
+      "ok": true,
+      "outputPath": "<local-path>",
+      "visualComplete": false,
+      "visualCompleteStatus": "unverified",
+      "renderChecked": false,
+      "openSafety": {
+        "ok": true,
+        "summary": "editor-open safety verification passed",
+        "detail": {
+          "ok": true,
+          "summary": "editor-open safety verification passed",
+          "validatePackage": {
+            "ok": true,
+            "errors": [],
+            "warnings": [
+              "Contents/content.hpf: manifest does not reference a version part; engine will fall back to 'version.xml'"
+            ],
+            "blockingErrors": []
+          },
+          "validateDocument": {
+            "ok": true,
+            "errors": [],
+            "warnings": []
+          },
+          "reopen": {
+            "ok": true,
+            "error": null
+          }
+        }
+      },
+      "semantic": {
+        "ok": true,
+        "checks": [],
+        "warnings": [],
+        "errors": []
+      },
+      "form": {
+        "ok": true,
+        "fields": [],
+        "warnings": [],
+        "errors": []
+      },
+      "layout": {
+        "ok": true,
+        "warnings": [],
+        "errors": [],
+        "status": "unverified",
+        "unverified_reason": "layout_lint policy is 'off'"
+      },
+      "visual": {
+        "ok": true,
+        "render_checked": false,
+        "original_render": null,
+        "output_render": null,
+        "diff_image": null,
+        "unexpected_diff_outside_mask": false,
+        "overlap_detected": false,
+        "overflow_detected": false,
+        "table_break_detected": false,
+        "page_count_changed": null,
+        "warnings": [
+          "visual gate disabled (render_check=off)"
+        ],
+        "errors": [],
+        "max_diff_ratio": null,
+        "before_page_count": null,
+        "after_page_count": null
+      },
+      "aesthetic": {
+        "ok": true,
+        "warnings": [],
+        "errors": []
+      },
+      "warnings": [],
+      "errors": [],
+      "debugPath": null,
+      "policy": {
+        "require_open_safety": true,
+        "require_visual_complete": false,
+        "require_reference_integrity": false,
+        "render_check": "off",
+        "xsd_mode": "off",
+        "overflow_policy": "warn",
+        "layout_lint": "off",
+        "allow_expert_unsafe": false
+      }
+    },
+    "realHancom": {
+      "required": false,
+      "ok": false,
+      "status": "unverified",
+      "renderChecked": false
+    }
+  },
+  "error": null,
+  "documentPublished": true,
+  "outputSha256": "49d8870c40c8a7c389fe7eeafbe5429d0265c5c70b42657316a4870b38fab48c",
+  "status": "PASS_STRUCTURE",
+  "runtime": {
+    "module": "<local-path>",
+    "parserSha256": "bd7e5d968c3585c7985de1f1c2871b643b9a0ab51f651b23bbda43de08bf25d1",
+    "shared": {
+      "python": "<local-path>",
+      "core": "<local-path>",
+      "automation": "<local-path>",
+      "sha256": {
+        "parser": "bd7e5d968c3585c7985de1f1c2871b643b9a0ab51f651b23bbda43de08bf25d1",
+        "run": "44b3e9f1370f5e8a89492f2eeb5ca214f830f7b6cc504ce308baac00eedb5575",
+        "commands": "6659ad403a69a54ba07d1417f8d244a6d11eca7f409adab4a8053b5e3beed34c"
+      }
+    }
+  }
+}

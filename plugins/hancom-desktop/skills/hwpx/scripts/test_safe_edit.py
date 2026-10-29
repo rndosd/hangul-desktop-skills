@@ -116,6 +116,33 @@ class SelectedEditTests(unittest.TestCase):
         texts=[t for t,_ in read_document(self.source)[0]]
         self.assert_preserved(['NEW' if t=='TARGET' else t for t in texts])
 
+    def test_newly_blank_cell_paragraph_is_reported_without_removal(self):
+        d=HwpxDocument.new();t=d.add_table(1,2)
+        p=t.cell(0,0).paragraphs[0];p.add_run('REMOVE',bold=True);p.add_run(' MORE',italic=True)
+        t.cell(0,0).add_paragraph('KEEP');t.cell(0,1).set_text('OTHER');self.save(d)
+        listing=inspect_targets(self.source,'REMOVE',table=1,row=1,column=1)
+        plan=make_plan(listing,[listing['targets'][0]['target_id']],'')
+        more=inspect_targets(self.source,'MORE',table=1,row=1,column=1)
+        plan['edits'] += make_plan(more,[more['targets'][0]['target_id']],'')['edits']
+        receipt=apply_plan(self.source,self.output,plan)
+        notices=receipt['layout_follow_up'];self.assertEqual(len(notices),1)
+        self.assertEqual(notices[0]['reason'],'newly_blank_cell_paragraph')
+        self.assertEqual(notices[0]['scope']['paragraph'],1)
+        self.assertEqual(len(notices[0]['target_ids']),2)
+        texts=[t for t,_ in read_document(self.source)[0]]
+        self.assert_preserved([' ' if t=='REMOVE MORE' else t for t in texts])
+
+    def test_partial_deletion_or_typo_adds_no_layout_follow_up(self):
+        for old,new in [('TARGET',''),('TARGET','NEW')]:
+            with self.subTest(replacement=new):
+                d=HwpxDocument.new();t=d.add_table(1,1)
+                t.cell(0,0).set_text('TARGET KEEP');self.save(d)
+                receipt=apply_plan(self.source,self.output,self.plan(find=old,replacement=new))
+                self.assertEqual(receipt['layout_follow_up'],[])
+                texts=[t for t,_ in read_document(self.source)[0]]
+                self.assert_preserved([new+' KEEP' if t=='TARGET KEEP' else t for t in texts])
+                self.output.unlink()
+
     def test_cell_second_paragraph_only_and_duplicate_cells(self):
         d=HwpxDocument.new();t=d.add_table(1,2)
         t.cell(0,0).set_text('TARGET');t.cell(0,1).set_text('TARGET');t.cell(0,1).add_paragraph('TARGET')

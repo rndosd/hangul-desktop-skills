@@ -9,13 +9,21 @@ from safe_cell_spacing import shape,snapshot
 SCHEMA='hwpx.safe-table-flow.v1'
 
 def plan(data,req):
- require(isinstance(req,dict) and {'schema','source_sha256','table'}<=set(req) and set(req)<={'schema','source_sha256','table','page_break','repeat_header','header_rows','outer_spacing_pt','caption','anchor_same_page'},'invalid request keys')
+ require(isinstance(req,dict) and {'schema','source_sha256','table'}<=set(req) and set(req)<={'schema','source_sha256','table','page_break','repeat_header','header_rows','outer_spacing_pt','caption','anchor_same_page','inline_to_flow'},'invalid request keys')
  require(req['schema']==SCHEMA and req['source_sha256']==hashlib.sha256(data).hexdigest(),'invalid schema/stale hash');require(len(req)>3,'explicit changes required')
  m,part,section,t=locate(data,req['table']);cs,grid=shape(t);require(all(all(c.find(P+'cellSpan').get(k)=='1' for k in ['rowSpan','colSpan']) for c in cs.values()),'merged table flow needs separate validation')
- require(t.get('lock','0')=='0' and t.get('noAdjust','0')=='0' and t.find(P+'sz') is not None and t.find(P+'sz').get('protect','0')=='0','fixed/protected table unsupported')
- require(t.find(P+'pos') is not None and t.find(P+'pos').get('treatAsChar')=='0','inline table unsupported; do not silently change its anchoring')
+ spacing_only=set(req)=={'schema','source_sha256','table','outer_spacing_pt'}
+ require(t.get('lock','0')=='0' and (t.get('noAdjust','0')=='0' or (t.get('noAdjust')=='1' and spacing_only)) and t.find(P+'sz') is not None and t.find(P+'sz').get('protect','0')=='0','fixed/protected table unsupported except outside spacing only')
+ pos=t.find(P+'pos');require(pos is not None,'table position required')
+ if 'inline_to_flow' in req:
+  require(req['inline_to_flow'] is True and pos.get('treatAsChar')=='1','explicit inline source conversion required')
+  require(t.get('textWrap')=='TOP_AND_BOTTOM' and pos.get('flowWithText')=='1' and pos.get('allowOverlap')=='0' and pos.get('vertRelTo')=='PARA' and pos.get('horzRelTo')=='PARA' and pos.get('vertAlign')=='TOP' and pos.get('horzAlign')=='LEFT' and pos.get('vertOffset')=='0' and pos.get('horzOffset')=='0' and pos.get('holdAnchorAndSO')=='0','only plain zero-offset inline flow can be converted')
+  require('anchor_same_page' not in req,'conversion and anchor binding must be reviewed separately')
+ else:require(pos.get('treatAsChar')=='0','inline table unsupported without explicit inline_to_flow')
  require(t.get('pageBreak') in ['CELL','TABLE'] and t.get('repeatHeader') in ['0','1'],'unsupported existing table flow');require(len(t.findall(P+'outMargin'))==1,'one outside margin required')
  host=t.getparent().getparent();require(host.tag==P+'p' and host.getparent() is section,'direct body table required');require(len(list(host.iter(P+'tbl')))==1,'one table per host required')
+ if req.get('inline_to_flow'):
+  require(all(n.tag in [P+'run',P+'linesegarray'] for n in host) and all(n is t or (n.tag==P+'t' and not len(n) and not (n.text or '').strip()) for run in host.findall(P+'run') for n in run),'conversion needs a table-only host')
  if 'page_break' in req:require(req['page_break'] in ['CELL','TABLE'],'only CELL/TABLE supported')
  if 'anchor_same_page' in req:
   require(req['anchor_same_page'] is True,'only explicit anchor binding true supported');pos=t.find(P+'pos');require(t.get('textWrap')=='TOP_AND_BOTTOM' and pos.get('vertRelTo')=='PARA' and pos.get('horzRelTo')=='COLUMN' and pos.get('flowWithText')=='1' and pos.get('allowOverlap')=='0','normal paragraph-relative flow required for anchor binding')
@@ -37,6 +45,8 @@ def plan(data,req):
  return m,part,section,t,cs,host,cap
 
 def modify_table(t,req):
+ if req.get('inline_to_flow'):
+  t.find(P+'pos').set('treatAsChar','0');t.find(P+'pos').set('horzRelTo','COLUMN')
  if 'anchor_same_page' in req:t.find(P+'pos').set('holdAnchorAndSO','1')
  if 'page_break' in req:t.set('pageBreak',req['page_break'])
  if 'repeat_header' in req:t.set('repeatHeader',str(int(req['repeat_header'])))

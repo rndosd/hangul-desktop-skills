@@ -1,0 +1,64 @@
+{
+  "evidenceSchema": "hwpx.hancom-finalize.v2",
+  "sourceSha256Before": "211C9AB4F6773F09622F0F342E10732EA70F3C8418E362A78FC80A3CF997CB77",
+  "status": "PASS_FULL",
+  "mode": "SaveAs",
+  "candidatePath": "<local-path>",
+  "finalPath": "<local-path>",
+  "firstOpen": true,
+  "saveAs": true,
+  "reopen": true,
+  "pdfExport": true,
+  "pageCountBefore": 3,
+  "pageCountAfter": 3,
+  "error": null,
+  "checkedAt": "2026-10-28T13:01:49.3444802+09:00",
+  "version": "13, 0, 0, 653",
+  "comCreated": true,
+  "registerModuleCalled": true,
+  "securityModuleRegistered": true,
+  "registerModuleArguments": [
+    "FilePathCheckDLL",
+    "FilePathCheckerModuleExample"
+  ],
+  "sourceSha256After": "211C9AB4F6773F09622F0F342E10732EA70F3C8418E362A78FC80A3CF997CB77",
+  "sourceUnchanged": true,
+  "cleanup": {
+    "forced": false,
+    "owned": true,
+    "owner": {
+      "hwnd": 28316060,
+      "path": "C:\\Program Files (x86)\\Hnc\\Office 2024\\HOffice130\\Bin\\Hwp.exe",
+      "pid": 4232,
+      "startTicks": 639287569095051619
+    },
+    "quit": true,
+    "normalExitWait": {
+      "handleAcquired": true,
+      "exitObservation": "MATCHED_INSTANCE_EXITED",
+      "identityError": null,
+      "exited": true,
+      "waited": true,
+      "identityReadError": null,
+      "limitMs": 10000,
+      "absenceChecks": 0,
+      "identityMatched": true
+    },
+    "remaining": []
+  },
+  "artifacts": [
+    {
+      "path": "<local-path>",
+      "sha256": "4D776CCFB915BF904FEF9F96B7D241F77CA280BD888F1B896C6C78BD7AEA4040",
+      "bytes": 42209
+    },
+    {
+      "path": "<local-path>",
+      "sha256": "43429C5D383BAAF3A601D024B5741368681361B1F9A9CC25704D8CB223CAAD5E",
+      "bytes": 56984
+    }
+  ],
+  "visual": "NOT_REVIEWED",
+  "structuralPreservation": "NOT_CHECKED",
+  "nonTargetPreservation": "NOT_CHECKED"
+}

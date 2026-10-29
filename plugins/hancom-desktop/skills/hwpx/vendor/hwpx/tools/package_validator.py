@@ -5,6 +5,9 @@ import argparse
 import io
 import re
 import xml.etree.ElementTree as ET
+from contextlib import contextmanager
+from contextvars import ContextVar
+from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from collections.abc import Iterator
@@ -61,6 +64,7 @@ __all__ = [
     "EditorOpenSafetyReport",
     "is_editor_open_blocking_issue",
     "validate_editor_open_safety",
+    "editor_open_safety_scope",
     "validate_package",
     "main",
 ]
@@ -203,8 +207,42 @@ class EditorOpenSafetyReport:
         }
 
 
+_OPEN_SAFETY_SCOPE: ContextVar[dict[bytes, EditorOpenSafetyReport] | None] = ContextVar(
+    "hwpx_editor_open_safety_scope", default=None
+)
+_OPEN_SAFETY_SCOPE_MAX_BYTES = 64 * 1024 * 1024
+_OPEN_SAFETY_SCOPE_MAX_ENTRIES = 4
+
+
+@contextmanager
+def editor_open_safety_scope() -> Iterator[None]:
+    """Reuse exact-byte validation evidence only within one synchronous operation."""
+
+    token = _OPEN_SAFETY_SCOPE.set({})
+    try:
+        yield
+    finally:
+        _OPEN_SAFETY_SCOPE.reset(token)
+
+
 def validate_editor_open_safety(source: str | Path | bytes) -> EditorOpenSafetyReport:
     """Return package/document/reopen evidence for editor-open-safe handoff."""
+
+    evidence = _OPEN_SAFETY_SCOPE.get()
+    if evidence is None or not isinstance(source, bytes):
+        return _validate_editor_open_safety_uncached(source)
+    if source in evidence:
+        return deepcopy(evidence[source])
+    report = _validate_editor_open_safety_uncached(source)
+    if (
+        len(evidence) < _OPEN_SAFETY_SCOPE_MAX_ENTRIES
+        and sum(map(len, evidence)) + len(source) <= _OPEN_SAFETY_SCOPE_MAX_BYTES
+    ):
+        evidence[source] = deepcopy(report)
+    return report
+
+
+def _validate_editor_open_safety_uncached(source: str | Path | bytes) -> EditorOpenSafetyReport:
 
     package_report = validate_package(source)
     blocking_errors = tuple(
