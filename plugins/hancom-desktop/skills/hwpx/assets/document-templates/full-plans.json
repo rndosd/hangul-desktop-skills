@@ -37,7 +37,7 @@
       },
       "pdf": {
         "path": "full-plans/plan-school/template.pdf",
-        "sha256": "62ff40334716be87d7f8c4e5fe396573fe9cf691d4729f3eb727095a6460ae8c"
+        "sha256": "c5292a0ef0fbf4b0549adf1e0dff985401f35dd363f77be0056a6c329ef34c4e"
       },
       "preview": {
         "path": "full-plans/plan-school/preview.png",
@@ -45,12 +45,12 @@
       },
       "fill": {
         "path": "full-plans/plan-school/manifest.json",
-        "sha256": "14a8bc45960fb1d7ffd471174a82b8d78c631dc89f41cd20824d370dbf88d25c"
+        "sha256": "5865d1fc9d6e5f7e95cfe3354a77e40c92bb159e82b476025851bd5e437ced99"
       },
       "verification": {
         "evidence": {
           "path": "full-plans/plan-school/evidence.json",
-          "sha256": "ecad050cc5bef3cce40f306a47d693dc2af7cc952ad9eeb4eb94eeff59396700"
+          "sha256": "4160efaea532c66c7182fcebb2af3141d3120f9d0c32fd93ec635fa72244690f"
         },
         "tested_edits": [
           {
@@ -104,7 +104,7 @@
       },
       "pdf": {
         "path": "full-plans/plan-education/template.pdf",
-        "sha256": "8ee000683fb557ff09132cdf49408b42f170a82faa80fbae72f8a5ea36121de8"
+        "sha256": "420d5cdcb50ba471d5abc10de1a409c0e14e21d40335c8a50dff7e28f810ad78"
       },
       "preview": {
         "path": "full-plans/plan-education/preview.png",
@@ -112,12 +112,12 @@
       },
       "fill": {
         "path": "full-plans/plan-education/manifest.json",
-        "sha256": "768e4614d7fbbb4b09123f93b6ac2f9456d263c9f446ddefc89e03b6a65adb4d"
+        "sha256": "dd97102aa7b4a057c5aca8b6a7c8e432b72e21f66b1b89c6aaac0fdbfe932c80"
       },
       "verification": {
         "evidence": {
           "path": "full-plans/plan-education/evidence.json",
-          "sha256": "aa23cd4c0ed380b4d325b1cba527c0cd08cfa3914dc70c18a3fa39aeade74dd7"
+          "sha256": "d65de26d631e1c98be7a1bb898ed62161991879a8766fd97edfb83672bbe2e38"
         },
         "tested_edits": [
           {
@@ -167,11 +167,11 @@
       },
       "document": {
         "path": "full-plans/plan-project/template.hwpx",
-        "sha256": "051d1dde3bc7050d6c550a5c0e30b0166cbb50559b128511593702408fe86c5c"
+        "sha256": "cdd02b652a05d0ddb4bab85d9ab4c9408ba3dd682eaa4a916fafca14b18910bf"
       },
       "pdf": {
         "path": "full-plans/plan-project/template.pdf",
-        "sha256": "51b6c1e85dd1489fcde8636cb9d3702d49adfcef24987f3346fcabc7bf0e9216"
+        "sha256": "e7942358bd4e5cf7244e2223ca810a5639d13b5c91568fe23d04a4441f26a138"
       },
       "preview": {
         "path": "full-plans/plan-project/preview.png",
@@ -179,12 +179,12 @@
       },
       "fill": {
         "path": "full-plans/plan-project/manifest.json",
-        "sha256": "c8478ec3022ff33299e9dd8d19118eb0e62a43cf0d207572b543eba0c8fb52d6"
+        "sha256": "f0a9d84931d74c3e6c5133b211e136d220d905abaac923920991abc2f8fe718e"
       },
       "verification": {
         "evidence": {
           "path": "full-plans/plan-project/evidence.json",
-          "sha256": "0eea42b2f70793011c4eb51b5dc509411e0d76a7a367d745d0754c0a3628627f"
+          "sha256": "445224e4e91b1e5b931a4b439e7618ef461ce5f5bfaeeb603031f4ecbb05090c"
         },
         "tested_edits": [
           {

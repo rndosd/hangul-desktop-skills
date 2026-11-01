@@ -17,7 +17,7 @@ def plan(data,req):
  hs=req['header_rows'];require(isinstance(hs,list) and 1<=len(hs)<=3 and all(type(x) is int for x in hs) and hs==list(range(1,len(hs)+1)),'contiguous top 1..3 header rows required')
  require(len(req)>4,'explicit changes required');m,part,r,t=locate(data,req['table']);cs,grid=shape(t);n=len(hs)
  require(n<int(t.get('rowCnt')),'body rows required')
- require(t.get('lock','0')=='0' and t.get('noAdjust','0')=='0' and t.find(P+'sz') is not None and t.find(P+'sz').get('protect','0')=='0','protected/fixed table unsupported')
+ require(t.get('lock','0')=='0' and t.find(P+'sz') is not None and t.find(P+'sz').get('protect','0')=='0','locked/protected table unsupported')  # noAdjust allowed: header repeat changes no size
  pos=t.find(P+'pos');require(pos is not None and pos.get('treatAsChar')=='0' and t.get('pageBreak')=='TABLE','normal floating whole-row table required')
  require(t.get('textWrap')=='TOP_AND_BOTTOM' and pos.get('vertRelTo')=='PARA' and pos.get('horzRelTo')=='COLUMN' and pos.get('flowWithText')=='1' and pos.get('allowOverlap')=='0','normal paragraph-relative flow required')
  host=t.getparent().getparent();require(host.tag==P+'p' and host.getparent() is r and len(list(host.iter(P+'tbl')))==1,'single direct-body table required')

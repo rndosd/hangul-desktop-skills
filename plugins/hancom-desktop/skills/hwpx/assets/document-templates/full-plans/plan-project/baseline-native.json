@@ -1,7 +1,7 @@
 {
   "evidenceSchema": "hwpx.hancom-finalize.v2",
-  "sourceSha256Before": "051D1DDE3BC7050D6C550A5C0E30B0166CBB50559B128511593702408FE86C5C",
-  "status": "BLOCKED_COM",
+  "sourceSha256Before": "CDD02B652A05D0DDB4BAB85D9AB4C9408BA3DD682EAA4A916FAFCA14B18910BF",
+  "status": "PASS_FULL",
   "mode": "OpenOnly",
   "candidatePath": "<local-path>",
   "finalPath": "<local-path>",
@@ -12,7 +12,7 @@
   "pageCountBefore": 5,
   "pageCountAfter": 5,
   "error": null,
-  "checkedAt": "2026-11-01T18:27:14.1041700+09:00",
+  "checkedAt": "2026-11-01T21:45:03.2073975+09:00",
   "version": "13, 0, 0, 3903",
   "comCreated": true,
   "registerModuleCalled": true,
@@ -21,21 +21,21 @@
     "FilePathCheckDLL",
     "FilePathCheckerModuleExample"
   ],
-  "sourceSha256After": "051D1DDE3BC7050D6C550A5C0E30B0166CBB50559B128511593702408FE86C5C",
+  "sourceSha256After": "CDD02B652A05D0DDB4BAB85D9AB4C9408BA3DD682EAA4A916FAFCA14B18910BF",
   "sourceUnchanged": true,
   "cleanup": {
     "forced": false,
     "owned": true,
     "owner": {
-      "hwnd": 3410144,
+      "hwnd": 5114722,
       "path": "<local-path>",
-      "pid": 19888,
-      "startTicks": 639291220343043692
+      "pid": 12448,
+      "startTicks": 639291339033951296
     },
     "quit": true,
     "normalExitWait": {
-      "handleAcquired": true,
-      "exitObservation": "HANDLE_EXITED_BEFORE_IDENTITY",
+      "handleAcquired": false,
+      "exitObservation": "PID_ABSENT",
       "identityError": null,
       "exited": true,
       "waited": false,
@@ -44,20 +44,18 @@
       "absenceChecks": 0,
       "identityMatched": null
     },
-    "remaining": [
-      19888
-    ]
+    "remaining": []
   },
   "artifacts": [
     {
       "path": "<local-path>",
-      "sha256": "051D1DDE3BC7050D6C550A5C0E30B0166CBB50559B128511593702408FE86C5C",
-      "bytes": 36347
+      "sha256": "CDD02B652A05D0DDB4BAB85D9AB4C9408BA3DD682EAA4A916FAFCA14B18910BF",
+      "bytes": 36272
     },
     {
       "path": "<local-path>",
-      "sha256": "51B6C1E85DD1489FCDE8636CB9D3702D49ADFCEF24987F3346FCABC7BF0E9216",
-      "bytes": 125271
+      "sha256": "E7942358BD4E5CF7244E2223CA810A5639D13B5C91568FE23D04A4441F26A138",
+      "bytes": 125250
     }
   ],
   "visual": "NOT_REVIEWED",

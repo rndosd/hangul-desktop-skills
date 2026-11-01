@@ -378,7 +378,7 @@
   "verification": {
     "evidence": {
       "path": "full-plans/plan-school/fill-evidence.json",
-      "sha256": "f9bc08b157eed725b58521f8e0bab7a28f3ef8ec74c8378f8650cb10e1113711"
+      "sha256": "c149d7a5141071715a26f21fd493e48acbe94ff8bb600140e61f9582bcbe0585"
     }
   },
   "preview": {
@@ -388,5 +388,15 @@
   "limits": [
     "준비본과 입력 예시의 검증이며 모든 분량·부분 선택·사용자 양식의 성공 보증이 아님",
     "새 작성 결과의 실제 출력은 내용과 분량에 따라 확인한다"
-  ]
+  ],
+  "sections": {
+    "activities": {
+      "label": "운영 활동(① 운영 개요·목적·대상·장소·운영 내용)",
+      "first": "/section[1]/paragraph[12]",
+      "last": "/section[1]/paragraph[17]",
+      "min": 1,
+      "max": 6,
+      "headingText": "운영 개요"
+    }
+  }
 }

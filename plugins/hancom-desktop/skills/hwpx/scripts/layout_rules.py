@@ -90,9 +90,10 @@ def classify(text):
 
 
 def content_runs(runs):
-    """Runs holding an item's text: a first run that holds only the symbol is left out."""
-    first = ''.join(t.text or '' for t in runs[0].iter() if _local(t) == 't').strip() if runs else ''
-    return runs[1:] if len(runs) > 1 and len(first) <= 1 else runs
+    """Runs holding an item's text: a first run that holds only the symbol, and runs of only spaces, are left out."""
+    text = lambda run: ''.join(t.text or '' for t in run.iter() if _local(t) == 't')
+    rest = runs[1:] if len(runs) > 1 and len(text(runs[0]).strip()) <= 1 else runs
+    return [run for run in rest if text(run).strip()] or rest
 
 
 def body_paragraphs(section):

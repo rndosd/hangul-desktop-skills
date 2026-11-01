@@ -18,7 +18,7 @@ def checked(data,req):
  require(req['schema']==SCHEMA and req['source_sha256']==hashlib.sha256(data).hexdigest(),'invalid schema/stale source')
  require(type(req['table']) is int and req['table']>=1,'integer table required');single_line(req['editable_reason'],search=True)
  m,part,root,t=locate(data,req['table']);cs,grid=shape(t);rows=t.findall(P+'tr');cols=int(t.get('colCnt'))
- require(t.get('lock','0')=='0' and t.get('noAdjust','0')=='0' and t.find(P+'sz') is not None and t.find(P+'sz').get('protect','0')=='0','locked/fixed table unsupported')
+ require(t.get('lock','0')=='0' and t.get('noAdjust','0')=='0' and t.find(P+'sz') is not None and t.find(P+'sz').get('protect','0')=='0','locked table or fixed cell size (셀 크기 고정): rows are not added or removed')
  pos=t.find(P+'pos');require(pos is not None and pos.get('treatAsChar')=='0' and t.get('pageBreak')=='TABLE','floating whole-row table required')
  require(t.get('textWrap')=='TOP_AND_BOTTOM' and pos.get('flowWithText')=='1' and pos.get('allowOverlap')=='0','normal flow required')
  host=t.getparent().getparent();require(host.tag==P+'p' and host.getparent() is root and len(list(host.iter(P+'tbl')))==1,'single direct-body table required')

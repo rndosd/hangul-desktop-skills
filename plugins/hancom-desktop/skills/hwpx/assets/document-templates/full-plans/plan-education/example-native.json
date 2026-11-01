@@ -12,7 +12,7 @@
   "pageCountBefore": 4,
   "pageCountAfter": 4,
   "error": null,
-  "checkedAt": "2026-11-01T18:27:03.3377144+09:00",
+  "checkedAt": "2026-11-01T21:45:52.1635724+09:00",
   "version": "13, 0, 0, 3903",
   "comCreated": true,
   "registerModuleCalled": true,
@@ -27,22 +27,22 @@
     "forced": false,
     "owned": true,
     "owner": {
-      "hwnd": 10684106,
+      "hwnd": 1051064,
       "path": "<local-path>",
-      "pid": 17048,
-      "startTicks": 639291220235652907
+      "pid": 5644,
+      "startTicks": 639291339523470711
     },
     "quit": true,
     "normalExitWait": {
-      "handleAcquired": false,
-      "exitObservation": "PID_ABSENT_BEFORE_HANDLE",
+      "handleAcquired": true,
+      "exitObservation": "MATCHED_INSTANCE_EXITED",
       "identityError": null,
       "exited": true,
-      "waited": false,
-      "identityReadError": "No process handle available.",
+      "waited": true,
+      "identityReadError": null,
       "limitMs": 10000,
-      "absenceChecks": 1,
-      "identityMatched": null
+      "absenceChecks": 0,
+      "identityMatched": true
     },
     "remaining": []
   },
@@ -54,8 +54,8 @@
     },
     {
       "path": "<local-path>",
-      "sha256": "A10F5B019D460CBC381B1A50BF8FDC1C79D0EB1B9438B79C01AA3BCF3875D69F",
-      "bytes": 101113
+      "sha256": "89D9878AD4F09714F9490AC58D50C9BCC23F9327D6690D333DE2384BC9729116",
+      "bytes": 101112
     }
   ],
   "visual": "NOT_REVIEWED",

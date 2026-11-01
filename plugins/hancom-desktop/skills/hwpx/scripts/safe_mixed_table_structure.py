@@ -14,7 +14,7 @@ from safe_native_story_text import shape,fingerprint
 P=body.P;need=body.require;SCHEMA='hwpx.mixed-table-structure.v1'
 def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 def grid(t):
- rows=t.findall(P+'tr');cols=int(t.get('colCnt'));need(2<=len(rows)<=100 and len(rows)==int(t.get('rowCnt')) and 1<=cols<=20,'bounded mixed grid required');need(t.get('lock')==t.get('noAdjust')==t.find(P+'sz').get('protect')=='0','unprotected adjustable table only');g={}
+ rows=t.findall(P+'tr');cols=int(t.get('colCnt'));need(2<=len(rows)<=100 and len(rows)==int(t.get('rowCnt')) and 1<=cols<=20,'bounded mixed grid required');need(t.get('lock','0')==t.get('noAdjust','0')==t.find(P+'sz').get('protect','0')=='0','locked/protected table or fixed cell size (셀 크기 고정): rows are not added or removed');g={}
  for y,row in enumerate(rows):
   for c in row.findall(P+'tc'):
    a=c.find(P+'cellAddr');s=c.find(P+'cellSpan');size=c.find(P+'cellSz');need(a is not None and s is not None and size is not None,'cell geometry required');x=int(a.get('colAddr'));cy=int(a.get('rowAddr'));w=int(s.get('colSpan'));h=int(s.get('rowSpan'));need(cy==y and w>0 and h>0 and x+w<=cols and y+h<=len(rows) and int(size.get('width'))>0 and int(size.get('height'))>0,'invalid geometry')

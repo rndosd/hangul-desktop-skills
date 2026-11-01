@@ -40,7 +40,7 @@ def apply(source,output,req,dry_run=False):
    for i in key[1]:node=node[i]
    require(all(parent.get('protect','0')=='0' for parent in node.iterancestors() if local(parent)=='tc'),'protected cell unsupported')
    for parent in node.iterancestors():
-    if local(parent)=='tbl':require(parent.get('lock','0')=='0' and parent.get('noAdjust','0')=='0' and parent.find('{http://www.hancom.co.kr/hwpml/2011/paragraph}sz').get('protect','0')=='0','protected/fixed table unsupported')
+    if local(parent)=='tbl':require(parent.get('lock','0')=='0' and parent.find('{http://www.hancom.co.kr/hwpml/2011/paragraph}sz').get('protect','0')=='0','locked/protected table unsupported')  # noAdjust allowed: word wrap changes no size
    para=HwpxOxmlParagraph(node,section);base=str(para.para_pr_id_ref);require(base in old,'unbound paragraph style');clone=copy.deepcopy(old[base]);bs=clone.find(H+'breakSetting');require(bs is not None and bs.get('breakNonLatinWord') in ['KEEP_WORD','BREAK_WORD'] and bs.get('breakLatinWord') in ['KEEP_WORD','BREAK_WORD','HYPHENATION'],'unknown original wrap mode')
    # Already requested: preserve its exact ID, even if an earlier duplicate
    # definition has equal content. No style allocation or cache invalidation.

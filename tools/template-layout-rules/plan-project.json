@@ -20,7 +20,7 @@
  "heading|0|①|1500": {
   "align": "JUSTIFY",
   "left": 0,
-  "hanging": 0,
+  "hanging": -2296,
   "lineSpacing": 150,
   "lead": 0,
   "symbolCharPr": "87",
@@ -46,5 +46,16 @@
  },
  "_itemText|1500": {
   "charPr": "74"
- }
+ },
+ "_tables": [
+  {
+   "id": "1767702636",
+   "pageBreak": "NONE",
+   "widths": [
+    8516,
+    29191,
+    8500
+   ]
+  }
+ ]
 }

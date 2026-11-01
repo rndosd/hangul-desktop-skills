@@ -44,6 +44,8 @@ $taskLauncher = Join-Path $taskSkillDir 'scripts/Invoke-HangulTask.ps1'
 
 계획서 작성은 [완성형 3종](template-selection.md#준비된-완성형-계획서) 중 적합한 하나를 고른 뒤 기존 fill을 쓴다. `SKILL_DIR`는 실제 hwpx 스킬 폴더이며 실행기는 이미 선택한 환경을 재사용한다.
 
+**구역 늘리기·빼기.** 양식 설명(`fill --template`)의 `sections`는 통째로 반복하거나 뺄 수 있는 구역이다(예: 활동 영역 ① 제목·목적·기간·대상·방법·내용). 내용의 영역 수만큼 `{"sections": {"activities": [영역1, 영역2, 영역3]}}`처럼 구역 입력을 영역마다 하나씩 준다. 복사된 구역의 원 숫자는 ①→②→③으로 이어지고, `heading`을 받는 구역은 제목 문구도 바꿀 수 있다. 빈 목록은 구역을 지우며(최소 개수가 0일 때), 구역 입력을 구역 밖 값과 중복해 주면 거부한다. **내용이 양식 칸보다 많으면 버리지 않는다.** 구역으로 늘리거나, 맞는 양식을 고르거나, 구조 편집으로 보완하고, 그래도 넣지 못한 내용은 사용자에게 알린다. 종합사업형은 과제가 요약·성과표와 연결돼 있어 구역 반복을 제공하지 않는다.
+
 ```powershell
 $planCatalog = Join-Path $taskSkillDir 'assets/document-templates/full-plans.json'
 & $taskLauncher fill --catalog $planCatalog --template plan-school

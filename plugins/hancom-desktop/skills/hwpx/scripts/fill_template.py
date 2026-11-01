@@ -57,9 +57,18 @@ def describe(catalog, template_id):
             'slots':{key:{'label':value.get('label',key),'role':value['role'],**({'contentOnly':True} if value.get('property')=='caption' else {})} for key,value in manifest['slots'].items() if 'valueFrom' not in value},
             **({'linkedPlacements':{key:value['valueFrom'] for key,value in manifest['slots'].items() if 'valueFrom' in value}} if any('valueFrom' in value for value in manifest['slots'].values()) else {}),
             'repeats':{key:{'label':value.get('label',key),'fields':list(value['fields'])} for key,value in manifest.get('repeats',{}).items()},
+            **({'sections':_sections(manifest,template)} if manifest.get('sections') else {}),
             'roles':list(styles), 'preview':refs.get('preparedPreview'), 'preparedVerification':manifest.get('verification'),
             'preparation':manifest.get('preparation',{'mode':'prepared-source-design'}), 'limits':manifest.get('limits',[]),
-            'native':'NOT_CHECKED', 'values':'Scalar strings and arrays of records. Omitted inputs stay blank or retain generic labels.'}
+            'native':'NOT_CHECKED', 'values':'Scalar strings and arrays of records. Omitted inputs stay blank or retain generic labels. Sections take {"sections": {name: [record per instance]}}; an empty list removes the section.'}
+
+
+def _sections(manifest, template):
+    activate()
+    from fill_sections import describe_sections
+    from hwpx_automation.office.agent.document import HwpxAgentDocument
+    with HwpxAgentDocument.open(template) as view:
+        return describe_sections(manifest, view)
 
 
 def _value(value):
@@ -178,6 +187,23 @@ def compile_fill(manifest, source, output, values, styles, overrides=None):
         return plan
 
 
+def _dependency_safe_chunks(commands, limit):
+    """[(start, end)] batches of at most `limit` commands in order, never splitting a command from a later
+    one that refers to its result ($<commandId>...). None when no such split exists."""
+    import re
+    index={c['commandId']:i for i,c in enumerate(commands)}
+    earliest=[min([index[name] for name in re.findall(r'\$([A-Za-z0-9_-]+)',json.dumps(c)) if name in index] or [i]) for i,c in enumerate(commands)]
+    # A boundary before k is safe when no command at or after k refers to a command before k.
+    suffix=[len(commands)]*(len(commands)+1)
+    for k in range(len(commands)-1,-1,-1):suffix[k]=min(suffix[k+1],earliest[k])
+    chunks,start=[],0
+    while start<len(commands):
+        end=next((k for k in range(min(start+limit,len(commands)),start,-1) if k==len(commands) or suffix[k]>=k),None)
+        if end is None:return None
+        chunks.append((start,end));start=end
+    return chunks
+
+
 def fill(catalog, template_id, output, values, *, styles=None, dry_run=False):
     from hangul_task import batch, stage_directory, sha
     manifest,source,defaults,refs=load_form(catalog,template_id)
@@ -185,18 +211,29 @@ def fill(catalog, template_id, output, values, *, styles=None, dry_run=False):
     require(output.suffix.lower()=='.hwpx' and output.parent.is_dir() and not output.exists() and not output.is_symlink(), 'new .hwpx output required')
     with stage_directory(output.parent) as folder:
         candidate=Path(folder)/'stage-0.hwpx'
-        plan=compile_fill(manifest,source,candidate,values,defaults,styles)
+        activate()
+        from fill_sections import prepare
+        from hwpx_automation.office.agent.document import HwpxAgentDocument
+        # Sections first: copy repeated sections (pass 1), then fill the expanded document with remapped bindings.
+        base,form,inputs,removals,sections=prepare(manifest,source,values,folder,lambda request:batch(request,dry_run=False),HwpxAgentDocument.open)
+        plan=compile_fill(form,base,candidate,inputs,defaults,styles)
+        for path in removals:
+            plan['commands'].append({'commandId':f"fill-{len(plan['commands'])+1}",'op':'remove','path':path})
         from hwpx_automation.office.agent.model import MAX_COMMANDS
         commands=plan['commands']
         batches=1
         if len(commands) <= MAX_COMMANDS:
             result=batch(plan,dry_run=dry_run)
         else:
-            require(all(c['op']=='set' and not c['path'].startswith('$') for c in commands), 'This repeat exceeds the bounded batch size; reduce the repeat items.')
+            # Sequential batches keep command order: each batch edits the previous batch's output, so row/paragraph
+            # copies and the sets after them resolve exactly as in one batch. A command that names an earlier
+            # command's result ($fill-N...) must stay in that command's batch, so split only where nothing crosses.
+            chunks=_dependency_safe_chunks(commands,MAX_COMMANDS)
+            require(chunks is not None, 'This repeat exceeds the bounded batch size; reduce the repeat items.')
             stages=[]
-            for offset in range(0,len(commands),MAX_COMMANDS):
-                next_candidate=Path(folder)/f'stage-{offset//MAX_COMMANDS}.hwpx'
-                step=dict(plan,commands=commands[offset:offset+MAX_COMMANDS],output={'filename':str(next_candidate),'overwrite':False},
+            for number,(offset,end) in enumerate(chunks):
+                next_candidate=Path(folder)/f'stage-{number}.hwpx'
+                step=dict(plan,commands=commands[offset:end],output={'filename':str(next_candidate),'overwrite':False},
                           idempotencyKey=plan['idempotencyKey']+f'-{offset}')
                 if stages:
                     step['input']={'filename':str(candidate)}
@@ -218,5 +255,6 @@ def fill(catalog, template_id, output, values, *, styles=None, dry_run=False):
                 os.link(candidate,output)
                 result['documentPublished']=True
                 if pipeline is not None:pipeline['outputPath']=str(output)
-        result['form']={'template':template_id,'inputs':len(values),'commands':len(plan['commands']),'mutationBatches':batches}
+        result['form']={'template':template_id,'inputs':len(values),'commands':len(plan['commands']),'mutationBatches':batches,
+                        **({'sections':sections} if sections else {})}
         return result

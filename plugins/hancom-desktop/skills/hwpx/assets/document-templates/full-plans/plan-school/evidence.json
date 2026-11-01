@@ -4,7 +4,7 @@
   "block_id": "plan-school",
   "origin_sha256": "10a2cd1337e373463faa906bd1a84c6fae18fd14debe88ead72939c814f3bd7d",
   "document_sha256": "a50d2a365aedc3da7c9bf4431e8d4a87d9425878eff64fbfdd9c584032c93ac2",
-  "pdf_sha256": "62ff40334716be87d7f8c4e5fe396573fe9cf691d4729f3eb727095a6460ae8c",
+  "pdf_sha256": "c5292a0ef0fbf4b0549adf1e0dff985401f35dd363f77be0056a6c329ef34c4e",
   "preview_sha256": "5bc8fc89c1af59fb84fa812c827a293d93f4bb912083aedcefc251337adb5c76",
   "content_state": "neutral_form",
   "pages": 2,
@@ -20,15 +20,15 @@
   ],
   "nativeBaseline": {
     "path": "full-plans/plan-school/baseline-native.json",
-    "sha256": "8ada27ddd903e24c5edab7b41e0bb542b9c8417861bd69bbeb3f503c565f1171"
+    "sha256": "2301e640f713a9497a26ea580063620f0e0e5495d57838cce840ffa95d1ff24c"
   },
   "nativeExample": {
     "path": "full-plans/plan-school/example-native.json",
-    "sha256": "aa0392abfc3926ed846d5df5dda9958d83cebb73857b2ae747edfaebab79e90c"
+    "sha256": "0f40302c6506d16ea28f03c028cbd15f79b399eb318a8f3bb09b3e0208e9806b"
   },
   "sampleProof": {
     "path": "full-plans/plan-school/fill-evidence.json",
-    "sha256": "f9bc08b157eed725b58521f8e0bab7a28f3ef8ec74c8378f8650cb10e1113711"
+    "sha256": "c149d7a5141071715a26f21fd493e48acbe94ff8bb600140e61f9582bcbe0585"
   },
   "acceptance": "Same-input native output and requested layout repair verified; complete source design retained"
 }

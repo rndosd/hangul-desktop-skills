@@ -104,7 +104,18 @@ def run(source, final, pdf, bundle, context, timeout=120):
     return {**common, **collected, 'schema': SCHEMA,
             'nativeStatus': result['status'], 'reviewTemplate': str(root / 'review-template.json'),
             'wrapAlignment': _wrap_alignment(request['pdf']),
+            'pageLayout': _page_layout(request['pdf']),
             'nextStep': 'Review differences and every PDF page, then run check with that review.'}
+
+
+def _page_layout(pdf):
+    """Review hints for page placement (last-page leftovers, thin table splits, short tails); never a verdict."""
+    try:
+        from page_layout import measure
+        report = measure(pdf)
+        return {key: report[key] for key in ('status', 'pages', 'counts', 'warnings')}
+    except Exception as exc:
+        return {'status': 'NOT_CHECKED', 'reason': f'{type(exc).__name__}: {exc}'}
 
 
 def _wrap_alignment(pdf):
