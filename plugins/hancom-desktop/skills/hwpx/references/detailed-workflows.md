@@ -2,7 +2,7 @@
 
 공통 진입과 우선순위는 현재 SKILL.md를 따른다. 이 참조는 전문 도구의 지원 범위와 기존 검증 계약을 보존한다. 필요한 절만 읽는다.
 
-Plugin setup: use the PC configuration from `${CODEX_HOME}/skills/hwpx/environment.json` (default `${USERPROFILE}/.codex/skills/hwpx/environment.json`) if this plugin cache has no environment.json. Run hancom-setup first when absent.
+PC setup: `Install.ps1` writes environment.json into each installed skill folder (Codex and Claude Code). A copy without one, such as the extracted package, uses `${CODEX_HOME}/skills/hwpx/environment.json` (default `${USERPROFILE}/.codex/skills/hwpx/environment.json`). Run `Install.ps1` first when both are absent.
 
 
 # HWPX 작업

@@ -76,7 +76,7 @@
 
 ## 0.3.0-beta.1 — 2026-11-01
 
-한 번의 `Install.ps1` 실행으로 Codex와 Claude Code를 함께 지원합니다. Python·설정·백업은 공용 폴더(CODEX_HOME, 기본 `.codex`)에 두고, Claude Code 폴더(`CLAUDE_CONFIG_DIR` 또는 `.claude`)가 있으면 `skills`에도 각자의 environment.json과 함께 설치합니다. `-Claude Yes/No`, `-ClaudeSkillsRoot`를 추가했고 재설치 시 Claude 사본도 `backup/claude`에 백업합니다. Claude Code 플러그인용 `.claude-plugin` 마켓플레이스·플러그인 파일을 추가하고 공개 검사에서 경로·이름·버전 일치를 확인합니다. 이 PC에 Claude Code CLI가 없어 `/plugin` 설치 자체는 실행하지 않았습니다.
+한 번의 `Install.ps1` 실행으로 Codex와 Claude Code를 함께 지원합니다. Python·설정·백업은 공용 폴더(CODEX_HOME, 기본 `.codex`)에 두고, Claude Code 폴더(`CLAUDE_CONFIG_DIR` 또는 `.claude`)가 있으면 `skills`에도 각자의 environment.json과 함께 설치합니다. `-Claude Yes/No`, `-ClaudeSkillsRoot`를 추가했고 재설치 시 Claude 사본도 `backup/claude`에 백업합니다. 설치 방법을 하나로 통일하기 위해 Codex 플러그인 마켓플레이스(`.agents/plugins`, `.codex-plugin`)와 플러그인 전용 `hancom-setup` 스킬을 제거했습니다. 어느 경로든 `Install.ps1`의 PC 준비가 필요했고 플러그인과 직접 설치를 함께 쓰면 스킬이 중복되기 때문입니다. 버전은 `package-info.json` 한 곳에서 관리하며, 공개 검사는 `skills/`에 설치 대상 두 스킬만 있는지 확인합니다.
 
 완료 게이트가 한글 SaveAs 후의 빈 `binaryItemIDRef`(대체 글꼴)와 빈 텍스트 run을 내용 변경으로 판정해 모든 저장본을 차단하던 문제를 수정했습니다. 실제 참조는 XML 위치 대신 파트별 문서 순서의 (요소, payload 해시)로 비교해 형제 삽입에는 흔들리지 않고 교체·뒤바뀜은 감지합니다. plan-project 준비본·예시의 `PrintMethod=4`(모아 찍기)를 0으로 바꿔 A4 세로로 출력되게 하고 연결 해시를 갱신했습니다.
 

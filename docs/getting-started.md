@@ -1,6 +1,6 @@
 # 설치부터 첫 문서까지
 
-처음 사용하는 Windows 사용자를 위한 설명서입니다. 먼저 ZIP으로 PC 환경과 두 스킬을 준비한 다음 새 대화에서 사용합니다. 한 번 설치하면 Codex와 Claude Code 양쪽에서 사용할 수 있습니다. 플러그인 목록으로 관리하는 방법은 뒤의 선택 항목입니다. 이 문서는 현재 GitHub main의 안내이며, 공개 베타의 확인 범위는 [지원 제한](known-limits.md)에 기록돼 있습니다.
+처음 사용하는 Windows 사용자를 위한 설명서입니다. 먼저 ZIP으로 PC 환경과 두 스킬을 준비한 다음 새 대화에서 사용합니다. 한 번 설치하면 Codex와 Claude Code 양쪽에서 사용할 수 있습니다. 설치 방법은 이 한 가지이며 별도의 플러그인 설치는 없습니다. 이 문서는 현재 GitHub main의 안내이며, 공개 베타의 확인 범위는 [지원 제한](known-limits.md)에 기록돼 있습니다.
 
 ## 1. 준비할 것
 
@@ -154,27 +154,11 @@ COM·모듈 성공만으로 이 문서 시험이 성공한 것은 아닙니다. 
 
 등록한 기본형이나 기본 제공 양식을 채울 때에도 내용에 맞게 구성·문단·표를 조정합니다. 최종 내용과 실제 출력은 작성할 때마다 확인하세요. 기존 문서의 일부 문구나 표만 수정하는 요청도 할 수 있습니다.
 
-## Codex 플러그인으로 관리하려면
-
-위 PC 설치를 마친 뒤, 플러그인 목록으로 관리하려는 사용자의 선택 경로입니다. ZIP의 두 스킬 직접 설치로 사용한다면 이 단계는 필수가 아닙니다.
-
-Codex CLI가 있는 PowerShell에서 실행합니다.
-
-```powershell
-codex plugin marketplace add rndosd/hangul-desktop-skills
-```
-
-앱을 다시 열고 플러그인 목록에서 추가한 소스를 선택해 `hancom-desktop`을 설치한 뒤 새 대화를 시작합니다. 앱 버전에 따라 화면 이름은 다를 수 있습니다. 명령을 찾지 못하면 CLI 설치를 전제로 하지 않는 위 ZIP 경로를 사용하세요. 소스 추가는 PC의 Python·한글·보안 DLL 준비를 대신하지 않습니다.
-
-[OpenAI 공식 패키징·마켓플레이스 안내](https://developers.openai.com/plugins/build/plugins)를 기준으로 한 절차입니다. 공개 디렉터리 등록·심사를 마친 제품은 아닙니다.
-
 ## Claude Code에서 사용하려면
 
 스킬은 `SKILL.md`, scripts, references를 묶는 형식이며 [Claude Code도 Agent Skills와 개인 스킬 폴더를 지원](https://code.claude.com/docs/en/skills)합니다. [Windows에서 로컬로 실행하는 Claude Code](https://code.claude.com/docs/en/setup)를 사용합니다.
 
-**방법 1. 기본 설치 (권장)**: 위 4단계의 `.\Install.ps1`이 Claude Code 폴더(`CLAUDE_CONFIG_DIR` 또는 `%USERPROFILE%\.claude`)를 찾으면 `skills\hwpx`, `skills\hwpx-windows-finalize`에 자동으로 설치하고 각 폴더에 이 PC의 설정(environment.json)을 넣습니다. Claude Code를 나중에 설치했다면 `.\Install.ps1 -Claude Yes`로 다시 실행합니다. 업데이트도 `Install.ps1`을 다시 실행하면 Codex와 Claude Code 양쪽이 함께 바뀌고, 이전 스킬은 백업 폴더의 `claude` 아래에 보관됩니다. 직접 복사하지 마세요. SKILL.md만 복사하면 vendor 코드와 참조가 빠집니다.
-
-**방법 2. 플러그인**: Claude Code에서 `/plugin marketplace add rndosd/hangul-desktop-skills`를 입력한 뒤 `/plugin install hancom-desktop@hangul-desktop-skills`로 설치합니다. 스킬 이름 앞에 `hancom-desktop:`이 붙습니다. 이 경우에도 `Install.ps1`로 PC 준비를 먼저 해야 하며, 플러그인 스킬은 공용 폴더(`CODEX_HOME`, 기본 `.codex`)의 설정을 읽습니다. 방법 1과 함께 쓰면 같은 스킬이 두 번 보이므로 `-Claude No`로 설치하세요.
+따로 할 일은 없습니다. 위 4단계의 `.\Install.ps1`이 Claude Code 폴더(`CLAUDE_CONFIG_DIR` 또는 `%USERPROFILE%\.claude`)를 찾으면 `skills\hwpx`, `skills\hwpx-windows-finalize`에 자동으로 설치하고 각 폴더에 이 PC의 설정(environment.json)을 넣습니다. Claude Code를 나중에 설치했다면 `.\Install.ps1 -Claude Yes`로 다시 실행합니다. 업데이트도 `Install.ps1`을 다시 실행하면 Codex와 Claude Code 양쪽이 함께 바뀌고, 이전 스킬은 백업 폴더의 `claude` 아래에 보관됩니다. 직접 복사하지 마세요. SKILL.md만 복사하면 vendor 코드와 참조가 빠집니다.
 
 Python 환경·보안 모듈 선택·백업은 공용 폴더 한 곳에서 관리하므로 Codex와 Claude Code가 같은 설정을 씁니다. Codex 앱 계정은 이 Python/PowerShell 도구의 실행 의존성이 아니며, Codex를 쓰지 않아도 `.codex` 폴더는 공용 폴더로 사용됩니다.
 

@@ -60,7 +60,7 @@ if __name__=='__main__':
     assert (Path(fourth['backupRoot'])/'claude/hwpx/keep-claude.txt').read_text()=='preserve claude backup'
     p=run(installer,['-CodexRoot',home,'-PythonPath',sys.executable,'-NoDependencyInstall','-Claude','Auto','-ClaudeSkillsRoot',workspace/'no-claude'/'skills'])
     assert json_prefix(p.stdout)['skillRoots']['claude'] is None and not (workspace/'no-claude').exists()
-    # Invoke the plugin-cache launcher using the current test desktop config.
+    # A package copy without its own environment.json uses the current test desktop config.
     env=dict(os.environ,CODEX_HOME=str(home))
     p=subprocess.run(['powershell.exe','-NoProfile','-File',str(PLUGIN/'skills/hwpx/scripts/Invoke-HangulTask.ps1'),'doctor'],cwd=ROOT,env=env,capture_output=True,text=True,encoding='utf-8-sig',errors='replace',timeout=45)
     assert p.returncode==0,(p.stdout,p.stderr)
@@ -74,7 +74,7 @@ if __name__=='__main__':
     p=run(damaged/'Install-HangulSkills.ps1',['-CodexRoot',untouched,'-CheckOnly'],False)
     assert 'Package hash mismatch' in p.stderr and not untouched.exists()
     assert before=={p:hashlib.sha256(p.read_bytes()).hexdigest() for p in PLUGIN.rglob('*') if p.is_file()}
-    result={'status':'PASS_ISOLATED_INSTALL','checks':['read-only no creation','no-consent stops before change','local configuration pair','unconfigured native remains blocked','reinstall backup','claude code target and backup','claude auto skips missing folder','plugin cache uses current PC','corrupt transfer blocked','source package unchanged'],
+    result={'status':'PASS_ISOLATED_INSTALL','checks':['read-only no creation','no-consent stops before change','local configuration pair','unconfigured native remains blocked','reinstall backup','claude code target and backup','claude auto skips missing folder','package copy uses current PC','corrupt transfer blocked','source package unchanged'],
             'python':sys.version.split()[0],'comCreated':'NOT_CALLED','securityModuleRegistered':'NOT_CALLED',
             'registryChanged':False,'networkUsed':False,'evidence':str(workspace)}
     (workspace/'result.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
