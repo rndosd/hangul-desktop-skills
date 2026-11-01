@@ -200,7 +200,7 @@
   "skills/hwpx/scripts/detect_hwpx_viewer.py": "6afe817440d64fb33735aeddd34c7c5b09773fda9a277abdf985df695bf7b50b",
   "skills/hwpx/scripts/diagnose_edit.py": "a04af531d62648d912fca0e39b273da2a7d79dcd3ee255908abad84d6be79a4d",
   "skills/hwpx/scripts/expanded_table_flow_cli.py": "e6c8e05e7a4c336e9898eb214652b0d9dbdec59e3d6f148a7700c60a719805e0",
-  "skills/hwpx/scripts/fill_sections.py": "53aac63bde257476e7e6139aa46d089f84d41ae64bc16c49b5ead383380fccb0",
+  "skills/hwpx/scripts/fill_sections.py": "3c2b2520ab0a5c56ad21634ea43b3a7806589fe95f1a3a5a5b2c9a26d7a3821e",
   "skills/hwpx/scripts/fill_template.py": "d6b002bf47ad9e2ac6600022a43ef8bb7f248c77e2b3069a8dc2f76223533882",
   "skills/hwpx/scripts/fix_namespaces.py": "1ef41e721fa203722cb7e943d9570640ff0b5452b06c464831fd040fe6656505",
   "skills/hwpx/scripts/fixture_benchmark.py": "2faeff03211029d11e6dab745947abba8ca103643b800b21881c229a79438d1f",

@@ -34,8 +34,9 @@ def plan(topic):
         'subtitle': s['subtitle'], 'title': s['title'], 'publication_date': '2026년 작성 연월 미정', 'organization': '학교명 미정',
         'sections': {'activities': [{'task1_title': t['title'], 'period': t.get('period', s['period']), 'audience': t.get('audience', s['audience']),
                                      'method': t.get('method', t['content']), 'task1_goals': T(t['goal']), 'task1_details': T(*t['details'])} for t in areas]},
+        'period': s['period'],  # overall period for the linked support/management lines
         'task2_title': support['title'], 'support_audience': s['support_audience'], 'support_budget': s['budget'],
-        'task3_title': s['tasks'][-1]['title'], 'management_goal': s['management_goal'], 'owners': s['owners'],
+        'task3_title': s.get('management_title', s['tasks'][-1]['title']), 'management_goal': s['management_goal'], 'owners': s['owners'],
         'management_budget': '미정(전체 예산 확정 후 편성)', 'evaluation_period': s['evaluation_period'],
         'basis': T(*s['basis']), 'objectives': T(*s['objectives']), 'status': T(*s['status']),
         'status_rows': s['status_rows'], 'principles': T(*s['principles']),
