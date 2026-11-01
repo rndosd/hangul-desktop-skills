@@ -1,6 +1,6 @@
 # 한글 데스크톱 스킬
 
-Codex 또는 Claude Code에서 짧은 요청으로 HWPX 문서를 작성하고, 기존 문서의 본문·표·서식을 편집하며, 설치된 Windows 한글로 실제 출력을 확인하는 커뮤니티 스킬 묶음입니다. **0.4.0-beta.1** 공개 베타입니다. 한컴·OpenAI·Anthropic의 공식 제품이 아닙니다.
+Codex 또는 Claude Code에서 짧은 요청으로 HWPX 문서를 작성하고, 기존 문서의 본문·표·서식을 편집하며, 설치된 Windows 한글로 실제 출력을 확인하는 커뮤니티 스킬 묶음입니다. **0.4.1-beta.1** 공개 베타입니다. 한컴·OpenAI·Anthropic의 공식 제품이 아닙니다.
 
 **한 번 설치하면 Codex와 Claude Code가 함께 사용합니다.** `Install.ps1`이 Python·설정을 공용 폴더(기본 `%USERPROFILE%\.codex`)에 준비하고, 같은 스킬을 Codex와 Claude Code(`%USERPROFILE%\.claude`가 있으면) 양쪽에 설치합니다. 업데이트도 `Install.ps1`을 다시 실행하면 양쪽이 함께 바뀝니다. 별도의 플러그인 설치는 없습니다.
 
