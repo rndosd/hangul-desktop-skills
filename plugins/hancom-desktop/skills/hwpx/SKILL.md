@@ -48,6 +48,7 @@ description: "한글 문서(.hwpx/OWPML)의 읽기·편집·작성·양식 채�
 | 등록된 빈 양식·반복 항목 채우기 | [공통 fill](references/simple-entry.md#준비된-양식-채우기). 원문 제거·좌표 탐색·셀별 서식 요청을 다시 만들지 않는다. |
 | 미등록 사용자 양식 채우기·변형 | [실행 경로 선택](references/task-routing.md#실행-경로-선택)에서 지원하는 기존 기능을 고른다. |
 | 현재 결과 수정·원인 분석 | [실사용 수정·개선](references/practical-use.md) |
+| 정렬·들여쓰기·내어쓰기·항목 서식 일관성 확인 | [공통 서식 규칙](references/layout-rules.md)의 `layout-check 문서.hwpx --pdf 한글출력.pdf`. `fill`·`preview`의 `layoutRules`·`wrapAlignment` 경고를 같은 기준으로 확인한다. |
 
 공통 도구는 입력 변환·반복 실행을 맡으며 사용자 메모의 항목명·설명·담당·날짜를 빠짐없이 반영한다. 새 문서의 문장·번호·합계 검수는 [업무 문서 기준](references/document-basics.md), 번호 연속·내어쓰기는 [원본 번호 체계](references/template-numbering.md)를 따른다. 원본의 NUMBER/BULLET 방식을 우선 보존하고 추가 항목도 같은 체계로 잇는다.
 

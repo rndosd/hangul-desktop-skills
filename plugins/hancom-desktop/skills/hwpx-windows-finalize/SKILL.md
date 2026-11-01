@@ -13,7 +13,7 @@ description: "Verify edited or created HWPX files in installed Hancom Hangul on 
 2. 일반 Windows 맥락에서 `scripts/run_native_job.py`의 [실행 준비/호출](references/native-execution-readiness.md)을 따른다. COM 생성과 `RegisterModule('FilePathCheckDLL', 선택한 모듈 이름)` 성공을 구분하며 false이면 문서를 열지 않는다.
 3. 열기/PDF는 OpenOnly, 필요한 저장·재열기 확인은 SaveAs를 선택한다. 저장했으면 저장본을 다시 열어 PDF를 출력한다. 정상 COM을 우선하고 실제 COM 차단 때만 UI 경로를 쓴다.
 4. 저장·재열기가 필요한 복합 작성·편집은 [판정 기준](references/acceptance-policy.md#복합-문서-출력-완료-연결)의 `finalize_document.py run`으로 준비·native 실행·자료 수집을 연결한다. 실제 검토 후 `check`로 판정한다. 준비된 블록 조합은 [공통 compose](../hwpx/references/simple-entry.md#준비된-블록-조합)가 같은 native 작업 안에서 저장·재열기·PDF까지 수행하므로 해당 영수증과 정확한 출력 파일을 검토에 재사용한다. 의도적으로 내용을 추가한 결과를 첫 블록과의 무변경 비교에 넣지 않는다. 일반 열기 요청은 OpenOnly 경로를 유지한다.
-5. [파일 보존 검사](references/native-file-roundtrip-audit.md)와 [공통 완료 기준](references/acceptance-policy.md#공통-완료-기준)에 따라 내용·서식·개체 및 PDF 전체 쪽의 가독성·배치를 확인한다. PDF 동등성·열기 성공·잘림 없음만으로 완료하지 않는다. 저장본의 재편집이 필요한 과제는 실제 저장본으로 시험한다.
+5. [파일 보존 검사](references/native-file-roundtrip-audit.md)와 [공통 완료 기준](references/acceptance-policy.md#공통-완료-기준)에 따라 내용·서식·개체 및 PDF 전체 쪽의 가독성·배치를 확인한다. PDF 동등성·열기 성공·잘림 없음만으로 완료하지 않는다. `finalize_document.py run`의 `wrapAlignment`(목록 항목 줄바꿈 내어쓰기·단계 위치, [공통 서식 규칙](../hwpx/references/layout-rules.md))는 검토할 쪽을 알려 주는 참고이며 판정을 대신하지 않는다. 저장본의 재편집이 필요한 과제는 실제 저장본으로 시험한다.
 
 ## 실패·보안·판정
 

@@ -1,0 +1,50 @@
+{
+ "heading|0|Ⅰ.|1600": {
+  "align": "JUSTIFY",
+  "left": 0,
+  "hanging": -3563,
+  "lineSpacing": 150,
+  "lead": 0,
+  "symbolCharPr": "92",
+  "count": 5
+ },
+ "item|1|◦|1500": {
+  "align": "LEFT",
+  "left": 0,
+  "hanging": -2073,
+  "lineSpacing": 155,
+  "lead": 1,
+  "symbolCharPr": "74",
+  "count": 33
+ },
+ "heading|0|①|1500": {
+  "align": "JUSTIFY",
+  "left": 0,
+  "hanging": 0,
+  "lineSpacing": 150,
+  "lead": 0,
+  "symbolCharPr": "87",
+  "count": 9
+ },
+ "item|2|⇒|1500": {
+  "align": "LEFT",
+  "left": 0,
+  "hanging": -3704,
+  "lineSpacing": 150,
+  "lead": 2,
+  "symbolCharPr": "74",
+  "count": 1
+ },
+ "item|2|-|1500": {
+  "align": "LEFT",
+  "left": 0,
+  "hanging": -3839,
+  "lineSpacing": 150,
+  "lead": 3,
+  "symbolCharPr": "74",
+  "count": 3
+ },
+ "_itemText|1500": {
+  "charPr": "74"
+ }
+}

@@ -1,19 +1,19 @@
 {
   "evidenceSchema": "hwpx.hancom-finalize.v2",
-  "sourceSha256Before": "0AE36E3763DCF2A1D59E19213CE625CD2A447F3BBEF86FDCE34763EA048886EA",
+  "sourceSha256Before": "A50D2A365AEDC3DA7C9BF4431E8D4A87D9425878EFF64FBFDD9C584032C93AC2",
   "status": "PASS_FULL",
-  "mode": "SaveAs",
+  "mode": "OpenOnly",
   "candidatePath": "<local-path>",
   "finalPath": "<local-path>",
   "firstOpen": true,
-  "saveAs": true,
+  "saveAs": false,
   "reopen": true,
   "pdfExport": true,
   "pageCountBefore": 2,
   "pageCountAfter": 2,
   "error": null,
-  "checkedAt": "2026-10-28T13:39:59.5876222+09:00",
-  "version": "13, 0, 0, 653",
+  "checkedAt": "2026-11-01T18:26:37.6007061+09:00",
+  "version": "13, 0, 0, 3903",
   "comCreated": true,
   "registerModuleCalled": true,
   "securityModuleRegistered": true,
@@ -21,16 +21,16 @@
     "FilePathCheckDLL",
     "FilePathCheckerModuleExample"
   ],
-  "sourceSha256After": "0AE36E3763DCF2A1D59E19213CE625CD2A447F3BBEF86FDCE34763EA048886EA",
+  "sourceSha256After": "A50D2A365AEDC3DA7C9BF4431E8D4A87D9425878EFF64FBFDD9C584032C93AC2",
   "sourceUnchanged": true,
   "cleanup": {
     "forced": false,
     "owned": true,
     "owner": {
-      "hwnd": 38146378,
-      "path": "C:\\Program Files (x86)\\Hnc\\Office 2024\\HOffice130\\Bin\\Hwp.exe",
-      "pid": 21984,
-      "startTicks": 639287591998254905
+      "hwnd": 6096264,
+      "path": "<local-path>",
+      "pid": 17576,
+      "startTicks": 639291219978072532
     },
     "quit": true,
     "normalExitWait": {
@@ -49,13 +49,13 @@
   "artifacts": [
     {
       "path": "<local-path>",
-      "sha256": "235656C75672CD9C9FFFF45AD1DEC0BD0F178507990562086AD65384402468A5",
-      "bytes": 53336
+      "sha256": "A50D2A365AEDC3DA7C9BF4431E8D4A87D9425878EFF64FBFDD9C584032C93AC2",
+      "bytes": 48709
     },
     {
       "path": "<local-path>",
-      "sha256": "F273E44076A768E4A07C4781D3380D0ED8801D91D211947B082647DF035C75E3",
-      "bytes": 54177
+      "sha256": "62FF40334716BE87D7F8C4E5FE396573FE9CF691D4729F3EB727095A6460AE8C",
+      "bytes": 50038
     }
   ],
   "visual": "NOT_REVIEWED",

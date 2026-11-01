@@ -61,6 +61,8 @@ def edit_summary(value, receipt):
                                'failed': sum(command.get('ok') is False for command in commands)}
     if 'stages' in value:
         summary['stageCount'] = len(value['stages'])
+    if 'layoutRules' in value:
+        summary['layoutRules'] = {key: value['layoutRules'][key] for key in ('status', 'checkedParagraphs') if key in value['layoutRules']}
     if 'layout' in value:
         layout = value['layout']
         summary['layout'] = {key: layout[key] for key in ('commands', 'removedEmptyParagraphs') if key in layout}
