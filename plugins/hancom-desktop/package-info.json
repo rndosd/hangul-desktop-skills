@@ -1,6 +1,6 @@
 {
   "name": "hancom-desktop",
-  "version": "0.3.1-beta.1",
+  "version": "0.4.0-beta.1",
   "description": "Windows 한글 HWPX 작성·편집과 실제 한글 출력 검증. Install.ps1로 Codex·Claude Code에 설치하며 보안 모듈은 명시적으로 선택.",
   "license": "Apache-2.0"
 }
