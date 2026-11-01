@@ -1,0 +1,41 @@
+{
+ "item|1|❍|1300": {
+  "align": "LEFT",
+  "left": 0,
+  "hanging": -2325,
+  "lineSpacing": 185,
+  "lead": 1,
+  "symbolCharPr": "46",
+  "count": 5
+ },
+ "heading|0|①|1500": {
+  "align": "JUSTIFY",
+  "left": 0,
+  "hanging": 0,
+  "lineSpacing": 180,
+  "lead": 0,
+  "symbolCharPr": "52",
+  "count": 4
+ },
+ "item|1|◦|1300": {
+  "align": "LEFT",
+  "left": 0,
+  "hanging": -2976,
+  "lineSpacing": 180,
+  "lead": 2,
+  "symbolCharPr": "46",
+  "count": 13
+ },
+ "item|2|-|1300": {
+  "align": "LEFT",
+  "left": 992,
+  "hanging": -2976,
+  "lineSpacing": 180,
+  "lead": 3,
+  "symbolCharPr": "46",
+  "count": 2
+ },
+ "_itemText|1300": {
+  "charPr": "46"
+ }
+}

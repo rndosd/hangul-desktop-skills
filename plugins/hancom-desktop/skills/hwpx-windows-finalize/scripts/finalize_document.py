@@ -103,7 +103,18 @@ def run(source, final, pdf, bundle, context, timeout=120):
         collected = _collected_status(root, plan)
     return {**common, **collected, 'schema': SCHEMA,
             'nativeStatus': result['status'], 'reviewTemplate': str(root / 'review-template.json'),
+            'wrapAlignment': _wrap_alignment(request['pdf']),
             'nextStep': 'Review differences and every PDF page, then run check with that review.'}
+
+
+def _wrap_alignment(pdf):
+    """Review hints for the visual pass (common layout rules R1/R4); never part of the gate verdict."""
+    try:
+        from wrap_alignment import measure
+        report = measure(pdf)
+        return {key: report[key] for key in ('status', 'wrappedItems', 'misaligned', 'warnings', 'note')}
+    except Exception as exc:  # the gate result stands even if the hint cannot be computed
+        return {'status': 'NOT_CHECKED', 'reason': f'{type(exc).__name__}: {exc}'}
 
 
 def check(bundle, review):

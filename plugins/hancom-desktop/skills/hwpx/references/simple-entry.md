@@ -166,7 +166,18 @@ PDF 페이지 이미지가 필요하면 같은 실행기의 기존 렌더 연결
 & $taskLauncher preview result.pdf --output 작업폴더/pdf-preview
 ```
 
-반환된 `pages[].image.path`를 실제로 열어 확인한다. 같은 PDF와 바뀌지 않은 이미지가 있으면 재사용한다. `PREVIEW_READY`는 화면 검토 합격을 뜻하지 않는다. 공통 실행기는 UTF-8을 사용하므로 한글 경로를 콘솔에 출력할 때도 별도 인코딩 설정이 필요 없다. 표 캡션에 연결된 입력은 내용만 바꾸고 원래 캡션 서식을 유지한다.
+반환된 `pages[].image.path`를 실제로 열어 확인한다. 같은 PDF와 바뀌지 않은 이미지가 있으면 재사용한다. `PREVIEW_READY`는 화면 검토 합격을 뜻하지 않는다. 함께 반환되는 `wrapAlignment`는 목록 항목의 줄바꿈 내어쓰기(R1)와 단계별 시작 위치(R4)를 PDF 좌표로 잰 결과다. 경고가 있으면 해당 쪽을 먼저 본다.
+
+## 서식 일관성 검사
+
+정렬·들여쓰기·내어쓰기·같은 단계 서식이 [공통 서식 규칙](layout-rules.md)에 맞는지 확인한다. `fill`은 같은 검사를 자동으로 실행해 `layoutRules`로 알린다.
+
+```powershell
+& $taskLauncher layout-check result.hwpx                  # 구조: R2·R3·R5·R6
+& $taskLauncher layout-check result.hwpx --pdf result.pdf # 한글 PDF까지: R1·R4
+```
+
+경고는 쓰기를 막지 않는 검토 항목이다. R1은 실제로 줄이 넘어간 항목만 확인되므로 `NOT_CHECKED`를 통과로 바꾸지 않는다. 공통 실행기는 UTF-8을 사용하므로 한글 경로를 콘솔에 출력할 때도 별도 인코딩 설정이 필요 없다. 표 캡션에 연결된 입력은 내용만 바꾸고 원래 캡션 서식을 유지한다.
 
 ## 결과와 수정
 

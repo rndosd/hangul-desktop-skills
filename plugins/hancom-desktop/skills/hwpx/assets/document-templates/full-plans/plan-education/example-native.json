@@ -1,19 +1,19 @@
 {
   "evidenceSchema": "hwpx.hancom-finalize.v2",
-  "sourceSha256Before": "00300C4FB79184092460EF3C04947D6030CEC4EA4379DF3F77ED32805B14FE56",
+  "sourceSha256Before": "F429AFBD214794E4A81CD3EA1C25DD599ACD27D6A195F520164D9F0C741E8EBE",
   "status": "PASS_FULL",
-  "mode": "SaveAs",
+  "mode": "OpenOnly",
   "candidatePath": "<local-path>",
   "finalPath": "<local-path>",
   "firstOpen": true,
-  "saveAs": true,
+  "saveAs": false,
   "reopen": true,
   "pdfExport": true,
   "pageCountBefore": 4,
   "pageCountAfter": 4,
   "error": null,
-  "checkedAt": "2026-10-28T13:02:22.0724642+09:00",
-  "version": "13, 0, 0, 653",
+  "checkedAt": "2026-11-01T18:27:03.3377144+09:00",
+  "version": "13, 0, 0, 3903",
   "comCreated": true,
   "registerModuleCalled": true,
   "securityModuleRegistered": true,
@@ -21,41 +21,41 @@
     "FilePathCheckDLL",
     "FilePathCheckerModuleExample"
   ],
-  "sourceSha256After": "00300C4FB79184092460EF3C04947D6030CEC4EA4379DF3F77ED32805B14FE56",
+  "sourceSha256After": "F429AFBD214794E4A81CD3EA1C25DD599ACD27D6A195F520164D9F0C741E8EBE",
   "sourceUnchanged": true,
   "cleanup": {
     "forced": false,
     "owned": true,
     "owner": {
-      "hwnd": 1511064,
-      "path": "C:\\Program Files (x86)\\Hnc\\Office 2024\\HOffice130\\Bin\\Hwp.exe",
-      "pid": 44564,
-      "startTicks": 639287569422348898
+      "hwnd": 10684106,
+      "path": "<local-path>",
+      "pid": 17048,
+      "startTicks": 639291220235652907
     },
     "quit": true,
     "normalExitWait": {
-      "handleAcquired": true,
-      "exitObservation": "MATCHED_INSTANCE_EXITED",
+      "handleAcquired": false,
+      "exitObservation": "PID_ABSENT_BEFORE_HANDLE",
       "identityError": null,
       "exited": true,
-      "waited": true,
-      "identityReadError": null,
+      "waited": false,
+      "identityReadError": "No process handle available.",
       "limitMs": 10000,
-      "absenceChecks": 0,
-      "identityMatched": true
+      "absenceChecks": 1,
+      "identityMatched": null
     },
     "remaining": []
   },
   "artifacts": [
     {
       "path": "<local-path>",
-      "sha256": "30E2E4A2039270D58670FB106CBBC4AE8F6B2B5356CDDB23E4BC5081ECD5A28B",
-      "bytes": 47360
+      "sha256": "F429AFBD214794E4A81CD3EA1C25DD599ACD27D6A195F520164D9F0C741E8EBE",
+      "bytes": 41660
     },
     {
       "path": "<local-path>",
-      "sha256": "98E166F0D8E6EDCB11637E8514E82A3044083C3EC9E1995174B4F2F00C954E42",
-      "bytes": 96802
+      "sha256": "A10F5B019D460CBC381B1A50BF8FDC1C79D0EB1B9438B79C01AA3BCF3875D69F",
+      "bytes": 101113
     }
   ],
   "visual": "NOT_REVIEWED",

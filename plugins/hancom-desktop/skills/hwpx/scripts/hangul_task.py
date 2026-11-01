@@ -162,7 +162,34 @@ def preview(pdf, output):
     need((native_scripts/'hancom_completion_gate.py').is_file(),'paired native preview helper required')
     sys.path.insert(0,str(native_scripts))
     from hancom_completion_gate import preview_pdf
-    return preview_pdf(pdf,output)
+    from wrap_alignment import measure
+    result=preview_pdf(pdf,output)
+    result['wrapAlignment']=measure(pdf)
+    return result
+
+def layout_check(source, pdf=None):
+    """Common layout rules: structure from the HWPX, wrapped-line positions from its Hangul PDF."""
+    from layout_rules import check
+    result=dict(check(source),source=str(Path(source).resolve()),sourceSha256=sha(source))
+    if pdf:
+        native_scripts=ROOT.parent/'hwpx-windows-finalize/scripts'
+        sys.path.insert(0,str(native_scripts))
+        from wrap_alignment import measure
+        result['wrapAlignment']=measure(pdf)
+        if result['wrapAlignment']['warnings']:result['status']='WARN'
+    return result
+
+def _layout_rules_after_fill(result):
+    """Fill publishes regardless; layout findings are warnings for the review, never a block."""
+    output=result.get('output',{}).get('filename')
+    if not output or not result.get('documentPublished') or not Path(output).is_file():return result
+    try:
+        from layout_rules import check
+        report=check(output)
+        result['layoutRules']={key:report[key] for key in ('status','checkedParagraphs','warnings')}
+    except Exception as ex:
+        result['layoutRules']={'status':'NOT_CHECKED','reason':f'{type(ex).__name__}: {ex}'}
+    return result
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);sub=p.add_subparsers(dest='command',required=True)
@@ -171,6 +198,7 @@ def main():
     s=sub.add_parser('compose');s.add_argument('--request',required=True);s.add_argument('--output',required=True);s.add_argument('--pdf',required=True);s.add_argument('--run',required=True);s.add_argument('--context',choices=['ordinary-shell','host-approved'],required=True);s.add_argument('--timeout',type=int,default=120)
     s=sub.add_parser('fill');s.add_argument('--template');s.add_argument('--values');s.add_argument('--content');s.add_argument('--output');s.add_argument('--styles');s.add_argument('--catalog',default=str(ROOT/'assets/document-templates/full-plans.json'));s.add_argument('--dry-run',action='store_true')
     s=sub.add_parser('preview');s.add_argument('pdf');s.add_argument('--output',required=True)
+    s=sub.add_parser('layout-check');s.add_argument('source');s.add_argument('--pdf')
     s=sub.add_parser('replace');s.add_argument('source');s.add_argument('output');s.add_argument('--find',required=True);s.add_argument('--replace',required=True)
     s=sub.add_parser('source');s.add_argument('source');s.add_argument('--cache',required=True)
     s=sub.add_parser('source-check');s.add_argument('source');s.add_argument('--analysis',required=True)
@@ -193,6 +221,7 @@ def main():
         elif a.command=='compose':result=compose(read(a.request),a.output,a.pdf,a.run,a.context,a.timeout)
         elif a.command=='schema':result=schema(a.operation)
         elif a.command=='preview':result=preview(a.pdf,a.output)
+        elif a.command=='layout-check':result=layout_check(a.source,a.pdf)
         elif a.command=='fill':
             from fill_template import describe,fill
             if a.content:
@@ -210,12 +239,12 @@ def main():
                     need(not a.styles and not a.dry_run,'content preview needs no styles/dry-run')
                     result=routing
                 else:
-                    result=fill(a.catalog,selected['template'],a.output,selected['values'],styles=read(a.styles) if a.styles else None,dry_run=a.dry_run)
+                    result=_layout_rules_after_fill(fill(a.catalog,selected['template'],a.output,selected['values'],styles=read(a.styles) if a.styles else None,dry_run=a.dry_run))
                     result['contentSelection']={key:selected[key] for key in ('template','layout','repeat','fields','unfilledFields')}
             elif a.values:
                 need(bool(a.template),'fill --values requires --template')
                 need(bool(a.output),'fill --values requires --output')
-                result=fill(a.catalog,a.template,a.output,read(a.values),styles=read(a.styles) if a.styles else None,dry_run=a.dry_run)
+                result=_layout_rules_after_fill(fill(a.catalog,a.template,a.output,read(a.values),styles=read(a.styles) if a.styles else None,dry_run=a.dry_run))
             else:
                 need(bool(a.template),'fill requires --template or --content')
                 need(not a.output and not a.styles and not a.dry_run,'describe needs only --template and optional --catalog')
