@@ -88,6 +88,7 @@ def prepare(manifest, source, values, folder, run_batch, open_view):
         records = [r.path for r in view.records]
         revision = view.revision
     plain = {k: v for k, v in values.items() if k != 'sections'}
+    shared = {s['valueFrom'] for s in manifest['slots'].values() if 'valueFrom' in s}
     counts = {}
     for name, items in requested.items():
         spec, (a, b, slots, repeats) = specs[name], layout[name]
@@ -96,7 +97,8 @@ def prepare(manifest, source, values, folder, run_batch, open_view):
         allowed = set(slots) | set(repeats) | ({'heading'} if spec.get('headingText') else set())
         for item in items:
             _require(isinstance(item, dict) and set(item) <= allowed, f'unknown input in section {name}: ' + ', '.join(set(item) - allowed))
-        _require(not (set(plain) & (set(slots) | set(repeats))), f'give inputs of section {name} inside its section records only')
+        # Inputs that other places link to (valueFrom) are shared: a top-level value feeds those links.
+        _require(not (set(plain) & (set(slots) | set(repeats)) - shared), f'give inputs of section {name} inside its section records only')
         counts[name] = len(items)
 
     # Pass 1: copy each repeated section after itself, last section first so earlier positions never move.
@@ -152,6 +154,17 @@ def prepare(manifest, source, values, folder, run_batch, open_view):
                               for name, r in manifest.get('repeats', {}).items()}
         flat = dict(plain)
         removals = []
+        # A linked placement whose source sits in a section would copy one instance's value (the first area's
+        # period into the support block). Detach it and feed it the shared top-level value instead.
+        in_section = {n: name for name in requested for n in layout[name][2]}
+        for alias, s in manifest['slots'].items():
+            target = s.get('valueFrom')
+            if target in in_section:
+                derived['slots'][alias] = {k: v for k, v in derived['slots'][alias].items() if k != 'valueFrom'}
+                first = (requested[in_section[target]] or [{}])[0]
+                value = plain.get(target, first.get(target, manifest['slots'][target].get('default')))
+                if value is not None:
+                    flat[alias] = value
         for name, items in requested.items():
             spec, (a, b, slots, repeats) = specs[name], layout[name]
             if not items:

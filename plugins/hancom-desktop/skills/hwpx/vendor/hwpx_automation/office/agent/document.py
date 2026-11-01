@@ -243,6 +243,7 @@ class HwpxAgentDocument:
         self._ambiguous_paths.add(parent.child(segment).canonical)
 
     def _project(self) -> None:
+        self._projection_memo = {}  # per pass; see _paragraph_summary
         root = NodeRecord(
             kind="document",
             path="/",
@@ -336,10 +337,23 @@ class HwpxAgentDocument:
         return True
 
     def _paragraph_summary(self, paragraph: Any) -> tuple[dict[str, Any], dict[str, str]]:
+        # hangul-desktop patch: each lookup re-serializes and re-parses the whole header, which made
+        # projection quadratic (paragraphs x header size). The header does not change during one
+        # projection, so resolve each style / paraPr id once per pass with the same calls.
+        memo = self.__dict__.setdefault("_projection_memo", {})
         style_ref = paragraph.element.get("styleIDRef")
-        style = self.document.styles.get(style_ref)
+        if ("style", style_ref) not in memo:
+            memo[("style", style_ref)] = self.document.styles.get(style_ref)
+        style = memo[("style", style_ref)]
         style_name = style.name if style is not None and style.name else style_ref
-        para_pr = self.document.styles.paragraph_property(paragraph.element.get("paraPrIDRef"))
+        para_ref = paragraph.element.get("paraPrIDRef")
+        if ("paraPr", para_ref) not in memo:
+            # Same rule as styles.paragraph_property(): _lookup_by_id over the merged table, parsed once per pass.
+            if "paraPrTable" not in memo:
+                memo["paraPrTable"] = self.document.styles.paragraph_properties
+            from hwpx.oxml.header_part import HwpxOxmlHeader
+            memo[("paraPr", para_ref)] = HwpxOxmlHeader._lookup_by_id(memo["paraPrTable"], para_ref)
+        para_pr = memo[("paraPr", para_ref)]
         summary: dict[str, Any] = {"text": _bounded_text(paragraph.text), "style": style_name}
         if para_pr is not None:
             summary["alignment"] = para_pr.align.horizontal if para_pr.align is not None else None

@@ -45,6 +45,16 @@ class SectionFill(unittest.TestCase):
             self.assertIn(f'내용 {i}-나', xml)
         self.assertEqual(result['form']['sections'], {'activities': 3})
 
+    def test_linked_input_stays_shared(self):
+        # 'period' sits in the activity section and is linked from the support/management blocks.
+        areas = [{'task1_title': f'영역 {i}', 'period': f'영역기간-{i}', 'task1_details': T(f'내용 {i}')} for i in (1, 2)]
+        result, out = self.fill('plan-education', {'period': '전체기간', 'sections': {'activities': areas}})
+        self.assertEqual(result['status'], 'PASS_STRUCTURE', result.get('reason'))
+        xml = text_of(out)
+        self.assertIn('영역기간-1', xml)
+        self.assertIn('영역기간-2', xml)
+        self.assertIn('전체기간', xml)
+
     def test_school_headings_replace_fixed_text(self):
         events = [{'heading': '오전 행사', 'activity_goal': '가', 'audience': '1학년', 'location': '강당', 'activities': T('a')},
                   {'heading': '오후 행사', 'activity_goal': '나', 'audience': '2학년', 'location': '운동장', 'activities': T('b')}]

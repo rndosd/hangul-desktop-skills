@@ -21,3 +21,12 @@ results belong to that run and do not certify other platforms or versions.
 The paragraph-removal change has separate public batch reproduction and
 ownership regression tests in tests/test_table_ownership_alignment.py.
 Its structural checks do not claim native rendering verification.
+
+Modified file: hwpx_automation/office/agent/document.py. Document projection
+resolved each paragraph's style and paraPr through the header lookups, which
+re-serialize and re-parse the whole header on every call, so projection was
+quadratic in paragraphs x header size. _paragraph_summary now resolves each
+style id and the paraPr table once per projection pass, using the same
+library lookups (_lookup_by_id over the merged table). The header does not
+change during one pass. A long plan fill went from 166 s to 8 s with
+byte-identical output; nothing else in the projection changed.
