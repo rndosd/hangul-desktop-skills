@@ -144,6 +144,29 @@ def apply(source, target, role_rules):
             for cached in [node for node in paragraph if rules._local(node) == 'linesegarray']:
                 paragraph.remove(cached)
             changed += 1
+    # Per-table settings: how the table splits at a page boundary and column widths (same total width).
+    for spec in role_rules.get('_tables', []):
+        table = next((t for t in section.iter() if rules._local(t) == 'tbl' and t.get('id') == spec['id']), None)
+        if table is None:
+            raise ValueError('table not found: ' + spec['id'])
+        if 'pageBreak' in spec:
+            table.set('pageBreak', spec['pageBreak'])
+        if 'widths' in spec:
+            total = sum(int(next(c for c in tc if rules._local(c) == 'cellSz').get('width'))
+                        for tc in next(tr for tr in table if rules._local(tr) == 'tr') if rules._local(tc) == 'tc')
+            if sum(spec['widths']) != total:
+                raise ValueError(f"widths must keep the table width {total}")
+            for tr in (n for n in table if rules._local(n) == 'tr'):
+                for tc in (n for n in tr if rules._local(n) == 'tc'):
+                    addr = next(c for c in tc if rules._local(c) == 'cellAddr')
+                    span = next((c for c in tc if rules._local(c) == 'cellSpan'), None)
+                    first, count = int(addr.get('colAddr')), int(span.get('colSpan')) if span is not None else 1
+                    next(c for c in tc if rules._local(c) == 'cellSz').set('width', str(sum(spec['widths'][first:first + count])))
+            for row in (n for n in table if rules._local(n) == 'tr'):
+                for paragraph in row.iter():
+                    if rules._local(paragraph) == 'p':
+                        for cached in [n for n in paragraph if rules._local(n) == 'linesegarray']:
+                            paragraph.remove(cached)
     container.set('itemCnt', str(len([n for n in container if rules._local(n) == 'paraPr'])))
     data['Contents/header.xml'] = etree.tostring(header, xml_declaration=True, encoding='UTF-8', standalone=True)
     data['Contents/section0.xml'] = etree.tostring(section, xml_declaration=True, encoding='UTF-8', standalone=True)

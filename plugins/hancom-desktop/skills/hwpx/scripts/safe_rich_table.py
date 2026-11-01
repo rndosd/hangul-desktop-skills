@@ -26,15 +26,15 @@ def api_table(doc,expected):
  matches=[t for t in doc.tables.all if t.element.get('id')==expected.get('id') and snap(t.element)==snap(expected)]
  require(len(matches)==1,'exact API table identity/structure required');return matches[0]
 def comparable(n,row=None,clone=False,texts=None,dirty=False):
- tag,attrs,text,children=snap(n)
+ # snap() gives (tag, attrs, text, tail, children); the tail is kept so the comparison stays exact.
  def walk(v,y=None,paragraph=-1,run=-1):
-  tag,attrs,text,children=v;attrs=dict(attrs)
+  tag,attrs,text,tail,children=v;attrs=dict(attrs)
   if tag==P+'cellAddr' and row is not None:attrs['rowAddr']=str(row)
   if clone and tag==P+'p':attrs.pop('id',None)
   if dirty and tag==P+'tc':attrs.pop('dirty',None)
   if clone and tag==P+'linesegarray':return None
-  return tag,tuple(sorted(attrs.items())),text,tuple(w for c in children if (w:=walk(c)) is not None)
- return walk((tag,attrs,text,children))
+  return tag,tuple(sorted(attrs.items())),text,tail,tuple(w for c in children if (w:=walk(c)) is not None)
+ return walk(snap(n))
 def verify(before,after,req):
  bm,part,br,bt=locate(before,req['table']);am,ap,ar,at=locate(after,req['table']);require(part==ap and set(bm)==set(am),'package inventory changed')
  for n in bm:

@@ -46,7 +46,7 @@ def plan(data,req):
  require(req['schema']==SCHEMA and req['source_sha256']==hashlib.sha256(data).hexdigest(),'invalid schema/stale hash')
  require(type(req['table']) is int and req['table']>=1,'integer table required')
  m,part,root,t=locate(data,req['table']);cs,grid=shape(t)
- require(t.get('lock','0')=='0' and t.get('noAdjust','0')=='0' and t.find(P+'sz').get('protect','0')=='0','protected/fixed table unsupported')
+ require(t.get('lock','0')=='0' and t.find(P+'sz').get('protect','0')=='0','locked/protected table unsupported')  # fixed cell size (noAdjust) is fine: no size changes here
  host=t.getparent().getparent();require(host.tag==P+'p' and host.getparent() is root and len(list(host.iter(P+'tbl')))==1,'single direct-body table required')
  require(isinstance(req['edits'],list) and 1<=len(req['edits'])<=100,'1..100 explicit cell edits required');out={}
  for e in req['edits']:

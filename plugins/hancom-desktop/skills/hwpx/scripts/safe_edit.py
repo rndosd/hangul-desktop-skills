@@ -237,6 +237,29 @@ def inspect_targets(source, find, *, table=None, row=None, column=None, limit=20
                                   'column': column, 'limit': limit}])[0]
 
 
+def _paragraph_split(source, find):
+    """Parts of `find` when it only exists across consecutive paragraphs of one story (a cell or the body)."""
+    for _, root in sections(io.BytesIO(Path(source).read_bytes())):
+        for story in root.iter():
+            paragraphs = [p for p in story if local(p) == 'p']
+            if len(paragraphs) < 2:
+                continue
+            texts = [''.join(t.text or '' for t in p.iter() if local(t) == 't') for p in paragraphs]
+            joined = ''.join(texts)
+            start = joined.find(find)
+            if start < 0:
+                continue
+            parts, offset = [], 0
+            for text in texts:
+                lo, hi = max(start, offset), min(start + len(find), offset + len(text))
+                if lo < hi:
+                    parts.append(joined[lo:hi])
+                offset += len(text)
+            if len(parts) > 1:
+                return parts
+    return None
+
+
 def inspect_many(source, queries):
     source = source_path(source)
     if not isinstance(queries, list) or not queries:
@@ -267,9 +290,15 @@ def inspect_many(source, queries):
             owners = {(t['scope']['row'], t['scope']['column']) for t in targets}
             if len(owners) > 1:
                 raise ValueError('ambiguous cell ownership')
-        result.append({'schema': 'hwpx.text-targets.v1', 'source_sha256': before, 'find': find,
-                       'total': len(targets), 'truncated': len(targets) > limit,
-                       'targets': [public_target(t) for t in targets[:limit]], 'native_render': 'not_checked'})
+        entry = {'schema': 'hwpx.text-targets.v1', 'source_sha256': before, 'find': find,
+                 'total': len(targets), 'truncated': len(targets) > limit,
+                 'targets': [public_target(t) for t in targets[:limit]], 'native_render': 'not_checked'}
+        if not targets:
+            parts = _paragraph_split(source, find)
+            if parts:
+                entry['hint'] = {'reason': 'spans_paragraphs', 'parts': parts,
+                                 'nextStep': 'The text continues over several paragraphs (for example lines in one cell). Query each part separately.'}
+        result.append(entry)
     if digest(source) != before:
         raise ValueError('source changed during inspection')
     return result

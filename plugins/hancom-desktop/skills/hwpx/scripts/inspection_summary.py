@@ -20,8 +20,9 @@ def text_summary(value, output):
                             additionalCandidatesInFile=max(0, len(targets)-3),
                             route='text-plan → text' if supported else None,
                             nextStep=('Review explicit target IDs in this inspection; no repeat inspection needed.'
-                                      if supported else
-                                      'No supported selected-text target here. Read the reason and the operation-specific route; do not auto-retry.')))
+                                      if supported else item['hint']['nextStep'] if item.get('hint') else
+                                      'No supported selected-text target here. Read the reason and the operation-specific route; do not auto-retry.'),
+                            **({'hint': item['hint']} if item.get('hint') else {})))
     return dict(status='INSPECTED', inspectionPath=str(Path(output).absolute()),
                 sourceSha256=inspections[0]['source_sha256'], queries=queries,
                 native='NOT_CHECKED')

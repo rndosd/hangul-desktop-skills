@@ -12,7 +12,7 @@
   "pageCountBefore": 3,
   "pageCountAfter": 3,
   "error": null,
-  "checkedAt": "2026-11-01T18:26:45.6895397+09:00",
+  "checkedAt": "2026-11-01T21:45:36.0201299+09:00",
   "version": "13, 0, 0, 3903",
   "comCreated": true,
   "registerModuleCalled": true,
@@ -27,10 +27,10 @@
     "forced": false,
     "owned": true,
     "owner": {
-      "hwnd": 4392510,
+      "hwnd": 3080560,
       "path": "<local-path>",
-      "pid": 5504,
-      "startTicks": 639291220058923294
+      "pid": 448,
+      "startTicks": 639291339362049654
     },
     "quit": true,
     "normalExitWait": {
@@ -45,7 +45,7 @@
       "identityMatched": null
     },
     "remaining": [
-      5504
+      448
     ]
   },
   "artifacts": [
@@ -56,8 +56,8 @@
     },
     {
       "path": "<local-path>",
-      "sha256": "DA7E5AF6BAC8427CBDA9D0D34C2E64D660DE1C02F615AD084AF4DE6438602CDA",
-      "bytes": 87503
+      "sha256": "1143B9E3263E787B26107D501F2440073A1095014964371517169531CAB79B0C",
+      "bytes": 87504
     }
   ],
   "visual": "NOT_REVIEWED",

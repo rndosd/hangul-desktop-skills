@@ -543,7 +543,7 @@
   "verification": {
     "evidence": {
       "path": "full-plans/plan-education/fill-evidence.json",
-      "sha256": "07ee9313b086c15144c3b59d46c1cee58f601bc66a7c689669e606dbd6f2bc35"
+      "sha256": "81cec49f8a34aac1214a0ee176fca12ce6dd712a0626154ed7ddd8a054c17649"
     }
   },
   "preview": {
@@ -553,5 +553,14 @@
   "limits": [
     "준비본과 입력 예시의 검증이며 모든 분량·부분 선택·사용자 양식의 성공 보증이 아님",
     "새 작성 결과의 실제 출력은 내용과 분량에 따라 확인한다"
-  ]
+  ],
+  "sections": {
+    "activities": {
+      "label": "교육활동 영역(① 제목·목적·기간·대상·방법·내용)",
+      "first": "/section[1]/paragraph[40]",
+      "last": "/section[1]/paragraph[47]",
+      "min": 1,
+      "max": 6
+    }
+  }
 }

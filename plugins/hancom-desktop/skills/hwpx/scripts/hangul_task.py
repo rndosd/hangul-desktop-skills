@@ -21,6 +21,7 @@ def stage_directory(parent):
         try:yield folder
         finally:
             for i in range(20): (Path(folder)/f'stage-{i}.hwpx').unlink(missing_ok=True)
+            (Path(folder)/'sections.hwpx').unlink(missing_ok=True)  # fill_sections pass 1
 def doctor():
     config=ROOT/'environment.json'
     if not config.is_file(): config=Path(os.environ.get('CODEX_HOME',str(Path.home()/'.codex')))/'skills/hwpx/environment.json'
@@ -163,8 +164,10 @@ def preview(pdf, output):
     sys.path.insert(0,str(native_scripts))
     from hancom_completion_gate import preview_pdf
     from wrap_alignment import measure
+    from page_layout import measure as page_layout
     result=preview_pdf(pdf,output)
     result['wrapAlignment']=measure(pdf)
+    result['pageLayout']=page_layout(pdf)
     return result
 
 def layout_check(source, pdf=None):
@@ -175,8 +178,10 @@ def layout_check(source, pdf=None):
         native_scripts=ROOT.parent/'hwpx-windows-finalize/scripts'
         sys.path.insert(0,str(native_scripts))
         from wrap_alignment import measure
+        from page_layout import measure as page_layout
         result['wrapAlignment']=measure(pdf)
-        if result['wrapAlignment']['warnings']:result['status']='WARN'
+        result['pageLayout']=page_layout(pdf)
+        if result['wrapAlignment']['warnings'] or result['pageLayout']['warnings']:result['status']='WARN'
     return result
 
 def _layout_rules_after_fill(result):
