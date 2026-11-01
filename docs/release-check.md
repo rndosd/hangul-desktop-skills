@@ -73,3 +73,11 @@
 격리 설치 8항목 PASS. 새 vendor 하위 경로로 기존 시험 폴더가 PowerShell 5.1 경로 제한을 넘은 실패를 보존하고, 짧은 임시 경로에서 같은 검사를 완료했습니다. Windows TEMP의 8.3 별칭은 실제 경로로 확정하여 비교합니다. 설치기 변경·전역 긴 경로 설정 변경·보안 모듈 등록은 하지 않았습니다. 현재 PC 및 공개 스킬 quick_validate PASS.
 
 업로드 전 ZIP payload 전수 비교에서 기본형 PDF 6개가 기존 *.pdf Git 제외 규칙 때문에 누락된 것을 발견했습니다. 최초 ZIP은 공개하지 않고 보존했습니다. full-plans 하위 PDF만 추적 예외로 추가하고 make_zip에서 manifest의 모든 payload가 Git 추적 대상인지 확인하도록 수정했습니다.
+
+## 0.3.0-beta.1 — 2026-11-01
+
+한 번의 `Install.ps1` 실행으로 Codex와 Claude Code를 함께 지원합니다. Python·설정·백업은 공용 폴더(CODEX_HOME, 기본 `.codex`)에 두고, Claude Code 폴더(`CLAUDE_CONFIG_DIR` 또는 `.claude`)가 있으면 `skills`에도 각자의 environment.json과 함께 설치합니다. `-Claude Yes/No`, `-ClaudeSkillsRoot`를 추가했고 재설치 시 Claude 사본도 `backup/claude`에 백업합니다. Claude Code 플러그인용 `.claude-plugin` 마켓플레이스·플러그인 파일을 추가하고 공개 검사에서 경로·이름·버전 일치를 확인합니다. 이 PC에 Claude Code CLI가 없어 `/plugin` 설치 자체는 실행하지 않았습니다.
+
+완료 게이트가 한글 SaveAs 후의 빈 `binaryItemIDRef`(대체 글꼴)와 빈 텍스트 run을 내용 변경으로 판정해 모든 저장본을 차단하던 문제를 수정했습니다. 실제 참조는 XML 위치 대신 파트별 문서 순서의 (요소, payload 해시)로 비교해 형제 삽입에는 흔들리지 않고 교체·뒤바뀜은 감지합니다. plan-project 준비본·예시의 `PrintMethod=4`(모아 찍기)를 0으로 바꿔 A4 세로로 출력되게 하고 연결 해시를 갱신했습니다.
+
+공개 검사 PASS, 회귀 6묶음 통과(게이트 24개 포함), PowerShell 구문 오류 0, 격리 설치 10항목 PASS(Claude 대상·백업·폴더 없음 건너뛰기 포함). Windows 한글 2024(13.0.0.3903, x86) 한 대에서 Claude Code로 완성형 3종 작성, 단건·다중 문구 편집, 표 행 삭제·연속 삽입, 저장·재열기·PDF와 게이트 `complete`를 확인했습니다. 다른 PC·x64 한글·Codex 앱에서의 이번 변경 실기는 확인하지 않았습니다. 오래된 개발용 테스트 정리, 채움 후 빈 쪽 경고는 다음 범위입니다.

@@ -1,10 +1,10 @@
 {
-  ".claude-plugin/plugin.json": "c2bd414f9da45d0306e3d6d09f6baf01ecf917ed701277760a77343e02436619",
-  ".codex-plugin/plugin.json": "55bf6a8f9c440a97a6a6c5118b2d599a0917031e0a010f245fc1ee32b4627fed",
+  ".claude-plugin/plugin.json": "275f20b0791b57c0867a8c5f8b79be5f7a47395d810dcfc7413910d55fec2f5e",
+  ".codex-plugin/plugin.json": "cb5cec11c852be2d79e7559eb118359d460aac0548a7c7493e10c29eafc4473e",
   "Bootstrap-Python.ps1": "54ddd28646a02f464751c2f3234db91c20ff02b0e56ac0d23371ab2570f72f82",
   "Install-HangulSkills.ps1": "86d940cc87e3448fbe50fdd7b66e5df8c04abe5dc80cd3e1770d3b7a5ea0292f",
   "INTEGRATION.md": "39b4e5be41675345515ddeedd483578ee8bf08ee7cfc6ef3fc58ac0538dce7a9",
-  "plugin.json": "c865fb7b9280e4835ec8e0dad150d7d6472135f0af0b2649354f126cdb6edb43",
+  "plugin.json": "87c34add1cd8274e2170d12305c80300a564e9b3d44442a9402aa84947ee6ce7",
   "requirements-core.txt": "b7b95af260b1e0b67570b741116724b276cbf378ab3b06523a5fd5d6c579c448",
   "Restore-ModuleRegistration.ps1": "64ba97423488a03d8ecfd9947f5dbc95a8f25ba46cf10fac3bc4ae4deefb29fc",
   "Setup-OfficialModule.ps1": "f43b8da3f60fead445091200c5fe1430e052f858096a27435aa43e2afb0edfc2",
