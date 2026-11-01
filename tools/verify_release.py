@@ -49,6 +49,13 @@ def verify():
     marketplace=json.loads((ROOT/'.agents/plugins/marketplace.json').read_text(encoding='utf-8'))
     entry=marketplace['plugins'][0]
     if (ROOT/entry['source']['path']).resolve() != PLUGIN.resolve(): errors.append('Marketplace source mismatch')
+    claude=json.loads((ROOT/'.claude-plugin/marketplace.json').read_text(encoding='utf-8'))
+    claude_plugin=json.loads((PLUGIN/'.claude-plugin/plugin.json').read_text(encoding='utf-8'))
+    claude_entry=claude['plugins'][0]
+    if (ROOT/claude_entry['source']).resolve() != PLUGIN.resolve(): errors.append('Claude marketplace source mismatch')
+    if not (claude_entry['name'] == claude_plugin['name'] == entry['name']): errors.append('Claude plugin name mismatch')
+    if not (claude_entry['version'] == claude_plugin['version'] == json.loads((PLUGIN/'plugin.json').read_text(encoding='utf-8'))['version']):
+        errors.append('Claude plugin version mismatch')
     manifest=json.loads((PLUGIN/'PAYLOAD-SHA256.json').read_text(encoding='utf-8'))
     if manifest != inventory(): errors.append('Payload differs from complete file manifest')
     for p in (ROOT/'LICENSE', ROOT/'NOTICE', PLUGIN/'skills/hwpx/vendor/licenses/LICENSE', PLUGIN/'skills/hwpx/vendor/licenses/NOTICE'):

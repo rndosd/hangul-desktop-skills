@@ -1,6 +1,8 @@
 # 한글 데스크톱 스킬
 
-Codex에서 짧은 요청으로 HWPX 문서를 작성하고, 기존 문서의 본문·표·서식을 편집하며, 설치된 Windows 한글로 실제 출력을 확인하는 커뮤니티 플러그인입니다. **0.2.0-beta.1** 공개 베타입니다. 한컴 또는 OpenAI의 공식 제품이 아닙니다.
+Codex 또는 Claude Code에서 짧은 요청으로 HWPX 문서를 작성하고, 기존 문서의 본문·표·서식을 편집하며, 설치된 Windows 한글로 실제 출력을 확인하는 커뮤니티 플러그인입니다. **0.2.0-beta.1** 공개 베타입니다. 한컴·OpenAI·Anthropic의 공식 제품이 아닙니다.
+
+**한 번 설치하면 Codex와 Claude Code가 함께 사용합니다.** `Install.ps1`이 Python·설정을 공용 폴더(기본 `%USERPROFILE%\.codex`)에 준비하고, 같은 스킬을 Codex와 Claude Code(`%USERPROFILE%\.claude`가 있으면) 양쪽에 설치합니다. 업데이트도 `Install.ps1`을 다시 실행하면 양쪽이 함께 바뀝니다.
 
 보고서의 내용이나 목차를 고정하지 않습니다. 요청에 맞는 구성·번호 계층·표·간격을 선택하고 원자료, 비대상 서식, 실제 지면을 구분해 확인합니다. 원본을 덮어쓰지 않습니다.
 
@@ -36,7 +38,7 @@ AI가 양식을 분석하고, 새 내용을 넣을 위치와 반복 문단·표�
 
 ## AI에게 설치를 맡기려면
 
-내 Windows PC에서 파일과 명령을 실행할 수 있는 **Codex 또는 Claude Code**를 준비합니다. 현재 배포 검증은 Codex 기준이며 Claude Code 연결 방법은 사용자 설명서에 있습니다. Cursor Agent·Google Antigravity도 로컬 설치 작업을 수행할 수 있지만 이 스킬의 전체 실행은 미검증입니다. 일반 웹 채팅에 주소만 넣는 것과는 다릅니다.
+내 Windows PC에서 파일과 명령을 실행할 수 있는 **Codex 또는 Claude Code**를 준비합니다. 아래 요청문은 두 도구에서 같게 사용합니다. Cursor Agent·Google Antigravity도 로컬 설치 작업을 수행할 수 있지만 이 스킬의 전체 실행은 미검증입니다. 일반 웹 채팅에 주소만 넣는 것과는 다릅니다.
 
 > https://github.com/rndosd/hangul-desktop-skills
 > 이 저장소의 README와 설치 안내를 읽고 최신 베타를 내 Windows PC에 설치해줘. 지금 사용하는 AI 도구에서 스킬을 사용할 수 있도록 연결해줘. 보안 모듈은 반복되는 파일 접근 확인창을 줄이는 용도와 허용 범위를 설명하고 내 선택을 받아 진행해줘. 기본 제공 계획서 3종이 보이는지 확인하고 작은 가상 문서로 실제 한글 작업까지 시험해줘.
@@ -51,7 +53,7 @@ AI가 양식을 분석하고, 새 내용을 넣을 위치와 반복 문단·표�
 
 HWPX 내용 작성·정적 검사는 COM 없이도 수행할 수 있습니다. 다만 이 배포본은 검토된 모듈이 준비되지 않으면 실제 한글 COM 문서 작업을 차단합니다. **스킬 설치 → COM 생성 → 보안 모듈 등록 → 문서 열기/저장/출력 → 내용·서식·지면 검수**는 각각 별개의 확인 단계입니다.
 
-Claude Code의 스킬 형식과도 호환되는 구조이나, 현재 배포 검증은 Codex 기준입니다. Windows Claude Code에서 연결하는 수동 절차와 미검증 범위는 [사용자 설명서의 Claude 안내](docs/getting-started.md#claude-code에서-사용하려면)를 참고하세요.
+스킬은 Codex와 Claude Code가 함께 읽는 `SKILL.md` 형식입니다. 기본 설치가 두 도구에 모두 연결하며, 세부 내용과 확인 범위는 [사용자 설명서의 Claude 안내](docs/getting-started.md#claude-code에서-사용하려면)를 참고하세요.
 
 ## 다른 PC에 설치
 
@@ -71,7 +73,7 @@ Windows x64와 정상 설치·활성화된 한컴 한글이 필요합니다. 현
 .\Install.ps1
 ```
 
-현재 사용자 또는 `CODEX_HOME` 아래에 Python 환경과 두 스킬을 준비합니다. 필요한 경우 고정 버전 uv와 Python 3.12를 다운로드하고 전용 venv에 의존성을 설치합니다. 시스템 PATH·실행 정책·ACL은 바꾸지 않습니다. 기존 스킬은 별도 백업합니다. 이미 사용자가 검토한 같은 PC의 모듈 설정은 재검증 후 유지할 수 있습니다. 등록된 DLL이 있다는 이유만으로 자동 선택하지 않습니다.
+현재 사용자 또는 `CODEX_HOME` 아래에 Python 환경과 두 스킬을 준비하고, Claude Code 폴더(`CLAUDE_CONFIG_DIR` 또는 `%USERPROFILE%\.claude`)가 있으면 `skills` 아래에도 같은 설정으로 설치합니다. Claude Code를 나중에 설치했다면 `.\Install.ps1 -Claude Yes`, Claude Code에는 설치하지 않으려면 `-Claude No`를 붙입니다. 필요한 경우 고정 버전 uv와 Python 3.12를 다운로드하고 전용 venv에 의존성을 설치합니다. 시스템 PATH·실행 정책·ACL은 바꾸지 않습니다. 기존 스킬은 별도 백업합니다. 이미 사용자가 검토한 같은 PC의 모듈 설정은 재검증 후 유지할 수 있습니다. 등록된 DLL이 있다는 이유만으로 자동 선택하지 않습니다.
 
 다운로드 없이 기존 Python으로 설치하려면 다음과 같이 지정합니다.
 
@@ -106,6 +108,17 @@ codex plugin marketplace add rndosd/hangul-desktop-skills
 그다음 데스크톱 앱의 플러그인 설치 화면에서 `hancom-desktop`을 설치하고 새 대화에서 사용합니다. 플러그인 설치와 PC 의존성 준비는 별개입니다. 웹에서 플러그인을 불러오는 것만으로 Windows 한글 COM을 실행할 수 없습니다. [공식 플러그인 패키징 안내](https://developers.openai.com/plugins/build/plugins)를 기준으로 구성했습니다. 공개 디렉터리 등록/심사를 마친 제품은 아닙니다.
 
 ZIP 설치기의 두 스킬 설치 방식과 플러그인 방식 중 하나로 사용할 수 있습니다. 플러그인 캐시에서 실행하는 도구도 이 PC의 `CODEX_HOME/skills` 설정을 읽습니다. 캐시에 이전 PC 설정을 넣지 마세요.
+
+## Claude Code 플러그인으로 불러오기
+
+저장소 루트의 `.claude-plugin/marketplace.json`으로 Claude Code에서도 플러그인으로 설치할 수 있습니다. PC 준비(`Install.ps1`)를 먼저 실행한 뒤 Claude Code에서 입력합니다.
+
+```text
+/plugin marketplace add rndosd/hangul-desktop-skills
+/plugin install hancom-desktop@hangul-desktop-skills
+```
+
+플러그인 스킬은 `/hancom-desktop:hwpx`처럼 플러그인 이름이 앞에 붙습니다. `Install.ps1`이 이미 `.claude/skills`에 설치했다면 같은 스킬이 두 번 보이므로 둘 중 하나만 사용하세요. 플러그인 설치도 PC의 Python·한글·보안 모듈 준비를 대신하지 않습니다.
 
 ## 사용 예
 

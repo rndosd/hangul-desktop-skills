@@ -24,7 +24,8 @@ if __name__=='__main__':
     workspace=Path(tempfile.mkdtemp(prefix='hi-')).resolve()
     home=workspace/'한글 test home'
     installer=ROOT/'Install.ps1'
-    args=['-CodexRoot',home,'-PythonPath',sys.executable]
+    # Never touch the real Claude Code folder; the Claude target is tested below in the test home.
+    args=['-CodexRoot',home,'-PythonPath',sys.executable,'-Claude','No']
     before={p:hashlib.sha256(p.read_bytes()).hexdigest() for p in PLUGIN.rglob('*') if p.is_file()}
     # CheckOnly must not bootstrap or create even the requested CODEX_HOME.
     p=run(installer,[*args,'-CheckOnly'])
@@ -45,6 +46,20 @@ if __name__=='__main__':
     second=json_prefix(p.stdout)
     backup=Path(second['backupRoot'])/'hwpx/keep-old.txt'
     assert backup.read_text()=='preserve backup' and not marker.exists()
+    assert second['skillRoots']['claude'] is None
+    # Claude Code target: same configuration in both skill roots; a reinstall backs up the Claude copy too.
+    claude=workspace/'claude config'/'skills'
+    claude_args=['-CodexRoot',home,'-PythonPath',sys.executable,'-NoDependencyInstall','-Claude','Yes','-ClaudeSkillsRoot',claude]
+    third=json_prefix(run(installer,claude_args).stdout)
+    assert Path(third['skillRoots']['claude'])==claude
+    for name in ('hwpx','hwpx-windows-finalize'):
+        assert json.loads((claude/name/'environment.json').read_text(encoding='utf-8-sig'))==json.loads((home/'skills'/name/'environment.json').read_text(encoding='utf-8-sig'))
+        assert (claude/name/'SKILL.md').is_file()
+    (claude/'hwpx/keep-claude.txt').write_text('preserve claude backup')
+    fourth=json_prefix(run(installer,claude_args).stdout)
+    assert (Path(fourth['backupRoot'])/'claude/hwpx/keep-claude.txt').read_text()=='preserve claude backup'
+    p=run(installer,['-CodexRoot',home,'-PythonPath',sys.executable,'-NoDependencyInstall','-Claude','Auto','-ClaudeSkillsRoot',workspace/'no-claude'/'skills'])
+    assert json_prefix(p.stdout)['skillRoots']['claude'] is None and not (workspace/'no-claude').exists()
     # Invoke the plugin-cache launcher using the current test desktop config.
     env=dict(os.environ,CODEX_HOME=str(home))
     p=subprocess.run(['powershell.exe','-NoProfile','-File',str(PLUGIN/'skills/hwpx/scripts/Invoke-HangulTask.ps1'),'doctor'],cwd=ROOT,env=env,capture_output=True,text=True,encoding='utf-8-sig',errors='replace',timeout=45)
@@ -59,7 +74,7 @@ if __name__=='__main__':
     p=run(damaged/'Install-HangulSkills.ps1',['-CodexRoot',untouched,'-CheckOnly'],False)
     assert 'Package hash mismatch' in p.stderr and not untouched.exists()
     assert before=={p:hashlib.sha256(p.read_bytes()).hexdigest() for p in PLUGIN.rglob('*') if p.is_file()}
-    result={'status':'PASS_ISOLATED_INSTALL','checks':['read-only no creation','no-consent stops before change','local configuration pair','unconfigured native remains blocked','reinstall backup','plugin cache uses current PC','corrupt transfer blocked','source package unchanged'],
+    result={'status':'PASS_ISOLATED_INSTALL','checks':['read-only no creation','no-consent stops before change','local configuration pair','unconfigured native remains blocked','reinstall backup','claude code target and backup','claude auto skips missing folder','plugin cache uses current PC','corrupt transfer blocked','source package unchanged'],
             'python':sys.version.split()[0],'comCreated':'NOT_CALLED','securityModuleRegistered':'NOT_CALLED',
             'registryChanged':False,'networkUsed':False,'evidence':str(workspace)}
     (workspace/'result.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')

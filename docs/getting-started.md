@@ -1,13 +1,13 @@
 # 설치부터 첫 문서까지
 
-처음 사용하는 Windows 사용자를 위한 설명서입니다. 먼저 ZIP으로 PC 환경과 두 스킬을 준비한 다음 새 대화에서 사용합니다. Codex 플러그인으로 관리하는 방법은 뒤의 선택 항목입니다. 이 문서는 현재 GitHub main의 안내이며, 공개 베타의 확인 범위는 [지원 제한](known-limits.md)에 기록돼 있습니다.
+처음 사용하는 Windows 사용자를 위한 설명서입니다. 먼저 ZIP으로 PC 환경과 두 스킬을 준비한 다음 새 대화에서 사용합니다. 한 번 설치하면 Codex와 Claude Code 양쪽에서 사용할 수 있습니다. 플러그인 목록으로 관리하는 방법은 뒤의 선택 항목입니다. 이 문서는 현재 GitHub main의 안내이며, 공개 베타의 확인 범위는 [지원 제한](known-limits.md)에 기록돼 있습니다.
 
 ## 1. 준비할 것
 
 | 준비물 | 설명 |
 |---|---|
 | Windows x64 PC | 실제 한글 검증은 Windows에서 실행합니다. |
-| AI의 로컬 실행 환경 | 기본 안내는 Codex 기준입니다. 사용자 PC의 파일과 PowerShell을 실행할 수 있어야 합니다. Claude Code 시험 방법은 아래 별도 항목을 참고하세요. |
+| AI의 로컬 실행 환경 | Codex 또는 Windows에서 로컬로 실행하는 Claude Code. 사용자 PC의 파일과 PowerShell을 실행할 수 있어야 합니다. 둘 다 써도 설치는 한 번입니다. |
 | 설치·활성화된 한컴 한글 | 프로그램과 라이선스는 직접 준비합니다. 공식 모듈 자동 설치는 현재 x86 한글용입니다. Windows의 비트수와 한글 프로그램의 비트수는 별개입니다. |
 | 인터넷 | 처음 필요한 Python·패키지 다운로드에 사용합니다. 이미 준비된 Python으로 설치하는 방법도 있습니다. |
 | 원본 HWPX 또는 작성 자료 | 기존 양식을 쓰려면 HWPX를, 새 문서를 쓰려면 메모나 자료를 준비합니다. HWP 원본은 아래 공식 변환기로 먼저 HWPX로 변환할 수 있습니다. |
@@ -59,11 +59,11 @@ Test-Path -LiteralPath .\Install.ps1
 .\Install.ps1
 ```
 
-필요한 Python·패키지를 준비하고 `hwpx`, `hwpx-windows-finalize` 두 스킬을 설치합니다. 기본 위치는 현재 사용자 `.codex` 폴더이며, `CODEX_HOME`을 지정했다면 그 위치를 사용합니다. 기존 같은 이름의 스킬은 백업하고, 끝에 **Skills installed. Backup:**과 백업 경로를 출력합니다. JSON의 `coreStatus`도 확인하세요. 설치 파일 복사 성공과 Python 준비 성공은 별개입니다.
+필요한 Python·패키지를 준비하고 `hwpx`, `hwpx-windows-finalize` 두 스킬을 설치합니다. Python과 설정은 공용 폴더인 현재 사용자 `.codex` 폴더(`CODEX_HOME`을 지정했다면 그 위치)에 두고, 스킬은 Codex와 Claude Code 양쪽에 설치합니다. Claude Code는 `CLAUDE_CONFIG_DIR` 또는 `.claude` 폴더가 있을 때 자동으로 포함됩니다. Claude Code를 나중에 설치했다면 `.\Install.ps1 -Claude Yes`, 제외하려면 `-Claude No`를 붙입니다. 기존 같은 이름의 스킬은 백업하고, 끝에 **Skills installed for:**(설치한 도구와 위치), **Skills installed. Backup:**(백업 경로)을 출력합니다. JSON의 `coreStatus`도 확인하세요. 설치 파일 복사 성공과 Python 준비 성공은 별개입니다.
 
 기본 설치는 새 DLL을 등록하지 않습니다. 따라서 “Native COM document work remains blocked” 안내는 보안 모듈을 아직 선택하지 않았다는 뜻입니다. HWPX 내용 작성·정적 검사 준비와 실제 한글 자동화 준비를 구분하세요.
 
-설치 후 Codex에서 **새 대화**를 시작합니다. 스킬이 보이지 않으면 앱을 정상 종료·다시 열고 새 대화를 시작한 뒤 아래처럼 요청하세요.
+설치 후 Codex 또는 Claude Code에서 **새 대화**를 시작합니다. 스킬이 보이지 않으면 앱을 정상 종료·다시 열고 새 대화를 시작한 뒤 아래처럼 요청하세요.
 
 > 설치한 hwpx와 hwpx-windows-finalize 스킬을 사용해 이 PC의 준비 상태를 확인해줘. COM 생성과 보안 모듈 등록 성공은 따로 알려줘. 설정은 바꾸지 마.
 
@@ -170,13 +170,15 @@ codex plugin marketplace add rndosd/hangul-desktop-skills
 
 ## Claude Code에서 사용하려면
 
-스킬은 `SKILL.md`, scripts, references를 묶는 형식이며 [Claude Code도 Agent Skills와 개인 스킬 폴더를 지원](https://code.claude.com/docs/en/skills)합니다. **현재 이 배포본의 Claude 모델 실제 작성·수정·COM 작업은 미검증입니다.** Codex용 마켓플레이스 명령을 Claude에 그대로 입력하지 않습니다.
+스킬은 `SKILL.md`, scripts, references를 묶는 형식이며 [Claude Code도 Agent Skills와 개인 스킬 폴더를 지원](https://code.claude.com/docs/en/skills)합니다. [Windows에서 로컬로 실행하는 Claude Code](https://code.claude.com/docs/en/setup)를 사용합니다.
 
-시험할 때는 위 Windows PC 설치를 먼저 마치고, [Windows에서 로컬로 실행하는 Claude Code](https://code.claude.com/docs/en/setup)를 사용합니다. ZIP의 `plugins/hancom-desktop/skills/hwpx`와 `hwpx-windows-finalize` 폴더 전체를 개인 `.claude/skills` 아래에 같은 이름의 형제 폴더로 놓습니다. SKILL.md만 복사하면 vendor 코드와 참조가 빠집니다. 기존 같은 이름의 스킬이 있다면 먼저 백업하고 덮어쓰지 마세요.
+**방법 1. 기본 설치 (권장)**: 위 4단계의 `.\Install.ps1`이 Claude Code 폴더(`CLAUDE_CONFIG_DIR` 또는 `%USERPROFILE%\.claude`)를 찾으면 `skills\hwpx`, `skills\hwpx-windows-finalize`에 자동으로 설치하고 각 폴더에 이 PC의 설정(environment.json)을 넣습니다. Claude Code를 나중에 설치했다면 `.\Install.ps1 -Claude Yes`로 다시 실행합니다. 업데이트도 `Install.ps1`을 다시 실행하면 Codex와 Claude Code 양쪽이 함께 바뀌고, 이전 스킬은 백업 폴더의 `claude` 아래에 보관됩니다. 직접 복사하지 마세요. SKILL.md만 복사하면 vendor 코드와 참조가 빠집니다.
 
-이 도구들은 현재 PC의 `CODEX_HOME/skills` 설정을 읽습니다. 기본값은 사용자 `.codex/skills`이며 이 설치기가 만든 공유 설정입니다. Claude에서 사용해도 같은 Windows 사용자·CODEX_HOME의 설정을 사용해야 합니다. Codex 앱 계정은 이 Python/PowerShell 도구의 실행 의존성이 아닙니다.
+**방법 2. 플러그인**: Claude Code에서 `/plugin marketplace add rndosd/hangul-desktop-skills`를 입력한 뒤 `/plugin install hancom-desktop@hangul-desktop-skills`로 설치합니다. 스킬 이름 앞에 `hancom-desktop:`이 붙습니다. 이 경우에도 `Install.ps1`로 PC 준비를 먼저 해야 하며, 플러그인 스킬은 공용 폴더(`CODEX_HOME`, 기본 `.codex`)의 설정을 읽습니다. 방법 1과 함께 쓰면 같은 스킬이 두 번 보이므로 `-Claude No`로 설치하세요.
 
-새 Claude Code 세션에서 `/hwpx`로 준비 상태부터 확인하고 작은 합성 문서로 시험합니다. 파일·프로세스 실행 권한과 한글·보안 모듈은 별도로 필요합니다. Claude 웹/API/클라우드/Cowork에 스킬 ZIP을 올리는 방법의 Windows COM 연결은 이 배포에서 지원·검증하지 않습니다.
+Python 환경·보안 모듈 선택·백업은 공용 폴더 한 곳에서 관리하므로 Codex와 Claude Code가 같은 설정을 씁니다. Codex 앱 계정은 이 Python/PowerShell 도구의 실행 의존성이 아니며, Codex를 쓰지 않아도 `.codex` 폴더는 공용 폴더로 사용됩니다.
+
+새 Claude Code 세션에서 `/hwpx`로 준비 상태부터 확인하고 작은 합성 문서로 시험합니다. 주요 흐름(완성형 3종 작성, 문구·표 편집, 한글 저장·재열기·PDF)은 Claude Code에서도 확인했으며, 그 밖의 전문 기능 범위는 [지원 제한](known-limits.md)을 따릅니다. 파일·프로세스 실행 권한과 한글·보안 모듈은 별도로 필요합니다. Claude 웹/API/클라우드/Cowork에 스킬 ZIP을 올리는 방법의 Windows COM 연결은 이 배포에서 지원·검증하지 않습니다.
 
 ## 문제가 생겼을 때
 
@@ -186,7 +188,7 @@ codex plugin marketplace add rndosd/hangul-desktop-skills
 | “스크립트를 실행할 수 없습니다” | 조직의 PowerShell 정책과 파일 신뢰 절차를 확인합니다. 전역 실행 정책을 바꾸거나 Bypass로 우회하지 않습니다. |
 | Package hash mismatch | 파일을 수정한 묶음인지 확인하고 원본 릴리스 ZIP을 새 폴더에 풉니다. 손상 검사를 끄지 않습니다. |
 | Python·다운로드 실패 | 오류의 다운로드 주소·네트워크/프록시·정책을 확인합니다. 기존 Python 3.12로 설치하는 옵션은 [README](../README.md#다른-pc에-설치)에 있습니다. |
-| 설치했는데 스킬이 안 보임 | 새 세션인지, 설치기의 codexRoot와 앱/CLI의 CODEX_HOME이 같은지 확인합니다. |
+| 설치했는데 스킬이 안 보임 | 새 세션인지, 설치기의 codexRoot와 앱/CLI의 CODEX_HOME이 같은지 확인합니다. Claude Code라면 설치 출력의 **Skills installed for:**에 `claude`가 있는지 보고, 없으면 `.\Install.ps1 -Claude Yes`로 다시 실행합니다. |
 | 한글 설치 정보 없음·COM 생성 실패 | 실제 한글 실행·활성화 여부와 한글 COM 설치 상태를 확인합니다. 반복해서 DLL을 등록하지 않습니다. |
 | RegisterModule 실패·파일 접근 승인창 | 선택 이름·등록 경로·DLL 해시·비트수·정책 기록과 실행 맥락을 비교합니다. [보안 모듈 안내](security-module.md)를 참고하세요. |
 | PROCESS_CONFLICT | 열려 있는 한글 문서를 직접 저장하고 정상 종료한 뒤 한 번 다시 확인합니다. 사용자 프로세스를 강제 종료하지 않습니다. |

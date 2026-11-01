@@ -7,12 +7,18 @@ param(
     [string]$SecurityModuleName,
     [string]$SecurityDllSha256,
     [string]$SecurityPolicyPath,
-    [switch]$ConfirmReviewedSecurityModule
+    [switch]$ConfirmReviewedSecurityModule,
+    [ValidateSet('Auto','Yes','No')][string]$Claude='Auto',
+    [string]$ClaudeSkillsRoot
 )
 $ErrorActionPreference='Stop'
 $source=[IO.Path]::GetFullPath($PSScriptRoot)
 if(!$CodexRoot){$CodexRoot=if($env:CODEX_HOME){$env:CODEX_HOME}else{Join-Path $env:USERPROFILE '.codex'}}
 $CodexRoot=[IO.Path]::GetFullPath($CodexRoot)
+# CodexRoot stays the shared home for Python, settings and backups; Claude Code gets its own skill copies.
+if(!$ClaudeSkillsRoot){$ClaudeSkillsRoot=Join-Path $(if($env:CLAUDE_CONFIG_DIR){$env:CLAUDE_CONFIG_DIR}else{Join-Path $env:USERPROFILE '.claude'}) 'skills'}
+$ClaudeSkillsRoot=[IO.Path]::GetFullPath($ClaudeSkillsRoot)
+$installClaude=$Claude -eq 'Yes' -or ($Claude -eq 'Auto' -and (Test-Path -LiteralPath (Split-Path -Parent $ClaudeSkillsRoot) -PathType Container))
 . (Join-Path $source 'skills/hwpx-windows-finalize/scripts/Hancom.Environment.ps1')
 function Read-Python([string]$Exe){
     if(!$Exe -or !(Test-Path -LiteralPath $Exe -PathType Leaf)){return $null}
@@ -102,15 +108,19 @@ $environment=[ordered]@{
     hancom=$hancom;security=$security
     nativeStatus=if($security.status -eq 'reviewed_existing'){'configured_not_runtime_verified'}else{'blocked_security_module'}
     registryChanges=@();dllsInstalled=@();executionPolicyChanged=$false
+    skillRoots=[ordered]@{codex=(Join-Path $CodexRoot 'skills');claude=if($installClaude){$ClaudeSkillsRoot}else{$null}}
 }
 if($CheckOnly){$environment|ConvertTo-Json -Depth 14;exit 0}
 $id='hangul-desktop-'+(Get-Date -Format 'yyyyMMdd-HHmmss')+'-'+[guid]::NewGuid().ToString('N').Substring(0,8)
 $bundle=Join-Path $CodexRoot ('skill-bundles/'+$id)
 $backup=Join-Path $CodexRoot ('skill-backups/'+$id)
-$skillsRoot=Join-Path $CodexRoot 'skills'
+# Codex copies back up to the backup root itself (existing layout); Claude Code copies to backup/claude.
+$targets=@([pscustomobject]@{tool='codex';root=(Join-Path $CodexRoot 'skills');backup=$backup})
+if($installClaude){$targets+=[pscustomobject]@{tool='claude';root=$ClaudeSkillsRoot;backup=(Join-Path $backup 'claude')}}
 Assert-Child $bundle $CodexRoot;Assert-Child $backup $CodexRoot
-foreach($name in @('hwpx','hwpx-windows-finalize')){Assert-Child (Join-Path $skillsRoot $name) $skillsRoot}
-New-Item -ItemType Directory -Path (Split-Path $bundle),$backup,$skillsRoot -Force|Out-Null
+foreach($target in $targets){foreach($name in @('hwpx','hwpx-windows-finalize')){Assert-Child (Join-Path $target.root $name) $target.root}}
+New-Item -ItemType Directory -Path (Split-Path $bundle),$backup -Force|Out-Null
+foreach($target in $targets){New-Item -ItemType Directory -Path $target.root,$target.backup -Force|Out-Null}
 Copy-Item -LiteralPath $source -Destination $bundle -Recurse
 $environment.bundleRoot=$bundle;$environment.backupRoot=$backup
 if($security.status -eq 'reviewed_existing'){
@@ -120,22 +130,27 @@ if($security.status -eq 'reviewed_existing'){
 }
 $installed=@();$backedUp=@()
 try{
-    foreach($name in @('hwpx','hwpx-windows-finalize')){
-        $target=Join-Path $skillsRoot $name
-        if(Test-Path -LiteralPath $target){Move-Item -LiteralPath $target -Destination (Join-Path $backup $name);$backedUp+=$name}
-        $installed+=$name
-        Copy-Item -LiteralPath (Join-Path $bundle ('skills/'+$name)) -Destination $target -Recurse
-        Write-Json $environment (Join-Path $target 'environment.json')
+    foreach($target in $targets){
+        foreach($name in @('hwpx','hwpx-windows-finalize')){
+            $path=Join-Path $target.root $name
+            $item=[pscustomobject]@{tool=$target.tool;root=$target.root;backup=$target.backup;name=$name}
+            if(Test-Path -LiteralPath $path){Move-Item -LiteralPath $path -Destination (Join-Path $target.backup $name);$backedUp+=$item}
+            $installed+=$item
+            Copy-Item -LiteralPath (Join-Path $bundle ('skills/'+$name)) -Destination $path -Recurse
+            Write-Json $environment (Join-Path $path 'environment.json')
+        }
     }
     Write-Json $environment (Join-Path $bundle 'installed-environment.json')
     Write-Json @{status='installed';environment=$environment;restorableSkills=$backedUp;installedSkills=$installed} (Join-Path $backup 'installation-receipt.json')
 }catch{
     $failure=$_.Exception.Message
-    foreach($name in $installed){$target=Join-Path $skillsRoot $name;Assert-Child $target $skillsRoot;if(Test-Path -LiteralPath $target){Move-Item -LiteralPath $target -Destination (Join-Path $backup ('failed-new-'+$name))}}
-    foreach($name in $backedUp){$saved=Join-Path $backup $name;Assert-Child $saved $backup;Move-Item -LiteralPath $saved -Destination (Join-Path $skillsRoot $name)}
+    foreach($item in $installed){$path=Join-Path $item.root $item.name;Assert-Child $path $item.root;if(Test-Path -LiteralPath $path){Move-Item -LiteralPath $path -Destination (Join-Path $item.backup ('failed-new-'+$item.name))}}
+    foreach($item in $backedUp){$saved=Join-Path $item.backup $item.name;Assert-Child $saved $item.backup;Move-Item -LiteralPath $saved -Destination (Join-Path $item.root $item.name)}
     throw ('Installation rolled back: '+$failure)
 }
 $environment|ConvertTo-Json -Depth 14
+Write-Output ('Skills installed for: '+(($targets|ForEach-Object{$_.tool+' ('+$_.root+')'}) -join ', '))
 Write-Output ('Skills installed. Backup: '+$backup)
+if(!$installClaude -and $Claude -eq 'Auto'){Write-Output 'Claude Code folder not found; skipped. Rerun with -Claude Yes to install for Claude Code too.'}
 if(!$python){Write-Warning 'Skills installed, but Python work is not ready. Install Python 3.12 or pass -PythonPath and rerun.'}
 if($security.status -ne 'reviewed_existing'){Write-Warning 'Native COM document work remains blocked: no reviewed security module selected. No DLL or registry value was installed.'}

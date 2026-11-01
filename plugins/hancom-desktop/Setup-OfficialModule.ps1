@@ -1,5 +1,5 @@
 ﻿[CmdletBinding()]
-param([switch]$AcceptGlobalFileAccess,[string]$CodexRoot,[string]$PythonPath,[string]$ArchivePath)
+param([switch]$AcceptGlobalFileAccess,[string]$CodexRoot,[string]$PythonPath,[string]$ArchivePath,[ValidateSet('Auto','Yes','No')][string]$Claude='Auto',[string]$ClaudeSkillsRoot)
 $ErrorActionPreference='Stop'
 if(!$AcceptGlobalFileAccess){throw 'Explicit consent required: -AcceptGlobalFileAccess. Official example permits all requested paths within your Windows permissions.'}
 if(!$CodexRoot){$CodexRoot=if($env:CODEX_HOME){$env:CODEX_HOME}else{Join-Path $env:USERPROFILE '.codex'}}
@@ -38,6 +38,7 @@ $backup|ConvertTo-Json|Set-Content -LiteralPath $receipt -Encoding UTF8
 try{$key.SetValue($name,$dll,[Microsoft.Win32.RegistryValueKind]::String)}finally{$key.Dispose();$base.Dispose()}
 $argsMap=@{CodexRoot=$CodexRoot;SecurityModuleName=$name;SecurityDllSha256=$hash;SecurityPolicyPath=$policy;ConfirmReviewedSecurityModule=$true}
 if($PythonPath){$argsMap.PythonPath=$PythonPath}
+$argsMap.Claude=$Claude;if($ClaudeSkillsRoot){$argsMap.ClaudeSkillsRoot=$ClaudeSkillsRoot}
 try{
  & (Join-Path $PSScriptRoot 'Install-HangulSkills.ps1') @argsMap
  if(!$?){throw 'Skill setup failed'}
