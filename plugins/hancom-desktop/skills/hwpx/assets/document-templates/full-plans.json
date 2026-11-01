@@ -167,7 +167,7 @@
       },
       "document": {
         "path": "full-plans/plan-project/template.hwpx",
-        "sha256": "fbab78cf7a236f9da6950724166228bb8b8027c4feaf76e71819bb7629c42f37"
+        "sha256": "9d84227b35b915ec6af9814e79440c1f5f735f54c91c9afd3674e8a05a28b734"
       },
       "pdf": {
         "path": "full-plans/plan-project/template.pdf",
@@ -179,12 +179,12 @@
       },
       "fill": {
         "path": "full-plans/plan-project/manifest.json",
-        "sha256": "8343702ac606acef47c1ce396ac39269d9862194cfaa9ae3b64a1695ba9be60f"
+        "sha256": "fd9a35b5df72206f6a937b69e8598d3691309df49442f8d629e2606d219b6d8c"
       },
       "verification": {
         "evidence": {
           "path": "full-plans/plan-project/evidence.json",
-          "sha256": "42630a9625d8cd9d01b120f01c8a41885d8464608e49c4e01883719292ffa087"
+          "sha256": "3e9f22b69b38acd56e00a77ccd9ac470fdcb389e58efafa73572a6f58e99849c"
         },
         "tested_edits": [
           {

@@ -10,7 +10,8 @@ if __name__=='__main__':
     required={'plugins/hancom-desktop/'+path for path in manifest}
     missing=required-set(tracked)
     if missing:raise ValueError('Required payload files are not tracked: '+', '.join(sorted(missing)))
-    target=ROOT/'dist/hangul-desktop-skills-0.2.0-beta.1.zip';target.parent.mkdir(exist_ok=True)
+    version=json.loads((ROOT/'plugins/hancom-desktop/package-info.json').read_text(encoding='utf-8'))['version']
+    target=ROOT/f'dist/hangul-desktop-skills-{version}.zip';target.parent.mkdir(exist_ok=True)
     if target.exists():raise FileExistsError('Review existing archive; no overwrite')
     with zipfile.ZipFile(target,'w',compression=zipfile.ZIP_DEFLATED) as z:
         for relative in sorted(filter(None,tracked)):

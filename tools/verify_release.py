@@ -41,14 +41,17 @@ def verify():
                     if name.endswith(('.xml','.hpf')):
                         text=z.read(name).decode('utf-8-sig')
                         if PRIVATE_PATH.search(text) or TOKEN.search(text): errors.append('Private HWPX metadata: '+rel+'/'+name)
-    for name in ('hwpx','hwpx-windows-finalize','hancom-setup'):
+    # Install-HangulSkills.ps1 installs exactly these skills; anything else in skills/ would never reach users.
+    skills=('hwpx','hwpx-windows-finalize')
+    shipped=sorted(p.name for p in (PLUGIN/'skills').iterdir() if p.is_dir())
+    if shipped != sorted(skills): errors.append('Skills folder must contain only the installed skills: '+', '.join(shipped))
+    for name in skills:
         p=PLUGIN/'skills'/name/'SKILL.md';text=p.read_text(encoding='utf-8-sig')
         if not text.startswith('---\n') or f'name: {name}\n' not in text: errors.append('Invalid skill frontmatter: '+name)
         for link in re.findall(r'\]\(([^)]+)\)',text):
             if '://' not in link and not (p.parent/link.split('#')[0]).is_file(): errors.append('Broken skill link: '+name+': '+link)
-    marketplace=json.loads((ROOT/'.agents/plugins/marketplace.json').read_text(encoding='utf-8'))
-    entry=marketplace['plugins'][0]
-    if (ROOT/entry['source']['path']).resolve() != PLUGIN.resolve(): errors.append('Marketplace source mismatch')
+    info=json.loads((PLUGIN/'package-info.json').read_text(encoding='utf-8'))
+    if not re.fullmatch(r'\d+\.\d+\.\d+(-[0-9A-Za-z.]+)?', str(info.get('version',''))): errors.append('package-info.json version invalid')
     manifest=json.loads((PLUGIN/'PAYLOAD-SHA256.json').read_text(encoding='utf-8'))
     if manifest != inventory(): errors.append('Payload differs from complete file manifest')
     for p in (ROOT/'LICENSE', ROOT/'NOTICE', PLUGIN/'skills/hwpx/vendor/licenses/LICENSE', PLUGIN/'skills/hwpx/vendor/licenses/NOTICE'):

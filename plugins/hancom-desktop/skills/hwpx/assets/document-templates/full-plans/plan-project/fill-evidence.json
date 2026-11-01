@@ -1,7 +1,7 @@
 {
   "outcome": "PASS_SAMPLE",
-  "templateSha256": "fbab78cf7a236f9da6950724166228bb8b8027c4feaf76e71819bb7629c42f37",
-  "sampleSha256": "e1c973f40884fa23d1676e60d9a551c4536e156bd9d16e88ac94bab1b3048d70",
+  "templateSha256": "9d84227b35b915ec6af9814e79440c1f5f735f54c91c9afd3674e8a05a28b734",
+  "sampleSha256": "fba596e17badb7b626945914604406e72da1b538aa80010f194a8e1485567717",
   "pdfSha256": "9d7d9a2e8d980b70e98b28d619d5e922b96426f3986ebb8bce53461baea3c92b",
   "nativeReceipt": {
     "path": "full-plans/plan-project/example-native.json",

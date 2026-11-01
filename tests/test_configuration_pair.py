@@ -20,7 +20,7 @@ class ConfigurationPair(unittest.TestCase):
         return result
     def test_missing_pair_blocked(self):
         with self.assertRaisesRegex(ValueError,'DESKTOP_NOT_CONFIGURED'):native.configuration_pair(self.skill,self.home)
-    def test_plugin_cache_uses_current_desktop_pair(self):
+    def test_package_copy_uses_current_desktop_pair(self):
         expected=self.pair(self.home/'skills');self.assertEqual(native.configuration_pair(self.skill,self.home),expected)
     def test_local_candidate_pair_takes_precedence(self):
         expected=self.pair(self.skill.parent);self.pair(self.home/'skills')

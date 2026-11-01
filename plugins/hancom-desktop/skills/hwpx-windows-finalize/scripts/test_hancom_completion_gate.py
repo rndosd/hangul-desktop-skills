@@ -196,6 +196,20 @@ class CompletionGateTest(unittest.TestCase):
         self.assertTrue(comparison['invariants']['binaryPayloads'])
         self.assertFalse(comparison['invariants']['binaryReferences'])
 
+    def test_hangul_save_empty_refs_and_runs_are_not_content_changes(self):
+        # Hangul adds substitute fonts with binaryItemIDRef="" and may add an empty run on save.
+        def make(path,saved=False,ref='a'):
+            fonts='<font face="A"/><font face="B"><substFont face="C" binaryItemIDRef=""/></font>' if saved else '<font face="A"/>'
+            with ZipFile(path,'w') as z:
+                z.writestr('Contents/content.hpf','<package><manifest><item id="s0" href="Contents/section0.xml"/><item id="h" href="Contents/header.xml"/><item id="a" href="BinData/a.png"/><item id="b" href="BinData/b.png"/></manifest><spine><itemref idref="s0"/></spine></package>')
+                z.writestr('Contents/header.xml',f'<head>{fonts}<fill binaryItemIDRef="{ref}"/></head>')
+                z.writestr('Contents/section0.xml','<section><p><t>same</t>'+('<t/>' if saved else '')+'</p></section>')
+                z.writestr('BinData/a.png',b'asset A');z.writestr('BinData/b.png',b'asset B')
+        make(self.source);make(self.final,True)
+        self.assertTrue(all(g.compare(self.source,self.final)['invariants'].values()))
+        make(self.final,True,'b')
+        self.assertFalse(g.compare(self.source,self.final)['invariants']['binaryReferences'])
+
 
 class ControlPreservationTest(unittest.TestCase):
     def test_missing_changed_and_reordered_controls_fail_invariant(self):

@@ -125,19 +125,24 @@ def read_package(path):
                 kind = node.tag.rsplit('}', 1)[-1]
                 if kind == 'ctrl':
                     controls[name].append(control_tree(node))
-                if kind == 't':
-                    texts.append(node.text or '')
+                # Hangul may add an empty run on save; only visible text is content to preserve.
+                if kind == 't' and node.text:
+                    texts.append(node.text)
                 if kind in ('p', 'tbl', 'pic'):
                     counts[kind] += 1
+    # Per part, the document-order list of (element, payload hash) uses. Positions are not keys:
+    # Hangul inserts substitute-font siblings on save, which shifts locations without changing any use.
     references = {}
     for location, node in flat.items():
         for key, identity in node.get('attributes', {}).items():
             if key.rsplit('}', 1)[-1] == 'binaryItemIDRef':
+                # Hangul writes empty refs on substitute fonts when it rewrites the font table on save;
+                # an empty ref points at no payload, so it is not an asset use to preserve.
                 if not identity:
-                    references[location+'/'+key] = None
-                else:
-                    require(identity in manifest and manifest[identity] in binaries, 'unresolved_binary_reference')
-                    references[location+'/'+key] = binaries[manifest[identity]]
+                    continue
+                require(identity in manifest and manifest[identity] in binaries, 'unresolved_binary_reference')
+                part = next((location.split(ext, 1)[0] + ext for ext in ('.xml', '.hpf') if ext in location), location)
+                references.setdefault(part, []).append([node['tag'], binaries[manifest[identity]]])
     return {'flat': flat, 'texts': texts, 'counts': dict(counts), 'sections': sections,
             'binaries': binaries, 'binaryPayloads': sorted(binaries.values()), 'binaryReferences': references,
             'controls': controls}
