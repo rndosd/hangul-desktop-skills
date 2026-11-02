@@ -3,7 +3,7 @@
   "ok": true,
   "rolledBack": false,
   "dryRun": false,
-  "inputRevision": "sha256:a50d2a365aedc3da7c9bf4431e8d4a87d9425878eff64fbfdd9c584032c93ac2",
+  "inputRevision": "sha256:c9cf3447d264e9902ab0d302190e927bce500ae9cfbf86b82ca48e5619251a46",
   "documentRevision": "sha256:eb3deaadb8faf399e9b2f73ccb87c3138ee658301ceba4c3278e7ee7e0e859bd",
   "output": {
     "filename": "<local-path>"
@@ -769,7 +769,7 @@
   ],
   "semanticDiff": {
     "schemaVersion": "hwpx.agent-semantic-diff/v1",
-    "inputRevision": "sha256:a50d2a365aedc3da7c9bf4431e8d4a87d9425878eff64fbfdd9c584032c93ac2",
+    "inputRevision": "sha256:c9cf3447d264e9902ab0d302190e927bce500ae9cfbf86b82ca48e5619251a46",
     "candidateRevision": "sha256:eb3deaadb8faf399e9b2f73ccb87c3138ee658301ceba4c3278e7ee7e0e859bd",
     "changes": [
       {
@@ -1392,8 +1392,8 @@
       "store": "none"
     },
     "revision": {
-      "expected": "sha256:a50d2a365aedc3da7c9bf4431e8d4a87d9425878eff64fbfdd9c584032c93ac2",
-      "actual": "sha256:a50d2a365aedc3da7c9bf4431e8d4a87d9425878eff64fbfdd9c584032c93ac2",
+      "expected": "sha256:c9cf3447d264e9902ab0d302190e927bce500ae9cfbf86b82ca48e5619251a46",
+      "actual": "sha256:c9cf3447d264e9902ab0d302190e927bce500ae9cfbf86b82ca48e5619251a46",
       "matched": true
     },
     "inputOpenSafety": {

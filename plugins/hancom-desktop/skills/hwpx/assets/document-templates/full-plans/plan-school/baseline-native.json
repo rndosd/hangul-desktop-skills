@@ -1,6 +1,6 @@
 {
   "evidenceSchema": "hwpx.hancom-finalize.v2",
-  "sourceSha256Before": "A50D2A365AEDC3DA7C9BF4431E8D4A87D9425878EFF64FBFDD9C584032C93AC2",
+  "sourceSha256Before": "C9CF3447D264E9902AB0D302190E927BCE500AE9CFBF86B82CA48E5619251A46",
   "status": "PASS_FULL",
   "mode": "OpenOnly",
   "candidatePath": "<local-path>",
@@ -12,8 +12,8 @@
   "pageCountBefore": 2,
   "pageCountAfter": 2,
   "error": null,
-  "checkedAt": "2026-11-01T21:45:28.6820556+09:00",
-  "version": "13, 0, 0, 3903",
+  "checkedAt": "2026-11-02T14:09:21.6405846+09:00",
+  "version": "13, 0, 0, 653",
   "comCreated": true,
   "registerModuleCalled": true,
   "securityModuleRegistered": true,
@@ -21,16 +21,16 @@
     "FilePathCheckDLL",
     "FilePathCheckerModuleExample"
   ],
-  "sourceSha256After": "A50D2A365AEDC3DA7C9BF4431E8D4A87D9425878EFF64FBFDD9C584032C93AC2",
+  "sourceSha256After": "C9CF3447D264E9902AB0D302190E927BCE500AE9CFBF86B82CA48E5619251A46",
   "sourceUnchanged": true,
   "cleanup": {
     "forced": false,
     "owned": true,
     "owner": {
-      "hwnd": 5310066,
+      "hwnd": 1641570,
       "path": "<local-path>",
-      "pid": 1916,
-      "startTicks": 639291339288674607
+      "pid": 32316,
+      "startTicks": 639291929617985650
     },
     "quit": true,
     "normalExitWait": {
@@ -49,13 +49,13 @@
   "artifacts": [
     {
       "path": "<local-path>",
-      "sha256": "A50D2A365AEDC3DA7C9BF4431E8D4A87D9425878EFF64FBFDD9C584032C93AC2",
-      "bytes": 48709
+      "sha256": "C9CF3447D264E9902AB0D302190E927BCE500AE9CFBF86B82CA48E5619251A46",
+      "bytes": 48604
     },
     {
       "path": "<local-path>",
-      "sha256": "C5292A0EF0FBF4B0549ADF1E0DFF985401F35DD363F77BE0056A6C329EF34C4E",
-      "bytes": 50038
+      "sha256": "FBC6C7218A67CA33C86BC775DF4202758829E1152A6BC052D64E198F881D8951",
+      "bytes": 54156
     }
   ],
   "visual": "NOT_REVIEWED",
