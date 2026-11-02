@@ -3,9 +3,9 @@
   "outcome": "PASS",
   "block_id": "plan-project",
   "origin_sha256": "189acd8775c1d2e79a4e46f9ec137e55851613491e358472005f21c716daa4f7",
-  "document_sha256": "cdd02b652a05d0ddb4bab85d9ab4c9408ba3dd682eaa4a916fafca14b18910bf",
-  "pdf_sha256": "e7942358bd4e5cf7244e2223ca810a5639d13b5c91568fe23d04a4441f26a138",
-  "preview_sha256": "d3e37f51f532fb4bb0f33d1a2d80856fb035a17346645d6acc464e59a533519d",
+  "document_sha256": "13e9f7b9f71fd0d6b412bc262527732b4cc36fe7b4c59363a09e85ee51cbde0c",
+  "pdf_sha256": "4d101f13576c0ebf64657dc34a3ea6f70fb98bdef2e0ada4e2dcbd83640d16f3",
+  "preview_sha256": "04f27421ab932d3d610125405e7fb589520fd570b1e95539222856edc420f2e9",
   "content_state": "neutral_form",
   "pages": 5,
   "tested_edits": [
@@ -24,15 +24,15 @@
   ],
   "nativeBaseline": {
     "path": "full-plans/plan-project/baseline-native.json",
-    "sha256": "2a2c44acffce502ac2d27268df7db651a4c6805817172ee6e4e96b42d791af86"
+    "sha256": "8dbe24808453fbdcc7945f826656a26f91cbb72449cba98ceb14ae816f29ebe3"
   },
   "nativeExample": {
     "path": "full-plans/plan-project/example-native.json",
-    "sha256": "028db0290ed944e9c3807192655a5035eeb17364c24af37124c5bff22a056f41"
+    "sha256": "5b825cb97ffcdc51482a7a5081d520f191f0388d7ef0c09dc9c45f485760b4bf"
   },
   "sampleProof": {
     "path": "full-plans/plan-project/fill-evidence.json",
-    "sha256": "c628c226e940bfc341112f461f3b54e40873008be2a5ee4e3d636e95117cc58e"
+    "sha256": "f5359cdc56aa7e89093176e1c154bff5472ee930a66bdb9cf9bb91fd4b189042"
   },
   "acceptance": "Prepared form and fresh fill output reviewed for title spacing; content and original design preserved."
 }

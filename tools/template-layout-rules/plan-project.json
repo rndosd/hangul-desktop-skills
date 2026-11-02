@@ -55,7 +55,17 @@
     8516,
     29191,
     8500
-   ]
+   ],
+   "trimEmptyParagraphs": true
   }
- ]
+ ],
+ "_fontSubstitutes": {
+  "HCI Poppy": "바탕",
+  "한양신명조": "바탕",
+  "명조": "바탕"
+ },
+ "_wordBreak": {
+  "breakNonLatinWord": "BREAK_WORD",
+  "breakLatinWord": "KEEP_WORD"
+ }
 }

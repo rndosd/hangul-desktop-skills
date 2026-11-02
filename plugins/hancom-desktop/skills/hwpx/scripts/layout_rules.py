@@ -9,6 +9,9 @@ Rules (references/layout-rules.md):
   R5  item symbols follow the level order: circle (1) -> '-' or '⇒' (2) -> '·' (3)
   R6  item text uses one character format per document and size (font, spacing, weight);
       items that bold only some words are inline emphasis and are not compared
+  R7  the run that draws an item's or heading's symbol and leading spaces uses no Hancom legacy
+      (HFT) font: Hangul replaces those differently by PC and version, which changes the symbol
+      width and so breaks the hanging indent
 R1 (wrapped lines start under the first body character) and R4 (deeper levels start
 further right) need real line positions; hwpx-windows-finalize/scripts/wrap_alignment.py
 measures them in the Hangul PDF.
@@ -29,6 +32,8 @@ LEVEL = {**{c: 1 for c in CIRCLES}, '-': 2, '–': 2, '⇒': 2, '·': 3, 'ㆍ': 
 # Hancom private-use circled numbers (U+F02B1..) and ①-⑳ used as numbered sub-headings.
 CIRCLED = {chr(c) for c in range(0xF02B1, 0xF02C5)} | {chr(c) for c in range(0x2460, 0x2474)}
 ROMAN = tuple('ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ')
+# Font slots that draw symbols, spaces and numbers at the start of an item or heading.
+PREFIX_SLOTS = ('hangul', 'latin', 'symbol', 'other')
 # Symbol-font (Wingdings) code points shown by the glyph they draw.
 SHOWN = {'': '❍', '': '•'}
 
@@ -73,6 +78,24 @@ def char_styles(header):
     return styles
 
 
+def legacy_fonts(header):
+    """charPr id -> Hancom legacy (HFT) faces in its prefix slots, for the charPrs that have any."""
+    faces = {}
+    for node in header.iter():
+        if _local(node) == 'fontface':
+            faces[(node.get('lang') or '').lower()] = {font.get('id'): font.get('face') for font in node
+                                                       if _local(font) == 'font' and font.get('type') == 'HFT'}
+    legacy = {}
+    for node in header.iter():
+        if _local(node) != 'charPr':
+            continue
+        ref = next((child for child in node if _local(child) == 'fontRef'), None)
+        names = sorted({faces.get(slot, {}).get(ref.get(slot)) for slot in PREFIX_SLOTS} - {None}) if ref is not None else []
+        if names:
+            legacy[node.get('id')] = names
+    return legacy
+
+
 def classify(text):
     """(kind, symbol, level, leading spaces) for a paragraph's visible start, or None."""
     stripped = text.lstrip(' 　')
@@ -113,6 +136,8 @@ def check(path):
         sections = sorted(n for n in package.namelist() if n.startswith('Contents/section') and n.endswith('.xml'))
         trees = [etree.fromstring(package.read(name)) for name in sections]
     formats, heights, styles = paragraph_formats(header), char_heights(header), char_styles(header)
+    legacy = legacy_fonts(header)
+    legacy_prefixes = collections.defaultdict(list)  # (symbol, faces) -> examples
     roles = collections.defaultdict(list)
     item_text = collections.defaultdict(list)  # size -> [(text format, example)] for items without inline emphasis
     findings = []
@@ -129,6 +154,8 @@ def check(path):
             symbol_run = styles.get(runs[0].get('charPrIDRef'), (None, 0, False)) if runs else (None, 0, False)
             signature = (fmt.get('align'), fmt.get('left'), fmt.get('intent'), fmt.get('lineSpacing'), lead, size, *symbol_run)
             roles[(role_kind, level, symbol, size)].append((signature, text.strip()[:40]))
+            if runs and runs[0].get('charPrIDRef') in legacy:
+                legacy_prefixes[(symbol, tuple(legacy[runs[0].get('charPrIDRef')]))].append(text.strip()[:40])
             if role_kind == 'item':
                 text_formats = {(styles.get(run.get('charPrIDRef')), heights.get(run.get('charPrIDRef'))) for run in content_runs(runs)}
                 if len(text_formats) == 1:
@@ -164,6 +191,10 @@ def check(path):
                 'variants': [{'count': count, 'font': s[0][0] if s[0] else None, 'charSpacing': s[0][1] if s[0] else None,
                               'bold': s[0][2] if s[0] else None, 'size': s[1],
                               'example': next(t for f, t in entries if f == s)} for s, count in variants.most_common()]})
+    for (symbol, faces), examples in legacy_prefixes.items():
+        findings.append({'rule': 'R7', 'symbol': symbol, 'level': None, 'count': len(examples), 'fonts': list(faces), 'example': examples[0],
+                         'message': f"'{symbol}' 문단 {len(examples)}개의 기호·앞 공백을 한컴 옛 글꼴({', '.join(faces)})로 그립니다. "
+                                    "PC·한글 판마다 다른 글꼴로 바뀌어 기호 폭과 내어쓰기 위치가 달라지므로 PC마다 같은 TrueType 글꼴을 씁니다."})
     r2 = [f for f in findings if f['rule'] == 'R2']
     if r2:  # one line per symbol is enough to act on
         seen, kept = set(), []

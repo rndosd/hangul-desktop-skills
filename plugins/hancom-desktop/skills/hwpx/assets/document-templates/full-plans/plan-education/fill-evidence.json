@@ -1,11 +1,11 @@
 {
   "outcome": "PASS_SAMPLE",
-  "templateSha256": "aae60a0489b63156ab72dfa6b23796630f10616e4b8faa5a49a2fda765ecf242",
-  "sampleSha256": "f429afbd214794e4a81cd3ea1c25dd599acd27d6a195f520164d9f0c741e8ebe",
-  "pdfSha256": "89d9878ad4f09714f9490ac58d50c9bcc23f9327d6690d333de2384bc9729116",
+  "templateSha256": "4bc1c8b6019bcb3757301af7d56bc1f1334bc9ff5f5365eeb692177ad2997c95",
+  "sampleSha256": "274c37c7fe08b912667eaa42fd6121636a6e879c766d3c21c99c1f5ee44f0206",
+  "pdfSha256": "ae05aaa8256d76ee8df340adfc87ba6edb4539f2afcc2d23befa9a9eac42b826",
   "nativeReceipt": {
     "path": "full-plans/plan-education/example-native.json",
-    "sha256": "bc2fcf114860f610941b4bc6445944f5d1bcaaa57736cced7c85800449557ea1"
+    "sha256": "c4b91aae6d0842aa7410ac1bd4888ba520c82592dd819c3533c573ea769ab9bb"
   },
   "allSuppliedValuesPresentInHwpxAndPdf": true,
   "visualReview": {

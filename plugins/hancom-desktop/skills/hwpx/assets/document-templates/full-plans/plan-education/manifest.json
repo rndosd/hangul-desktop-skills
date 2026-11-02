@@ -1,10 +1,10 @@
 {
   "schema": "hangul.fill.v1",
   "blockId": "plan-education",
-  "sourceDocumentSha256": "aae60a0489b63156ab72dfa6b23796630f10616e4b8faa5a49a2fda765ecf242",
+  "sourceDocumentSha256": "4bc1c8b6019bcb3757301af7d56bc1f1334bc9ff5f5365eeb692177ad2997c95",
   "template": {
     "path": "full-plans/plan-education/template.hwpx",
-    "sha256": "aae60a0489b63156ab72dfa6b23796630f10616e4b8faa5a49a2fda765ecf242"
+    "sha256": "4bc1c8b6019bcb3757301af7d56bc1f1334bc9ff5f5365eeb692177ad2997c95"
   },
   "styles": {
     "path": "full-plans/plan-education/styles.json",
@@ -417,7 +417,7 @@
       }
     ],
     "preparedRanges": {
-      "documentSha256": "aae60a0489b63156ab72dfa6b23796630f10616e4b8faa5a49a2fda765ecf242",
+      "documentSha256": "4bc1c8b6019bcb3757301af7d56bc1f1334bc9ff5f5365eeb692177ad2997c95",
       "regions": [
         {
           "id": "cover",
@@ -543,12 +543,12 @@
   "verification": {
     "evidence": {
       "path": "full-plans/plan-education/fill-evidence.json",
-      "sha256": "81cec49f8a34aac1214a0ee176fca12ce6dd712a0626154ed7ddd8a054c17649"
+      "sha256": "b7ae24c4a5212a27cd1df07fd1b27ea4b189f42cd0f4fdf2143354bb6ff82e06"
     }
   },
   "preview": {
     "path": "full-plans/plan-education/preview.png",
-    "sha256": "e967b5ceed9a1d34b8b4c266c109dcb34efec4b59853422f58b980c9c1ae5302"
+    "sha256": "c416277624821303f4d9c5d7af892a8ce158ae97c76ff5ff3d78d81f69e13578"
   },
   "limits": [
     "준비본과 입력 예시의 검증이며 모든 분량·부분 선택·사용자 양식의 성공 보증이 아님",
