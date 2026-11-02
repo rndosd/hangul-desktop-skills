@@ -244,6 +244,10 @@ def prepare(name, spec, raw, out_dir, deep_indent):
         paragraphs = body_paragraphs(section)
         need(len(paragraphs) == 1, f'{name}: one text paragraph expected, found {len(paragraphs)}')
         set_placeholder(paragraphs[0], PREFIX[kind], spec['placeholder'])
+        if spec.get('symbol'):
+            prefix = next(t for t in paragraphs[0].iter(HP + 't') if t.text and SYMBOL[kind] in t.text)
+            prefix.text = prefix.text.replace(SYMBOL[kind], spec['symbol'], 1)
+            entry['symbol'] = spec['symbol']
         entry['placeholder'] = spec['placeholder']
         previews.append(spec['placeholder'])
         shape = shape_of(header, section, paragraphs[0])
@@ -286,7 +290,7 @@ def leftover_wording(path, allowed):
     text = ''.join(t.text or '' for t in section.iter(HP + 't')) + preview + ''.join(re.findall(r'<opf:title[^>]*>(.*?)</opf:title>', hpf, re.S))
     for value in sorted(allowed, key=len, reverse=True):
         text = text.replace(value, '')
-    return re.sub(r'[\s◦\-‧※·]', '', text)
+    return re.sub(r'[\s◦○\-‧※·]', '', text)
 
 
 def measure_advances(pdf, expected):
@@ -325,7 +329,7 @@ def calibrate_hanging(parts, out_dir, work):
         renders = [dict(part=str(out_dir / entry['file']), find=entry['placeholder'], text=WRAP_TEXT,
                         pdf=str(work / f'hanging-{attempt}-{name}.pdf')) for name, entry in items.items()]
         native(dict(renders=renders), work, f'hanging-{attempt}')
-        offsets = {name: wrap_offset(work / f'hanging-{attempt}-{name}.pdf', SYMBOL[entry['kind']]) for name, entry in items.items()}
+        offsets = {name: wrap_offset(work / f'hanging-{attempt}-{name}.pdf', entry.get('symbol', SYMBOL[entry['kind']])) for name, entry in items.items()}
         if attempt:
             return {name: round(offset * 25.4 / 72, 2) for name, offset in offsets.items()}
         for name, offset in offsets.items():

@@ -103,7 +103,7 @@ class AssemblyTest(unittest.TestCase):
     def test_tables_keep_part_columns(self):
         plan = self.plan(CHAPTER, {'t': 'table', 'part': 'schedule', 'rows': [['안내', '3. 15.', ''], ['실시', '9. 15.', '각 학교']]})
         table = next(s for s in plan['steps'] if s['op'] == 'table')
-        self.assertEqual((table['have'], table['cols'], table['prefix']), (9, 3, ' ◦ '))
+        self.assertEqual((table['have'], table['cols'], table['prefix']), (9, 3, ' ○ '))
         self.rejects('칸 수가 3이 아닙니다', CHAPTER, {'t': 'table', 'part': 'schedule', 'rows': [['안내', '3. 15.']]})
         self.rejects("표 부품 'item'", CHAPTER, {'t': 'table', 'part': 'item', 'rows': [['a']]})
 

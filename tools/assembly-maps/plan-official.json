@@ -19,12 +19,12 @@
     "heading1": {"range": [199, 200], "kind": "heading", "level": 1, "placeholder": "[1단계 제목]", "check": {"paragraph": 199, "startsWith": "1. 시험 시행세부계획"}},
     "heading2": {"range": [257, 258], "kind": "heading", "level": 2, "placeholder": "[2단계 제목]", "check": {"paragraph": 257, "startsWith": "가. 시험감독관"}},
     "heading3": {"range": [258, 259], "kind": "heading", "level": 3, "placeholder": "[3단계 제목]", "check": {"paragraph": 258, "startsWith": "1) 시험감독관과"}},
-    "item": {"range": [259, 260], "kind": "item", "placeholder": "[항목]", "baseLeftHwp": 0, "check": {"paragraph": 259, "startsWith": "◦ 시험감독관 및"}},
+    "item": {"range": [259, 260], "kind": "item", "symbol": "○", "placeholder": "[항목]", "baseLeftHwp": 0, "check": {"paragraph": 259, "startsWith": "◦ 시험감독관 및"}},
     "dash": {"range": [350, 351], "kind": "dash", "placeholder": "[항목]", "baseLeftHwp": 0, "check": {"paragraph": 350, "startsWith": "- 동일 시험장"}},
     "dot": {"range": [97, 98], "kind": "dot", "placeholder": "[항목]", "baseLeftHwp": 0, "check": {"paragraph": 97, "startsWith": "‧ 점자"}},
     "note": {"range": [108, 109], "kind": "note", "placeholder": "[항목]", "baseLeftHwp": 700, "check": {"paragraph": 108, "startsWith": "※ 응시원서"}},
     "spacer": {"range": [263, 264], "kind": "spacer"},
-    "schedule": {"range": [80, 81], "kind": "table", "table": {"cols": 3, "firstColumnPrefix": " ◦ "}},
+    "schedule": {"range": [80, 81], "kind": "table", "table": {"cols": 3, "firstColumnPrefix": " ○ "}},
     "two-column": {"range": [120, 121], "kind": "table", "table": {"cols": 2}}
   }
 }
