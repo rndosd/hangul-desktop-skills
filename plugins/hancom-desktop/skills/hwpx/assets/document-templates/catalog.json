@@ -41,7 +41,7 @@
       "label": "종합사업 추진계획 · 요약·상세형",
       "status": "active_source",
       "path": "full-plans/plan-project/template.hwpx",
-      "sha256": "13e9f7b9f71fd0d6b412bc262527732b4cc36fe7b4c59363a09e85ee51cbde0c",
+      "sha256": "5a35f6bf75bb9a877d537d32561480a7c5f4bb5799fea05d29790a34bb652bf8",
       "preview": "full-plans/plan-project/template.pdf",
       "limitations": [
         "준비본 복사이며 새 내용 반영·실제 출력은 별도 확인. 채움은 full-plans.json 사용."

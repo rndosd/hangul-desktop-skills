@@ -16,6 +16,10 @@ Template-wide keys, written by hand into rules.json:
                     BREAK_WORD is Hangul's word (어절) wrap; KEEP_WORD splits Korean words.
   _tables[].trimEmptyParagraphs  drop empty paragraphs after a cell's text, so vertically
                     centred cells of one row line up and rows keep only the height they need.
+  _tables[].dropFullWidthSpaces  remove full-width space controls left inside placeholders.
+  _tables[].useTableMargin  cells drop their own margins and use the table's inner margin.
+  _tables[].columns {"col": {"align", "hanging", "charPr"}}: one format for that column's body
+                    cells (rows from firstBodyRow, default 1).
 """
 from __future__ import annotations
 
@@ -107,13 +111,14 @@ def _empty(paragraph):
 
 
 def _set(paraPr, values):
+    """Write the given values; keys a rule leaves out keep the paragraph's own setting."""
     for node in paraPr.iter():
         name = rules._local(node)
-        if name == 'align':
+        if name == 'align' and 'align' in values:
             node.set('horizontal', values['align'])
-        elif name == 'lineSpacing':
+        elif name == 'lineSpacing' and 'lineSpacing' in values:
             node.set('value', str(values['lineSpacing']))
-        elif name in ('left', 'intent'):
+        elif (name == 'left' and 'left' in values) or (name == 'intent' and 'hanging' in values):
             value = values['left'] if name == 'left' else values['hanging']
             in_default = any(rules._local(a) == 'default' for a in node.iterancestors())
             node.set('value', str(value * 2 if in_default else value))  # legacy default branch uses 2x units
@@ -188,6 +193,42 @@ def apply(source, target, role_rules):
                 paragraphs = [n for n in cell if rules._local(n) == 'p']
                 while len(paragraphs) > 1 and _empty(paragraphs[-1]):
                     cell.remove(paragraphs.pop())
+        if spec.get('dropFullWidthSpaces'):
+            # A full-width space inside a placeholder stays put when the slot is filled: "정　비 완료".
+            for space in [n for n in table.iter() if rules._local(n) == 'fwSpace']:
+                holder, before = space.getparent(), space.getprevious()
+                if before is None:
+                    holder.text = (holder.text or '') + (space.tail or '')
+                else:
+                    before.tail = (before.tail or '') + (space.tail or '')
+                holder.remove(space)
+        if spec.get('useTableMargin'):
+            # Cells with their own tight margins put text against the borders; use the table's inner margin.
+            inner = next(n for n in table if rules._local(n) == 'inMargin')
+            for cell in (n for n in table.iter() if rules._local(n) == 'tc'):
+                cell.set('hasMargin', '0')
+                for margin in (n for n in cell if rules._local(n) == 'cellMargin'):
+                    margin.attrib.update(inner.attrib)
+                for paragraph in (n for n in cell.iter() if rules._local(n) == 'p'):
+                    for cached in [n for n in paragraph if rules._local(n) == 'linesegarray']:
+                        paragraph.remove(cached)
+        for column, values in spec.get('columns', {}).items():
+            # Body cells of one column share one paragraph and character format; the header row keeps its own.
+            for cell in (n for n in table.iter() if rules._local(n) == 'tc'):
+                addr = next(c for c in cell if rules._local(c) == 'cellAddr')
+                if addr.get('colAddr') != column or int(addr.get('rowAddr')) < spec.get('firstBodyRow', 1):
+                    continue
+                for paragraph in (n for n in next(c for c in cell if rules._local(c) == 'subList') if rules._local(n) == 'p'):
+                    if 'charPr' in values:
+                        for run in (n for n in paragraph if rules._local(n) == 'run'):
+                            run.set('charPrIDRef', values['charPr'])
+                    key = ('column', spec['id'], column, paragraph.get('paraPrIDRef'))
+                    if key not in clones:
+                        clone = copy.deepcopy(by_id[paragraph.get('paraPrIDRef')]); clone.set('id', str(next_id)); _set(clone, values)
+                        container.append(clone); clones[key] = str(next_id); next_id += 1
+                    paragraph.set('paraPrIDRef', clones[key])
+                    for cached in [n for n in paragraph if rules._local(n) == 'linesegarray']:
+                        paragraph.remove(cached)
     substitutes = role_rules.get('_fontSubstitutes', {})
     if substitutes:
         faces = {node.get('lang').lower(): {font.get('id'): font.get('face') for font in node if rules._local(font) == 'font'}

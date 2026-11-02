@@ -2,8 +2,8 @@
   "status": "PREVIEW_READY",
   "pdf": {
     "path": "<local-path>",
-    "sha256": "0bb1d98efe354634bf536b69b3edf8c4491ddbd59bc35a694c225ae394a65a21",
-    "bytes": 186696
+    "sha256": "864dabab4ad96abcd00756dd9e1f1616f6b3b3eccbb854e9d63c46e48343f7f0",
+    "bytes": 186631
   },
   "render": {
     "engine": "pymupdf",
@@ -57,8 +57,8 @@
       "page": 6,
       "image": {
         "path": "<local-path>",
-        "sha256": "d131025e6fb900ca575c2119182df9a87cc5ab9a838325f8676d8b9ce2f74fc5",
-        "bytes": 124450
+        "sha256": "8159b8e632ddc8a85f29096cd159aea9012328f3af7f84fd37efae1219db7553",
+        "bytes": 124791
       }
     }
   ]

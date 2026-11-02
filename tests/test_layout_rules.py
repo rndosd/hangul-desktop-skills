@@ -1,6 +1,6 @@
 """Common layout rules: structural checks on synthetic HWPX and line positions on synthetic PDFs."""
 from pathlib import Path
-import sys, tempfile, unittest, zipfile
+import re, sys, tempfile, unittest, zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'plugins/hancom-desktop/skills/hwpx/scripts'))
@@ -105,6 +105,18 @@ class WrapTest(unittest.TestCase):
     def test_deeper_level_left_of_parent_warns(self):
         report = self.pdf([(90, '◦ 상위 항목', None), (60, '- 하위 항목', None)])
         self.assertTrue(any(w.startswith('[R4]') for w in report['warnings']))
+
+
+class TemplatePlaceholderTest(unittest.TestCase):
+    def test_placeholders_hold_no_space_controls(self):
+        """Fill keeps a space control where it stands, so it would land after the first filled character."""
+        plans = ROOT / 'plugins/hancom-desktop/skills/hwpx/assets/document-templates/full-plans'
+        for template in sorted(plans.glob('*/template.hwpx')):
+            with zipfile.ZipFile(template) as z:
+                section = z.read('Contents/section0.xml').decode('utf-8')
+            for text in re.findall(r'<hp:t>(.*?)</hp:t>', section):
+                if '[' in text:
+                    self.assertNotIn('Space/>', text, f'{template.parent.name}: {text}')
 
 
 class ShortTailTest(unittest.TestCase):
