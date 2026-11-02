@@ -140,10 +140,14 @@ def build_plan(manifest, outline):
             steps += [dict(op='insert', part=name, keepSection=0),
                       dict(op='text', find=parts[name]['placeholder'], text=_text(node['text'], where, placeholders))]
         elif kind == 'table':
-            need(set(node) == {'t', 'part', 'rows'}, f'{where}: table은 t, part, rows만 받습니다.')
+            need({'t', 'part', 'rows'} <= set(node) <= {'t', 'part', 'rows', 'header'}, f'{where}: table은 t, part, rows와 선택 header만 받습니다.')
             part = parts.get(node['part'])
             need(part is not None and part['kind'] == 'table', f'{where}: 표 부품 {node["part"]!r}이 양식에 없습니다.')
-            spec, rows = part['table'], node['rows']
+            spec, rows, header = part['table'], node['rows'], node.get('header')
+            if header is not None:
+                need(isinstance(header, list) and len(header) == spec['cols'], f'{where}: header 칸 수가 {spec["cols"]}이 아닙니다.')
+                for c, cell in enumerate(header, 1):
+                    _text(cell, f'{where}.header[{c}]', placeholders)
             need(isinstance(rows, list) and 1 <= len(rows) <= MAX_ROWS, f'{where}: rows는 1~{MAX_ROWS}행입니다.')
             for r, row in enumerate(rows, 1):
                 need(isinstance(row, list) and len(row) == spec['cols'], f'{where}: {r}행의 칸 수가 {spec["cols"]}이 아닙니다.')
@@ -151,7 +155,7 @@ def build_plan(manifest, outline):
                     _text(cell, f'{where}.rows[{r}][{c}]', placeholders, allow_empty=True)
             name = node['part']
             steps += [dict(op='insert', part=name, keepSection=0),
-                      dict(op='table', have=spec['dataRows'], cols=spec['cols'], prefix=spec.get('firstColumnPrefix', ''), rows=rows)]
+                      dict(op='table', have=spec['dataRows'], cols=spec['cols'], prefix=spec.get('firstColumnPrefix', ''), header=header, rows=rows)]
         else:
             raise ValueError(f'{where}: 알 수 없는 t {kind!r} (chapter, heading, item, dash, dot, note, table)')
     used = {step['part'] for step in steps if step['op'] == 'insert'}
@@ -185,7 +189,7 @@ def check_output(path, plan):
     text = ''.join(t.text or '' for root in roots for t in root.iter(HP + 't'))
     finds = {step['find'] for step in plan['steps'] if step['op'] == 'text'}
     wanted = [step['text'] for step in plan['steps'] if step['op'] == 'text' and step['text']]
-    wanted += [cell for step in plan['steps'] if step['op'] == 'table' for row in step['rows'] for cell in row if cell]
+    wanted += [cell for step in plan['steps'] if step['op'] == 'table' for row in [step.get('header') or [], *step['rows']] for cell in row if cell]
     tables = [int(t.get('rowCnt')) for root in roots for t in root.iter(HP + 'tbl')]
     expected = [len(step['rows']) + 1 for step in plan['steps'] if step['op'] == 'table']
     result = dict(placeholdersLeft=sorted(p for p in finds if p in text), missingTexts=[t for t in wanted if t not in text],

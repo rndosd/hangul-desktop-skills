@@ -107,6 +107,44 @@ class AssemblyTest(unittest.TestCase):
         self.rejects('칸 수가 3이 아닙니다', CHAPTER, {'t': 'table', 'part': 'schedule', 'rows': [['안내', '3. 15.']]})
         self.rejects("표 부품 'item'", CHAPTER, {'t': 'table', 'part': 'item', 'rows': [['a']]})
 
+    def test_table_header_override_is_validated(self):
+        rows = [['1~2학년군', '그림책 읽기']]
+        plain = next(s for s in self.plan(CHAPTER, {'t': 'table', 'part': 'two-column', 'rows': rows})['steps'] if s['op'] == 'table')
+        self.assertIsNone(plain['header'])
+        named = self.plan(CHAPTER, {'t': 'table', 'part': 'two-column', 'header': ['학년군', '주요 활동'], 'rows': rows})
+        self.assertEqual(next(s for s in named['steps'] if s['op'] == 'table')['header'], ['학년군', '주요 활동'])
+        table = {'t': 'table', 'part': 'two-column', 'rows': rows}
+        self.rejects('header 칸 수가 2', CHAPTER, dict(table, header=['학년군']))
+        self.rejects('header 칸 수가 2', CHAPTER, dict(table, header='학년군'))
+        self.rejects('header\\[2\\]: 빈 문구', CHAPTER, dict(table, header=['학년군', ' ']))
+        self.rejects('header\\[1\\]: 양식 자리표시', CHAPTER, dict(table, header=['[항목]', '내용']))
+        self.rejects('선택 header만', CHAPTER, dict(table, caption='표'))
+
+    def test_table_cells_wrap_by_word_and_prefixed_column_hangs(self):
+        head = '{http://www.hancom.co.kr/hwpml/2011/head}'
+        core = '{http://www.hancom.co.kr/hwpml/2011/core}'
+        for name, part in self.manifest['parts'].items():
+            if part['kind'] != 'table':
+                continue
+            with zipfile.ZipFile(part['path']) as package:
+                section = ElementTree.fromstring(package.read('Contents/section0.xml'))
+                header = ElementTree.fromstring(package.read('Contents/header.xml'))
+            shapes = {s.get('id'): s for s in header.iter(head + 'paraPr')}
+            rows = list(next(section.iter(a.HP + 'tbl')).iter(a.HP + 'tr'))
+            for row in rows:
+                for cell in row.iter(a.HP + 'tc'):
+                    for paragraph in cell.iter(a.HP + 'p'):
+                        brk = shapes[paragraph.get('paraPrIDRef')].find(head + 'breakSetting')
+                        self.assertEqual((brk.get('breakNonLatinWord'), brk.get('breakLatinWord')), ('BREAK_WORD', 'KEEP_WORD'), name)
+            first = [list(row.iter(a.HP + 'tc'))[0].find(f'{a.HP}subList/{a.HP}p').get('paraPrIDRef') for row in rows[1:]]
+            self.assertEqual(len(set(first)), 1, name)
+            if part['table'].get('firstColumnPrefix'):
+                shape = shapes[first[0]]
+                self.assertEqual(shape.find(head + 'align').get('horizontal'), 'LEFT', name)
+                self.assertLess(int(shape.find(f'.//{head}margin/{core}intent').get('value')), 0, name)
+                others = [p.get('paraPrIDRef') for p in section.iter(a.HP + 'p') if p.get('paraPrIDRef') == first[0]]
+                self.assertEqual(len(others), len(rows) - 1, f'{name}: the first column format is shared')
+
     def test_invalid_outlines_are_rejected_before_hangul(self):
         self.rejects('장\\(chapter\\)으로 시작', H1)
         self.rejects('2단계 제목 앞에 1단계 제목', CHAPTER, H2)

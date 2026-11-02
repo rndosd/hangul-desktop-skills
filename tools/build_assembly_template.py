@@ -11,8 +11,10 @@ this tool then rewrites each saved part so that no source wording ships:
                wrapping text in each and the hanging indent is set so wrapped lines start under
                the first body character
   table parts  the header row stays; data rows lose their text and get the first data row's
-               height and cell margins, so rows grow only with their new content; the holding
-               paragraph gets at least 100% line spacing so the next line clears a grown table
+               height, cell margins and formats, so rows grow only with their new content; every
+               cell wraps by word, and a prefixed first column is left aligned with a hanging indent
+               calibrated like the items; the holding paragraph gets at least 100% line spacing so
+               the next line clears a grown table
   chapter box  kept with the next paragraph, like headings. Hangul renders calibration strings
                in the box; the measured character advances let the renderer size it to each title
 and writes manifest.json (schema hwpx.assembly-template.v1) with file hashes.
@@ -110,24 +112,57 @@ def shape_of(header, section, paragraph):
     return header.find(f'.//{HH}paraPr[@id="{pid}"]')
 
 
-def margin(header, section, paragraph, name, value=None):
-    """Read or set one paragraph margin (left, intent) of a paragraph format used only by this paragraph."""
-    pid = paragraph.get('paraPrIDRef')
-    need(sum(p.get('paraPrIDRef') == pid for p in section.iter(HP + 'p')) == 1, f'paragraph format {pid} is shared')
-    shape = shape_of(header, section, paragraph)
+def shape_margin(shape, name, value=None):
     if value is None:
         return int(shape.find(f'.//{HP}case/{HH}margin/{HC}{name}').get('value'))
     for branch, scale in (('case', 1), ('default', 2)):  # the compatibility branch stores doubled values
         shape.find(f'.//{HP}{branch}/{HH}margin/{HC}{name}').set('value', str(value * scale))
 
 
-def normalize_table(section, spec):
+def margin(header, section, paragraph, name, value=None):
+    """Read or set one paragraph margin (left, intent) of a paragraph format used only by this paragraph."""
+    pid = paragraph.get('paraPrIDRef')
+    need(sum(p.get('paraPrIDRef') == pid for p in section.iter(HP + 'p')) == 1, f'paragraph format {pid} is shared')
+    return shape_margin(shape_of(header, section, paragraph), name, value)
+
+
+def own_shape(header, pid):
+    """A copy of paragraph format pid under a new id, so cells can change it without touching other paragraphs."""
+    shapes = header.find(f'.//{HH}paraProperties')
+    clone = copy.deepcopy(shapes.find(f'{HH}paraPr[@id="{pid}"]'))
+    clone.set('id', str(max(int(s.get('id')) for s in shapes) + 1))
+    shapes.append(clone)
+    shapes.set('itemCnt', str(len(shapes)))
+    # In OWPML BREAK_WORD for non-Latin text is Hangul's word wrap (어절); KEEP_WORD breaks between characters.
+    clone.find(HH + 'breakSetting').attrib.update({'breakLatinWord': 'KEEP_WORD', 'breakNonLatinWord': 'BREAK_WORD'})
+    return clone
+
+
+def first_column_shape(header, section):
+    """Paragraph format of the first data cell in the first column; normalize_table gives that column its own."""
+    cell = next(section.iter(HP + 'tbl')).findall(HP + 'tr')[1].find(HP + 'tc')
+    return header.find(f'.//{HH}paraPr[@id="{cell.find(f"{HP}subList/{HP}p").get("paraPrIDRef")}"]')
+
+
+def normalize_table(section, header_xml, spec):
     table = next(section.iter(HP + 'tbl'))
     rows = table.findall(HP + 'tr')
     need(len(rows[0].findall(HP + 'tc')) == spec['cols'], 'table column count differs from the part map')
     first = rows[1].findall(HP + 'tc')
     height = int(first[0].find(HP + 'cellSz').get('height'))
     header = [text_of(cell) for cell in rows[0].findall(HP + 'tc')]
+    for cell in rows[0].findall(HP + 'tc'):
+        for paragraph in cell.iter(HP + 'p'):
+            paragraph.set('paraPrIDRef', own_shape(header_xml, paragraph.get('paraPrIDRef')).get('id'))
+    shapes, styles = [], []
+    for column, model in enumerate(first):
+        paragraph = model.find(f'{HP}subList/{HP}p')
+        shape = own_shape(header_xml, paragraph.get('paraPrIDRef'))
+        if column == 0 and spec.get('firstColumnPrefix'):
+            shape.find(HH + 'align').set('horizontal', 'LEFT')  # justified lines widen the space after the prefix
+            shape_margin(shape, 'intent', 0)  # calibrate_hanging measures and sets the hanging indent
+        shapes.append(shape.get('id'))
+        styles.append((paragraph.get('styleIDRef'), paragraph.find(HP + 'run').get('charPrIDRef')))
     for row in rows[1:]:
         for column, cell in enumerate(row.findall(HP + 'tc')):
             model = first[column]
@@ -146,6 +181,9 @@ def normalize_table(section, spec):
                     keep.remove(child)
             for child in list(runs[0]):
                 runs[0].remove(child)
+            keep.set('paraPrIDRef', shapes[column])
+            keep.set('styleIDRef', styles[column][0])
+            runs[0].set('charPrIDRef', styles[column][1])
     table.find(HP + 'sz').set('height', str(int(rows[0].find(HP + 'tc/' + HP + 'cellSz').get('height')) + height * (len(rows) - 1)))
     table.set('rowCnt', str(len(rows)))
     return dict(dataRows=len(rows) - 1, cols=spec['cols'], header=header, rowHeightHwp=height,
@@ -264,7 +302,7 @@ def prepare(name, spec, raw, out_dir, deep_indent):
     elif kind == 'spacer':
         need(not body_paragraphs(section), 'spacer part must be empty')
     elif kind == 'table':
-        entry['table'] = normalize_table(section, spec['table'])
+        entry['table'] = normalize_table(section, header, spec['table'])
         holder = next(p for p in section.findall(HP + 'p') if p.find(f'.//{HP}tbl') is not None)
         for spacing in shape_of(header, section, holder).iter(HH + 'lineSpacing'):
             if spacing.get('type') == 'PERCENT' and int(spacing.get('value')) < 100:
@@ -323,21 +361,33 @@ def wrap_offset(pdf, symbol):
 
 
 def calibrate_hanging(parts, out_dir, work):
-    """Set each item part's hanging indent so wrapped lines start under the first body character."""
+    """Set the hanging indent of each item part and each prefixed first table column so wrapped
+    lines start under the first body character."""
     items = {name: entry for name, entry in parts.items() if entry['kind'] in ITEM_KINDS and entry['depth'] == 0}
+    tables = {name: entry for name, entry in parts.items() if entry.get('table', {}).get('firstColumnPrefix')}
+    def render(name, entry, attempt):
+        pdf = str(work / f'hanging-{attempt}-{name}.pdf')
+        if name in tables:
+            return dict(part=str(out_dir / entry['file']), cell=[1, 0], text=entry['table']['firstColumnPrefix'] + WRAP_TEXT, pdf=pdf)
+        return dict(part=str(out_dir / entry['file']), find=entry['placeholder'], text=WRAP_TEXT, pdf=pdf)
+    def symbol(name, entry):
+        return entry['table']['firstColumnPrefix'].strip() if name in tables else entry.get('symbol', SYMBOL[entry['kind']])
+    targets = {**items, **tables}
     for attempt in range(2):
-        renders = [dict(part=str(out_dir / entry['file']), find=entry['placeholder'], text=WRAP_TEXT,
-                        pdf=str(work / f'hanging-{attempt}-{name}.pdf')) for name, entry in items.items()]
-        native(dict(renders=renders), work, f'hanging-{attempt}')
-        offsets = {name: wrap_offset(work / f'hanging-{attempt}-{name}.pdf', entry.get('symbol', SYMBOL[entry['kind']])) for name, entry in items.items()}
+        native(dict(renders=[render(name, entry, attempt) for name, entry in targets.items()]), work, f'hanging-{attempt}')
+        offsets = {name: wrap_offset(work / f'hanging-{attempt}-{name}.pdf', symbol(name, entry)) for name, entry in targets.items()}
         if attempt:
             return {name: round(offset * 25.4 / 72, 2) for name, offset in offsets.items()}
         for name, offset in offsets.items():
-            for variant in (name, f'{name}-deep'):
+            for variant in (name,) if name in tables else (name, f'{name}-deep'):
                 path = out_dir / parts[variant]['file']
                 section, header = load(path)
-                paragraph = body_paragraphs(section)[0]
-                margin(header, section, paragraph, 'intent', margin(header, section, paragraph, 'intent') - round(offset * 100))
+                if name in tables:
+                    shape = first_column_shape(header, section)
+                    shape_margin(shape, 'intent', shape_margin(shape, 'intent') - round(offset * 100))
+                else:
+                    paragraph = body_paragraphs(section)[0]
+                    margin(header, section, paragraph, 'intent', margin(header, section, paragraph, 'intent') - round(offset * 100))
                 write_part(path, path, section, header)
                 parts[variant]['sha256'] = sha(path)
 

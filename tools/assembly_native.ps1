@@ -52,8 +52,16 @@ try {
     }
     foreach ($render in $plan.renders) {
         if (-not $hwp.Open([string]$render.part, 'HWPX', 'forceopen:true')) { throw "PART_OPEN_FAILED: $($render.part)" }
-        if ($render.find) {
-            Find-Backward ([string]$render.find)
+        if ($render.cell) {
+            $table = $null; $control = $hwp.HeadCtrl
+            while ($control) { if ($control.CtrlID -eq 'tbl') { $table = $control }; $control = $control.Next }
+            [void]$hwp.SetPosBySet($table.GetAnchorPos(0)); [void]$hwp.FindCtrl()
+            [void]$hwp.Run('ShapeObjTableSelCell'); [void]$hwp.Run('Cancel')
+            for ($i = 0; $i -lt [int]$render.cell[0]; $i++) { [void]$hwp.Run('TableLowerCell') }
+            for ($i = 0; $i -lt [int]$render.cell[1]; $i++) { [void]$hwp.Run('TableRightCell') }
+        }
+        if ($render.find) { Find-Backward ([string]$render.find) }
+        if ($render.find -or $render.cell) {
             $text = $hwp.HParameterSet.HInsertText
             [void]$hwp.HAction.GetDefault('InsertText', $text.HSet); $text.Text = [string]$render.text
             [void]$hwp.HAction.Execute('InsertText', $text.HSet)

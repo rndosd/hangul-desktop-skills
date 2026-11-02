@@ -38,6 +38,14 @@ function Enter-HancomLastTable($Hwp) {
     [void]$Hwp.HAction.Run('ShapeObjTableSelCell');[void]$Hwp.HAction.Run('Cancel')
 }
 
+function Set-HancomCellText($Hwp,[string]$Value) {
+    [void]$Hwp.HAction.Run('MoveListBegin');[void]$Hwp.HAction.Run('MoveSelListEnd')
+    if($Value -eq '') { [void]$Hwp.HAction.Run('Delete');return }  # an empty insert would keep the old text
+    $insert=$Hwp.HParameterSet.HInsertText
+    [void]$Hwp.HAction.GetDefault('InsertText',$insert.HSet);$insert.Text=$Value
+    [void]$Hwp.HAction.Execute('InsertText',$insert.HSet)
+}
+
 function Set-HancomTableRows($Hwp,$Step) {
     $have=[int]$Step.have;$rows=@($Step.rows);$need=$rows.Count;$columns=[int]$Step.cols
     Enter-HancomLastTable $Hwp
@@ -49,23 +57,23 @@ function Set-HancomTableRows($Hwp,$Step) {
         for($i=0;$i -lt $need-$have;$i++){if($Hwp.HAction.Run('TableAppendRow') -eq $false){throw 'ASSEMBLY_ROW_APPEND_FAILED'}}
     }
     Enter-HancomLastTable $Hwp
+    if($Step.header) {
+        for($column=0;$column -lt $columns;$column++) {
+            Set-HancomCellText $Hwp ([string]@($Step.header)[$column])
+            if($column -lt $columns-1){[void]$Hwp.HAction.Run('TableRightCell')}
+        }
+    }
     foreach($row in $rows) {
         [void]$Hwp.HAction.Run('TableLowerCell');[void]$Hwp.HAction.Run('TableColBegin')
         for($column=0;$column -lt $columns;$column++) {
             $value=[string]@($row)[$column]
             if($column -eq 0 -and $value -ne ''){$value=[string]$Step.prefix+$value}
-            [void]$Hwp.HAction.Run('MoveListBegin');[void]$Hwp.HAction.Run('MoveSelListEnd')
-            if($value -eq '') { [void]$Hwp.HAction.Run('Delete') }  # an empty insert would keep the old text
-            else {
-                $insert=$Hwp.HParameterSet.HInsertText
-                [void]$Hwp.HAction.GetDefault('InsertText',$insert.HSet);$insert.Text=$value
-                [void]$Hwp.HAction.Execute('InsertText',$insert.HSet)
-            }
+            Set-HancomCellText $Hwp $value
             if($column -lt $columns-1){[void]$Hwp.HAction.Run('TableRightCell')}
         }
     }
     [void]$Hwp.HAction.Run('Cancel')
-    return @{have=$have;rows=$need;cols=$columns}
+    return @{have=$have;rows=$need;cols=$columns;header=[bool]$Step.header}
 }
 
 function Invoke-HancomAssembly($Hwp,$Plan,$Report) {
