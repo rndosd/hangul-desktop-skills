@@ -25,6 +25,9 @@ def page_profile(data):
     return tuple((element.tag,tuple(sorted(element.attrib.items()))) for element in pages[0].iter())
 
 def validate(plan, source=None):
+    if isinstance(plan, dict) and plan.get('schema') == 'hwpx.native-assemble.v1':
+        from native_assembly import validate_plan
+        return validate_plan(plan, source)
     require(isinstance(plan, dict) and set(plan) == {'schema', 'base', 'blocks'}, 'compose requires schema, base and blocks')
     require(plan['schema'] == SCHEMA, 'unsupported composition schema')
     require(isinstance(plan['blocks'], list) and 1 <= len(plan['blocks']) <= 20, 'compose requires 1..20 appended blocks')
@@ -54,7 +57,7 @@ def validate(plan, source=None):
     return result
 
 def inputs(plan):
-    return {p['path']:p['sha256'] for p in [plan['base'],*plan['blocks']]}
+    return {p['path']:p['sha256'] for p in [plan['base'],*plan.get('blocks',[]),*plan.get('parts',{}).values()]}
 
 def check_inputs(plan):
     result=[]

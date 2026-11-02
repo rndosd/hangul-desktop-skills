@@ -56,6 +56,32 @@ $planCatalog = Join-Path $taskSkillDir 'assets/document-templates/full-plans.jso
 
 아래 블록 입력·`--content`·compose는 필요한 표나 부분 구조를 보완할 때 사용한다.
 
+## 개요로 공문서형 계획서 조립
+
+장·절 수가 정해지지 않은 공문서형 계획(Ⅰ. / 1. / 가. / 1) / ○ / - / ‧ / ※, 표 포함)은 한 원본에서 잘라 둔 부품을 개요 순서로 붙이는 `assemble`을 쓴다. 기본 양식은 `plan-official`(교육부 「2027학년도 대학수학능력시험 시행기본계획」 서식, 공공누리 출처표시, 원문 문구 없음)이다.
+
+```powershell
+& $taskLauncher assemble --template plan-official --outline 개요.json --output 계획.hwpx --pdf 계획.pdf --run 작업폴더/assemble-run --context host-approved
+```
+
+```json
+{"schema":"hwpx.assembly-outline.v1","template":"plan-official",
+ "cover":{"title":"학업성취도 평가 시행계획","subtitle":"2027학년도 ○○도 중학교 3학년","date":"2027. 3. 15.","organization":"○○도교육청"},
+ "nodes":[{"t":"chapter","text":"평가 개요"},
+          {"t":"heading","level":1,"text":"평가의 목적"},
+          {"t":"item","text":"성취 수준을 진단함."},{"t":"dash","text":"세부 내용"},{"t":"dot","text":"하위 내용"},{"t":"note","text":"참고 사항"},
+          {"t":"table","part":"schedule","rows":[["시행계획 안내","3. 15.(월)",""]]}]}
+```
+
+- 번호(Ⅰ. 1. 가. 1))는 개요에서 만든다. 문구에 번호를 넣지 않는다. 절을 빼면 뒤 번호가 당겨진다.
+- `cover`의 `title`·`date`는 필수다. `subtitle`(제목 위 작은 줄)·`organization`은 빼면 빈 줄로 남는다.
+- `level` 2는 1 아래, 3은 2 아래에만 둔다. 3단계 제목 아래 항목은 원본처럼 한 단계 깊게 들여 쓴다.
+- 표 부품: `schedule`(주요 업무·추진 일정·비고 3열, 첫 열 앞에 ` ○ `), `two-column`(구분·내용 2열). 행 수는 자유(1~100), 칸 수는 열 수와 같아야 한다. 제목 행은 선택 `"header":["학년군","주요 활동"]`(열 수만큼)로 바꾸며, 빼면 부품의 제목을 쓴다.
+- 장 제목 상자는 제목 길이에 맞춰 넓어진다. 본문 폭을 넘는 제목은 실행 전에 거부한다.
+- 문구는 줄바꿈·탭 없이 한 문단씩 넣는다. 빈 문구와 `[항목]` 같은 자리표시 문구는 거부한다.
+
+입력 검사가 끝난 뒤 한글을 한 번 열어 표지 부품에 장·제목·항목·표 부품을 차례로 붙이고 저장·재열기·PDF를 만든다. 결과의 `assembly`는 저장본에 자리표시가 남지 않았는지와 요청한 문구·표 행 수를 확인한 값이며, `wrapAlignment`·`pageLayout`은 PDF 배치 경고다. `PASS_NATIVE` 뒤에도 쪽 이미지를 확인한다([preview](#준비된-블록-조합)). 내 양식을 부품으로 등록하는 방법은 저장소의 `tools/build_assembly_template.py`(부품 지도 → 블록 저장 → 자리표시·정규화 → manifest)이며, 등록한 폴더는 `--catalog`로 지정한다.
+
 ## 준비된 양식 채우기
 
 현재 기본 목록은 `full-plans.json`의 완성형 계획서 3종이다. 위 fill 호출을 사용한다. 개인 양식은 해당 업무 폴더의 `--catalog`를 명시한다. 과거 블록 ID·합본은 기본 선택에서 제외한다.

@@ -26,7 +26,7 @@ import pymupdf
 
 PT = 25.4 / 72
 FOOTER = re.compile(r'^[-–]\s*\d+\s*[-–]$')
-ITEM = set('◦○❍-⇒·•m')
+ITEM = set('◦○❍-⇒·‧•m')
 HEADING = set('□❑') | {chr(c) for c in range(0x2460, 0x2474)} | {chr(c) for c in range(0xF000, 0xF100)}
 LAST_PAGE_MAX_LINES = 3
 GAP_RATIO = 0.40
@@ -112,7 +112,7 @@ def measure(pdf):
         for item in p['lines']:
             # Round symbols may be exported without the space after them (as in wrap_alignment._marker).
             if (item['text'][:1] not in ITEM or item['x2'] is None
-                    or not (item['text'][:1] in '◦○❍•⇒·' or item['text'][1:2].isspace())):
+                    or not (item['text'][:1] in '◦○❍•⇒·‧' or item['text'][1:2].isspace())):
                 continue
             previous = item
             while True:

@@ -1,12 +1,21 @@
 # Official append actions only. Ownership, security, save/reopen and cleanup
 # remain in hancom_worker.ps1. Input hashes are read before Open and after Quit.
+. (Join-Path $PSScriptRoot 'Hancom.Assembly.ps1')
+
+function Get-HancomCompositionInputs($Plan) {
+    if($Plan.schema -eq 'hwpx.native-assemble.v1'){return @($Plan.base)+@($Plan.parts.PSObject.Properties.Value)}
+    return @($Plan.base)+@($Plan.blocks)
+}
+
 function Read-HancomComposition([string]$PlanPath,[string]$PlanSha256,[string]$Candidate,[string]$SourceSha256) {
     if ((Get-FinalizeSha256 $PlanPath) -ine $PlanSha256) { throw 'COMPOSITION_PLAN_CHANGED' }
     $plan=Get-Content -LiteralPath $PlanPath -Raw -Encoding UTF8 | ConvertFrom-Json
-    if ($plan.schema -ne 'hwpx.native-compose.v1' -or @($plan.blocks).Count -lt 1 -or @($plan.blocks).Count -gt 20) { throw 'INVALID_COMPOSITION_PLAN' }
+    if ($plan.schema -eq 'hwpx.native-assemble.v1') {
+        if (@($plan.steps).Count -lt 1) { throw 'INVALID_ASSEMBLY_PLAN' }
+    } elseif ($plan.schema -ne 'hwpx.native-compose.v1' -or @($plan.blocks).Count -lt 1 -or @($plan.blocks).Count -gt 20) { throw 'INVALID_COMPOSITION_PLAN' }
     if ([IO.Path]::GetFullPath($plan.base.path) -ine $Candidate) { throw 'COMPOSITION_BASE_MISMATCH' }
     $hashes=@{};$hashes[$Candidate]=$SourceSha256
-    foreach($inputRef in @($plan.base)+@($plan.blocks)) {
+    foreach($inputRef in (Get-HancomCompositionInputs $plan)) {
         if(!$hashes.ContainsKey($inputRef.path)){$hashes[$inputRef.path]=Get-FinalizeSha256 $inputRef.path}
         if ([IO.Path]::GetExtension($inputRef.path) -ine '.hwpx' -or $hashes[$inputRef.path] -ine $inputRef.sha256) { throw 'COMPOSITION_INPUT_CHANGED' }
     }
@@ -15,6 +24,7 @@ function Read-HancomComposition([string]$PlanPath,[string]$PlanSha256,[string]$C
 }
 
 function Invoke-HancomComposition($Hwp,$Plan,$Report) {
+    if($Plan.schema -eq 'hwpx.native-assemble.v1'){Invoke-HancomAssembly $Hwp $Plan $Report;return}
     $index=0
     foreach($block in $Plan.blocks) {
         Write-HancomStage "compose-$index-start"
@@ -41,7 +51,7 @@ function Invoke-HancomComposition($Hwp,$Plan,$Report) {
 
 function Test-HancomCompositionInputs($Plan,[string]$Candidate,[string]$SourceSha256) {
     $checks=@();$hashes=@{};$hashes[$Candidate]=$SourceSha256
-    foreach($inputRef in @($Plan.base)+@($Plan.blocks)) {
+    foreach($inputRef in (Get-HancomCompositionInputs $Plan)) {
         $actual=$null;$errorText=$null
         try {
             if(!$hashes.ContainsKey($inputRef.path)){$hashes[$inputRef.path]=Get-FinalizeSha256 $inputRef.path}

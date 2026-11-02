@@ -16,7 +16,7 @@ import sys
 
 PT_TO_MM = 25.4 / 72
 TOLERANCE_MM = 0.6
-LEVEL = {'◦': 1, '○': 1, '❍': 1, '•': 1, '-': 2, '–': 2, '⇒': 2, '·': 3}
+LEVEL = {'◦': 1, '○': 1, '❍': 1, '•': 1, '-': 2, '–': 2, '⇒': 2, '‧': 2, '·': 3}
 # Symbol fonts export ❍ as the letter it is mapped to in Wingdings.
 SYMBOL_FONT_LETTERS = {'m': '❍', '': '❍', '': '•'}
 
@@ -42,7 +42,7 @@ def _marker(line):
     if symbol not in LEVEL or len(visible) < 2:
         return None
     rest = text[1:]
-    if not rest[:1].isspace() and first not in '◦○❍•⇒·':
+    if not rest[:1].isspace() and first not in '◦○❍•⇒·‧':
         return None
     if first == 'm' and not ('가' <= rest.strip()[:1] <= '힣'):
         return None  # an ordinary word starting with "m", not the Wingdings ❍

@@ -69,7 +69,7 @@ def run(source,mode,output,pdf,run_dir,context,timeout=120,preflight_only=False,
  if composition is not None:
   write(r/'composition.json',composition)
   composition_sha=sha(r/'composition.json')
-  write(r/'composition-dependencies.json',{n:dict(path=str(S/n),sha256=sha(S/n)) for n in ['native_composition.py','Hancom.Composition.ps1']})
+  write(r/'composition-dependencies.json',{n:dict(path=str(S/n),sha256=sha(S/n)) for n in ['native_composition.py','Hancom.Composition.ps1','native_assembly.py','Hancom.Assembly.ps1']})
  argv=[str(ps),'-NoProfile','-STA','-File',str(S/'check_native_context.ps1'),'-OutputPath',str(r/'context.json')]
  p=subprocess.run(argv,env=env,capture_output=True,text=True,encoding='utf-8-sig',errors='replace',timeout=30)
  write(r/'preflight-command.json',dict(argv=argv,exitCode=p.returncode,stdout=p.stdout,stderr=p.stderr))
@@ -91,7 +91,7 @@ def run(source,mode,output,pdf,run_dir,context,timeout=120,preflight_only=False,
  if not result['sourceUnchanged']:result['status']='FAIL_SOURCE_CHANGED'
  if composition is not None:
   checks=check_inputs(composition)
-  result['composition']=dict(planPath=str(r/'composition.json'),planSha256=composition_sha,inputs=checks,sourceBlocks=len(composition['blocks'])+1,fullPreservation='NOT_CHECKED',visual='NOT_CHECKED',formulaRefresh='NOT_REQUESTED')
+  result['composition']=dict(planPath=str(r/'composition.json'),planSha256=composition_sha,inputs=checks,sourceBlocks=len(inputs(composition)),fullPreservation='NOT_CHECKED',visual='NOT_CHECKED',formulaRefresh='NOT_REQUESTED')
   if not all(x['unchanged'] for x in checks):result['status']='FAIL_COMPOSITION_INPUT_CHANGED'
  write(r/'runner-result.json',result);return result
 if __name__=='__main__':
