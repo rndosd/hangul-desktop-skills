@@ -42,8 +42,9 @@ description: "한글 문서(.hwpx/OWPML)의 읽기·편집·작성·양식 채�
 | 업무 표의 완료 행 삭제·새 행 추가 | `schema table` → 요청 JSON → `table source.hwpx result.hwpx --request task.json`. 적용 전에 결과를 검토할 필요가 있을 때만 `--dry-run` |
 | 여러 열·범위의 정렬을 함께 변경 | [셀 정렬](references/cell-merge-alignment.md)의 `align_many`로 범위별 정렬을 한 요청에 묶는다. |
 | 원본 조합·내용 축약에 따른 표 서식 맞춤 | [역할별 서식 연결](references/simple-entry.md#내용-수정과-표-서식을-함께-적용)의 `text --layout`·`batch --layout` 또는 `layout`으로 필요한 글꼴·정렬·빈 문단·행 높이를 한 batch에 연결한다. |
-| 여러 run·중복 문구·지정 셀 수정 | [공통 조회→편집](references/simple-entry.md#조회-결과를-편집에-이어-쓰기)의 `inspect → text-plan → text`. 저장한 조회로 지원 범위를 판단하고 여러 수정을 묶는다. 문단 삽입·삭제는 `inspect-body` → [본문 구조](references/body-structure-edit.md) |
-| 문구·서식·블록의 복합 편집 | [공통 batch](references/simple-entry.md#복합-편집을-선택된-런타임에서-실행)로 선택된 vendor의 공개 원자 편집 API 실행 |
+| 여러 run·중복 문구·지정 셀 수정 | [공통 조회→편집](references/simple-entry.md#조회-결과를-편집에-이어-쓰기)의 `inspect → text-plan → text`. 저장한 조회로 지원 범위를 판단하고 여러 수정을 묶는다. |
+| 본문 문단 삽입·삭제(문구 수정과 섞여도) | `inspect-body` → [본문 구조](references/body-structure-edit.md). 쪽 번호·쪽 나눔 같은 제어 요소가 든 문단은 이 도구가 거부한다. 제어를 남기고 문구만 비우거나(`text`) 사용자에게 알리며, batch `remove`나 직접 만든 스크립트로 지우지 않는다. |
+| 문구·서식·블록의 복합 편집 | [공통 batch](references/simple-entry.md#복합-편집을-선택된-런타임에서-실행)로 선택된 vendor의 공개 원자 편집 API 실행. 본문 문단 삭제는 위 경로를 쓴다. |
 | 완성형 양식 추가·교체 | [완성형 등록 안내](references/complete-template-registration.md). 등록할 때만 준비·입력 연결·대표 출력 확인을 수행한다. |
 | 등록된 빈 양식·반복 항목 채우기 | [공통 fill](references/simple-entry.md#준비된-양식-채우기). 원문 제거·좌표 탐색·셀별 서식 요청을 다시 만들지 않는다. |
 | 미등록 사용자 양식 채우기·변형 | [실행 경로 선택](references/task-routing.md#실행-경로-선택)에서 지원하는 기존 기능을 고른다. |
