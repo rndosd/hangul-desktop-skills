@@ -58,7 +58,7 @@ $planCatalog = Join-Path $taskSkillDir 'assets/document-templates/full-plans.jso
 
 ## 개요로 공문서형 계획서 조립
 
-장·절 수가 정해지지 않은 공문서형 계획(Ⅰ. / 1. / 가. / 1) / ◦ / - / ‧ / ※, 표 포함)은 한 원본에서 잘라 둔 부품을 개요 순서로 붙이는 `assemble`을 쓴다. 기본 양식은 `plan-official`(교육부 「2027학년도 대학수학능력시험 시행기본계획」 서식, 공공누리 출처표시, 원문 문구 없음)이다.
+장·절 수가 정해지지 않은 공문서형 계획(Ⅰ. / 1. / 가. / 1) / ○ / - / ‧ / ※, 표 포함)은 한 원본에서 잘라 둔 부품을 개요 순서로 붙이는 `assemble`을 쓴다. 기본 양식은 `plan-official`(교육부 「2027학년도 대학수학능력시험 시행기본계획」 서식, 공공누리 출처표시, 원문 문구 없음)이다.
 
 ```powershell
 & $taskLauncher assemble --template plan-official --outline 개요.json --output 계획.hwpx --pdf 계획.pdf --run 작업폴더/assemble-run --context host-approved
