@@ -57,6 +57,10 @@ class StructureTest(unittest.TestCase):
         self.assertIn('R6', self.rules([('1', [('1', '  ◦ 보통')]), ('1', [('2', '  ◦ 굵게')])], chars=chars))
         self.assertNotIn('R6', self.rules([('1', [('1', '  ◦ 보통')]), ('1', [('1', '  ◦ 일부 '), ('2', '강조')])], chars=chars))
 
+    def test_middle_dot_item_is_level_two(self):
+        self.assertEqual(layout_rules.classify('       ‧ 세부 항목')[:3], ('item', '‧', 2))
+        self.assertEqual(wrap_alignment.LEVEL['‧'], 2)
+
     def test_symbol_in_legacy_font_is_r7(self):
         hwpx(self.path, [('1', [('1', '  ◦ 항목')])])
         with zipfile.ZipFile(self.path) as z:

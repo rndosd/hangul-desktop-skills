@@ -126,6 +126,20 @@ def _set(paraPr, values):
             node.set('value', str(value * 2 if in_default else value))  # legacy default branch uses 2x units
 
 
+def substitute_fonts(header, substitutes):
+    """Character formats that name a face in substitutes name its replacement from the same language list."""
+    faces = {node.get('lang').lower(): {font.get('id'): font.get('face') for font in node if rules._local(font) == 'font'}
+             for node in header.iter() if rules._local(node) == 'fontface'}
+    for ref in (n for n in header.iter() if rules._local(n) == 'fontRef'):
+        for slot, font_id in ref.attrib.items():
+            face = faces.get(slot, {}).get(font_id)
+            if face in substitutes:
+                replacement = next((i for i, f in faces[slot].items() if f == substitutes[face]), None)
+                if replacement is None:
+                    raise ValueError(f'{substitutes[face]} is not in the {slot} font list')
+                ref.set(slot, replacement)
+
+
 def apply(source, target, role_rules):
     infos, data = _load(source)
     header, section = etree.fromstring(data['Contents/header.xml']), etree.fromstring(data['Contents/section0.xml'])
@@ -254,17 +268,7 @@ def apply(source, target, role_rules):
                     for cached in [n for n in paragraph if rules._local(n) == 'linesegarray']:
                         paragraph.remove(cached)
     substitutes = role_rules.get('_fontSubstitutes', {})
-    if substitutes:
-        faces = {node.get('lang').lower(): {font.get('id'): font.get('face') for font in node if rules._local(font) == 'font'}
-                 for node in header.iter() if rules._local(node) == 'fontface'}
-        for ref in (n for n in header.iter() if rules._local(n) == 'fontRef'):
-            for slot, font_id in ref.attrib.items():
-                face = faces.get(slot, {}).get(font_id)
-                if face in substitutes:
-                    replacement = next((i for i, f in faces[slot].items() if f == substitutes[face]), None)
-                    if replacement is None:
-                        raise ValueError(f'{substitutes[face]} is not in the {slot} font list')
-                    ref.set(slot, replacement)
+    substitute_fonts(header, substitutes)
     if role_rules.get('_wordBreak'):
         for setting in (n for n in container.iter() if rules._local(n) == 'breakSetting'):
             for name, value in role_rules['_wordBreak'].items():

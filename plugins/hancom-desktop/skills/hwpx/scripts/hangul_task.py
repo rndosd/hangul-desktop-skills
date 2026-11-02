@@ -26,7 +26,7 @@ def doctor():
     config=ROOT/'environment.json'
     if not config.is_file(): config=Path(os.environ.get('CODEX_HOME',str(Path.home()/'.codex')))/'skills/hwpx/environment.json'
     actual=activate();parser=actual.parent/'opc/xml_utils.py'
-    return dict(status='READY_LOCAL_TOOLS',skillRoot=str(ROOT),configuration=str(config),configurationExists=config.is_file(),python=sys.executable,hwpxModule=str(actual),parserSha256=sha(parser),runtime=identity(),commands=['doctor','schema table','inspect','inspect-body','text-plan','text','layout','replace','table','source','source-check','batch','tool','compose','fill','preview'],writePermission='UNTESTED',native='NOT_CHECKED',securityModule='NOT_CHECKED')
+    return dict(status='READY_LOCAL_TOOLS',skillRoot=str(ROOT),configuration=str(config),configurationExists=config.is_file(),python=sys.executable,hwpxModule=str(actual),parserSha256=sha(parser),runtime=identity(),commands=['doctor','schema table','inspect','inspect-body','text-plan','text','layout','replace','table','source','source-check','batch','tool','compose','assemble','fill','preview'],writePermission='UNTESTED',native='NOT_CHECKED',securityModule='NOT_CHECKED')
 def schema(operation):
     return dict(schema=SCHEMA,operation='table',headers=['열 제목1','열 제목2'],reason='사용자 메모의 완료 업무 삭제와 새 업무 추가',operations=[dict(op='delete',key={'열 제목1':'삭제할 셀의 완전한 문구'}),dict(op='insert_after',key={'열 제목1':'기준 셀의 완전한 문구'},cells=['새 항목명: 설명까지 전체','다른 열 값'],heightHwpunit=2400)])
 def replace(source,output,old,new):
@@ -158,6 +158,28 @@ def compose(request, output, pdf, run_dir, context, timeout=120):
     from compose_native import compose as native_compose
     return native_compose(request,output,pdf,run_dir,context,timeout)
 
+def assemble(template, outline, output, pdf, run_dir, context, catalog=None, timeout=240):
+    """Outline -> parts of one assembly template, assembled in one owned Hangul job."""
+    native_scripts=ROOT.parent/'hwpx-windows-finalize/scripts'
+    need((native_scripts/'native_assembly.py').is_file(), 'paired native assembly helper required')
+    sys.path.insert(0,str(native_scripts))
+    from native_assembly import load_template, build_plan, check_output
+    from run_native_job import run
+    from wrap_alignment import measure
+    from page_layout import measure as page_layout
+    manifest=load_template(catalog or ROOT/'assets/document-templates/assembly',template)
+    plan=build_plan(manifest,outline)
+    result=run(plan['base']['path'],'SaveAs',output,pdf,run_dir,context,timeout,composition=plan)
+    result['template']=dict(id=manifest['id'],label=manifest['label'],source=manifest['source'].get('attribution'))
+    if result['status']=='PASS_NATIVE':
+        receipt=json.loads(Path(result['receiptPath']).read_text(encoding='utf-8-sig'))
+        result['pages']=receipt.get('pageCountAfter')
+        result['assembly']=check_output(output,plan)
+        if not result['assembly']['ok']:result['status']='FAIL_ASSEMBLY_TEXT'
+        result['wrapAlignment']=measure(pdf)
+        result['pageLayout']=page_layout(pdf)
+    return result
+
 def preview(pdf, output):
     native_scripts=ROOT.parent/'hwpx-windows-finalize/scripts'
     need((native_scripts/'hancom_completion_gate.py').is_file(),'paired native preview helper required')
@@ -201,6 +223,7 @@ def main():
     sub.add_parser('doctor');s=sub.add_parser('schema');s.add_argument('operation',choices=['table'])
     s=sub.add_parser('tool');s.add_argument('script');s.add_argument('arguments',nargs=argparse.REMAINDER)
     s=sub.add_parser('compose');s.add_argument('--request',required=True);s.add_argument('--output',required=True);s.add_argument('--pdf',required=True);s.add_argument('--run',required=True);s.add_argument('--context',choices=['ordinary-shell','host-approved'],required=True);s.add_argument('--timeout',type=int,default=120)
+    s=sub.add_parser('assemble');s.add_argument('--template',required=True);s.add_argument('--outline',required=True);s.add_argument('--output',required=True);s.add_argument('--pdf',required=True);s.add_argument('--run',required=True);s.add_argument('--context',choices=['ordinary-shell','host-approved'],required=True);s.add_argument('--catalog');s.add_argument('--timeout',type=int,default=240)
     s=sub.add_parser('fill');s.add_argument('--template');s.add_argument('--values');s.add_argument('--content');s.add_argument('--output');s.add_argument('--styles');s.add_argument('--catalog',default=str(ROOT/'assets/document-templates/full-plans.json'));s.add_argument('--dry-run',action='store_true')
     s=sub.add_parser('preview');s.add_argument('pdf');s.add_argument('--output',required=True)
     s=sub.add_parser('layout-check');s.add_argument('source');s.add_argument('--pdf')
@@ -224,6 +247,7 @@ def main():
         if a.command=='tool':return run_tool(a.script,a.arguments)
         if a.command=='doctor':result=doctor()
         elif a.command=='compose':result=compose(read(a.request),a.output,a.pdf,a.run,a.context,a.timeout)
+        elif a.command=='assemble':result=assemble(a.template,read(a.outline),a.output,a.pdf,a.run,a.context,a.catalog,a.timeout)
         elif a.command=='schema':result=schema(a.operation)
         elif a.command=='preview':result=preview(a.pdf,a.output)
         elif a.command=='layout-check':result=layout_check(a.source,a.pdf)
@@ -271,14 +295,14 @@ def main():
             from prepare_source import check_source
             result=check_source(a.source,a.analysis)
         if a.command!='schema':
-            result.setdefault('native',result.get('status') if a.command=='compose' else 'NOT_CHECKED');result.setdefault('entryScript',str(Path(__file__).resolve()));result.setdefault('entrySha256',sha(__file__))
+            result.setdefault('native',result.get('status') if a.command in ('compose','assemble') else 'NOT_CHECKED');result.setdefault('entryScript',str(Path(__file__).resolve()));result.setdefault('entrySha256',sha(__file__))
         displayed=result
         if a.command in ('text','batch','layout','table','replace','fill') and not a.full_output and (a.command!='fill' or a.values or (a.content and result.get('ok') is not None)):
             from inspection_summary import saved_edit_summary
             output=getattr(a,'output',None) or result.get('output',{}).get('filename')
             displayed=saved_edit_summary(result,output)
             if 'contentSelection' in result:displayed['contentSelection']=result['contentSelection']
-        print(json.dumps(displayed,ensure_ascii=False,indent=2));return (0 if result.get('status')=='PASS_NATIVE' else 3) if a.command=='compose' else (2 if result.get('status') in ('STALE','BLOCKED') else 0)
+        print(json.dumps(displayed,ensure_ascii=False,indent=2));return (0 if result.get('status')=='PASS_NATIVE' else 3) if a.command in ('compose','assemble') else (2 if result.get('status') in ('STALE','BLOCKED') else 0)
     except Exception as ex:
         print(json.dumps(dict(status='BLOCKED',reason=str(ex),errorType=type(ex).__name__,native='NOT_CHECKED',nextStep='reason에 해당하는 입력·지원 범위를 references/simple-entry.md에서 확인하세요. 보존·revision 실패는 중단하고 같은 요청을 자동 재시도하지 마세요.'),ensure_ascii=False));return 2
 if __name__=='__main__':raise SystemExit(main())
