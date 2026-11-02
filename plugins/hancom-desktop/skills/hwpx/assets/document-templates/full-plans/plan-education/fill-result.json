@@ -3,7 +3,7 @@
   "ok": true,
   "rolledBack": false,
   "dryRun": false,
-  "inputRevision": "sha256:aae60a0489b63156ab72dfa6b23796630f10616e4b8faa5a49a2fda765ecf242",
+  "inputRevision": "sha256:4bc1c8b6019bcb3757301af7d56bc1f1334bc9ff5f5365eeb692177ad2997c95",
   "documentRevision": "sha256:00300c4fb79184092460ef3c04947d6030cec4ea4379df3f77ed32805b14fe56",
   "output": {
     "filename": "<local-path>"
@@ -1199,7 +1199,7 @@
   ],
   "semanticDiff": {
     "schemaVersion": "hwpx.agent-semantic-diff/v1",
-    "inputRevision": "sha256:aae60a0489b63156ab72dfa6b23796630f10616e4b8faa5a49a2fda765ecf242",
+    "inputRevision": "sha256:4bc1c8b6019bcb3757301af7d56bc1f1334bc9ff5f5365eeb692177ad2997c95",
     "candidateRevision": "sha256:00300c4fb79184092460ef3c04947d6030cec4ea4379df3f77ed32805b14fe56",
     "changes": [
       {
@@ -2169,8 +2169,8 @@
       "store": "none"
     },
     "revision": {
-      "expected": "sha256:aae60a0489b63156ab72dfa6b23796630f10616e4b8faa5a49a2fda765ecf242",
-      "actual": "sha256:aae60a0489b63156ab72dfa6b23796630f10616e4b8faa5a49a2fda765ecf242",
+      "expected": "sha256:4bc1c8b6019bcb3757301af7d56bc1f1334bc9ff5f5365eeb692177ad2997c95",
+      "actual": "sha256:4bc1c8b6019bcb3757301af7d56bc1f1334bc9ff5f5365eeb692177ad2997c95",
       "matched": true
     },
     "inputOpenSafety": {

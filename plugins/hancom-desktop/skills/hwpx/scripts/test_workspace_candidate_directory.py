@@ -20,6 +20,15 @@ class WorkspaceCandidateDirectory(unittest.TestCase):
             with workspace_candidate_directory(prefix='guard-',dir=self.parent) as y:
                 self.assertNotEqual(x,y);self.assertTrue(Path(x).is_dir());self.assertTrue(Path(y).is_dir())
             self.assertTrue(Path(x).is_dir())
+    def test_long_parent_is_reported_before_the_path_limit(self):
+        import workspace_candidate_directory as module
+        enabled=module.long_paths_enabled
+        module.long_paths_enabled=lambda:False
+        self.addCleanup(setattr,module,'long_paths_enabled',enabled)
+        long_prefix='x'*(module.FOLDER_LIMIT-len(str(self.parent)))
+        with self.assertRaisesRegex(ValueError,'PATH_TOO_LONG'):
+            with workspace_candidate_directory(prefix=long_prefix,dir=self.parent):pass
+        self.assertFalse(any(p.name.startswith('.'+long_prefix) for p in self.parent.iterdir()))
     def test_reject_path_in_prefix(self):
         for prefix in ['../escape','..\\escape','C:drive','']:
             with self.assertRaises(ValueError):

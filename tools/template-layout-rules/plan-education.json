@@ -37,5 +37,22 @@
  },
  "_itemText|1300": {
   "charPr": "46"
+ },
+ "_tables": [
+  {
+   "id": "1603622838",
+   "widths": [
+    2089,
+    7461,
+    11551,
+    13624,
+    6163,
+    6865
+   ]
+  }
+ ],
+ "_wordBreak": {
+  "breakNonLatinWord": "BREAK_WORD",
+  "breakLatinWord": "KEEP_WORD"
  }
 }

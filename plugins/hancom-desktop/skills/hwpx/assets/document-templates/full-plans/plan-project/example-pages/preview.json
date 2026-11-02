@@ -2,8 +2,8 @@
   "status": "PREVIEW_READY",
   "pdf": {
     "path": "<local-path>",
-    "sha256": "5c6ad0f3b58592f9a0b46fa0eaa4cd5ac9027850026e62fa826053a41dc8822a",
-    "bytes": 186880
+    "sha256": "864dabab4ad96abcd00756dd9e1f1616f6b3b3eccbb854e9d63c46e48343f7f0",
+    "bytes": 186631
   },
   "render": {
     "engine": "pymupdf",
@@ -17,56 +17,48 @@
       "page": 1,
       "image": {
         "path": "<local-path>",
-        "sha256": "4fd2f7c71f22d2ac26a253b7b1b956a07cab0057b9c76cbd0b66fb520cf7ba65",
-        "bytes": 40580
+        "sha256": "2c3d8b14ccd66c91e5e81318657f9bf826fb1d10af4a50646faede299627a885",
+        "bytes": 40553
       }
     },
     {
       "page": 2,
       "image": {
         "path": "<local-path>",
-        "sha256": "5f99b46830e49b3b6bf279ef3afe9d57df7e701ca4de0d358f34d3a4d5141175",
-        "bytes": 127348
+        "sha256": "45f9ef8d832c4afb58ae1fff8b49da7e87606ffb16f94d1de88a71a48afa0ac9",
+        "bytes": 127859
       }
     },
     {
       "page": 3,
       "image": {
         "path": "<local-path>",
-        "sha256": "48664d5d8aabb1532cbfbf0469b7ca52a6f739e9b9433e8ea6df12379f47540a",
-        "bytes": 128694
+        "sha256": "a40ce438763e8111cefd8c57d2175a9f32fe15de2ace35b208249290b4e5eb4c",
+        "bytes": 129438
       }
     },
     {
       "page": 4,
       "image": {
         "path": "<local-path>",
-        "sha256": "505346e26339d23b8e99451401312be835a918ef10cd90ad2d227f16ed070b2b",
-        "bytes": 142867
+        "sha256": "215188c9352c5938a73ae734153325b04e32735f66c3b7054627e700e04bf70e",
+        "bytes": 143549
       }
     },
     {
       "page": 5,
       "image": {
         "path": "<local-path>",
-        "sha256": "3dde01ea2c1f6fa029c0c8b408163abb391af01d4e4dd40b43bee525bf47cdb7",
-        "bytes": 98893
+        "sha256": "bf37d41562978e28b5a83e70bf3546fe701b3fd5dfa56611374d5192f1ba32e9",
+        "bytes": 99187
       }
     },
     {
       "page": 6,
       "image": {
         "path": "<local-path>",
-        "sha256": "42aeaa84f5222dc1d730811a7d664fffe246dc83156fc68f58df95088ae24254",
-        "bytes": 87955
-      }
-    },
-    {
-      "page": 7,
-      "image": {
-        "path": "<local-path>",
-        "sha256": "9a7ad684bc7e731eb3e77d61c3fe945b74828d898928c4cd410e7799f656e5cf",
-        "bytes": 46902
+        "sha256": "8159b8e632ddc8a85f29096cd159aea9012328f3af7f84fd37efae1219db7553",
+        "bytes": 124791
       }
     }
   ]

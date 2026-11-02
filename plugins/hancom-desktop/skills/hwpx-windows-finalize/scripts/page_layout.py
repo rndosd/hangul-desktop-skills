@@ -95,6 +95,7 @@ def measure(pdf):
             if same and p['limit'] - end['bottom'] < 25 / PT and start['top'] - body_top < 25 / PT and min(end['rows'], start['rows']) <= 2:
                 findings.append({'code': 'TABLE_SPLIT_THIN', 'page': p['page'], 'detail': f"rows {end['rows']} | {start['rows']} on next page"})
     for p in pages:
+        tails = []
         by_block = collections.defaultdict(list)
         for line in p['lines']:
             by_block[line['block']].append(line)
@@ -105,7 +106,26 @@ def measure(pdf):
                         and 0 <= line['top'] - previous['bottom'] < previous['bottom'] - previous['top']
                         and (line['x'] <= previous['x'] + 2 / PT or abs(line['center'] - previous['center']) < 3 / PT)
                         and line['text'][:1] not in ITEM | HEADING | {'⇨', '→'}):
-                    findings.append({'code': 'SHORT_TAIL', 'page': p['page'], 'detail': f"'{line['text']}' after '{previous['text'][-12:]}'"})
+                    tails.append((previous, line))
+        # A list item wraps under its text, right of the symbol, and Hangul often exports each wrapped
+        # line as a block of its own: follow the item's lines down instead of pairing within a block.
+        for item in p['lines']:
+            # Round symbols may be exported without the space after them (as in wrap_alignment._marker).
+            if (item['text'][:1] not in ITEM or item['x2'] is None
+                    or not (item['text'][:1] in '◦○❍•⇒·' or item['text'][1:2].isspace())):
+                continue
+            previous = item
+            while True:
+                line = next((l for l in p['lines'] if 0 <= l['top'] - previous['bottom'] < previous['bottom'] - previous['top']
+                             and abs(l['size'] - item['size']) < 0.6 and abs(l['x'] - item['x2']) < 5 / PT
+                             and l['text'][:1] not in ITEM | HEADING), None)
+                if line is None:
+                    break
+                if line['visible'] <= SHORT_TAIL_CHARS and all(line is not seen for _, seen in tails):
+                    tails.append((previous, line))
+                previous = line
+        for previous, line in tails:
+            findings.append({'code': 'SHORT_TAIL', 'page': p['page'], 'detail': f"'{line['text']}' after '{previous['text'][-12:]}'"})
     items = collections.defaultdict(list)
     for p in pages:
         for line in p['lines']:

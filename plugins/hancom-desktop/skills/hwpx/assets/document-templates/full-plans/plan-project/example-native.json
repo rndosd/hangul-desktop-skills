@@ -1,6 +1,6 @@
 {
   "evidenceSchema": "hwpx.hancom-finalize.v2",
-  "sourceSha256Before": "E7DD84E64749343BBC097774094929F87774EB802D3BEDD04D49BEA5B2A7D5CA",
+  "sourceSha256Before": "754DD931046C54D6AC15E6B35FEB049838D885B3C9A3052079BAE0446A400727",
   "status": "PASS_FULL",
   "mode": "OpenOnly",
   "candidatePath": "<local-path>",
@@ -9,11 +9,11 @@
   "saveAs": false,
   "reopen": true,
   "pdfExport": true,
-  "pageCountBefore": 7,
-  "pageCountAfter": 7,
+  "pageCountBefore": 6,
+  "pageCountAfter": 6,
   "error": null,
-  "checkedAt": "2026-11-01T21:45:14.3861858+09:00",
-  "version": "13, 0, 0, 3903",
+  "checkedAt": "2026-11-02T12:12:47.1728362+09:00",
+  "version": "13, 0, 0, 653",
   "comCreated": true,
   "registerModuleCalled": true,
   "securityModuleRegistered": true,
@@ -21,41 +21,41 @@
     "FilePathCheckDLL",
     "FilePathCheckerModuleExample"
   ],
-  "sourceSha256After": "E7DD84E64749343BBC097774094929F87774EB802D3BEDD04D49BEA5B2A7D5CA",
+  "sourceSha256After": "754DD931046C54D6AC15E6B35FEB049838D885B3C9A3052079BAE0446A400727",
   "sourceUnchanged": true,
   "cleanup": {
     "forced": false,
     "owned": true,
     "owner": {
-      "hwnd": 3476408,
+      "hwnd": 1445514,
       "path": "<local-path>",
-      "pid": 2076,
-      "startTicks": 639291339147023732
+      "pid": 25088,
+      "startTicks": 639291859673614680
     },
     "quit": true,
     "normalExitWait": {
-      "handleAcquired": false,
-      "exitObservation": "PID_ABSENT_BEFORE_HANDLE",
+      "handleAcquired": true,
+      "exitObservation": "MATCHED_INSTANCE_EXITED",
       "identityError": null,
       "exited": true,
-      "waited": false,
-      "identityReadError": "No process handle available.",
+      "waited": true,
+      "identityReadError": null,
       "limitMs": 10000,
-      "absenceChecks": 1,
-      "identityMatched": null
+      "absenceChecks": 0,
+      "identityMatched": true
     },
     "remaining": []
   },
   "artifacts": [
     {
       "path": "<local-path>",
-      "sha256": "E7DD84E64749343BBC097774094929F87774EB802D3BEDD04D49BEA5B2A7D5CA",
-      "bytes": 39822
+      "sha256": "754DD931046C54D6AC15E6B35FEB049838D885B3C9A3052079BAE0446A400727",
+      "bytes": 38926
     },
     {
       "path": "<local-path>",
-      "sha256": "5C6AD0F3B58592F9A0B46FA0EAA4CD5AC9027850026E62FA826053A41DC8822A",
-      "bytes": 186880
+      "sha256": "864DABAB4AD96ABCD00756DD9E1F1616F6B3B3ECCBB854E9D63C46E48343F7F0",
+      "bytes": 186631
     }
   ],
   "visual": "NOT_REVIEWED",

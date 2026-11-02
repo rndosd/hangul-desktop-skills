@@ -100,24 +100,24 @@
       },
       "document": {
         "path": "full-plans/plan-education/template.hwpx",
-        "sha256": "aae60a0489b63156ab72dfa6b23796630f10616e4b8faa5a49a2fda765ecf242"
+        "sha256": "4bc1c8b6019bcb3757301af7d56bc1f1334bc9ff5f5365eeb692177ad2997c95"
       },
       "pdf": {
         "path": "full-plans/plan-education/template.pdf",
-        "sha256": "420d5cdcb50ba471d5abc10de1a409c0e14e21d40335c8a50dff7e28f810ad78"
+        "sha256": "91dab5554e5791b837b38fdfa48b017739aed2c4f90519e77445549c118b157b"
       },
       "preview": {
         "path": "full-plans/plan-education/preview.png",
-        "sha256": "e967b5ceed9a1d34b8b4c266c109dcb34efec4b59853422f58b980c9c1ae5302"
+        "sha256": "c416277624821303f4d9c5d7af892a8ce158ae97c76ff5ff3d78d81f69e13578"
       },
       "fill": {
         "path": "full-plans/plan-education/manifest.json",
-        "sha256": "dd97102aa7b4a057c5aca8b6a7c8e432b72e21f66b1b89c6aaac0fdbfe932c80"
+        "sha256": "fdb163df3d7450dff750e75cd9ef2e5b3539274ede2d1eb1a2a2c81aaf0386e1"
       },
       "verification": {
         "evidence": {
           "path": "full-plans/plan-education/evidence.json",
-          "sha256": "d65de26d631e1c98be7a1bb898ed62161991879a8766fd97edfb83672bbe2e38"
+          "sha256": "5e07a4637884978681bef4c0a13c160a2852db4632e824c9b0c1efb2742da0e6"
         },
         "tested_edits": [
           {
@@ -167,24 +167,24 @@
       },
       "document": {
         "path": "full-plans/plan-project/template.hwpx",
-        "sha256": "cdd02b652a05d0ddb4bab85d9ab4c9408ba3dd682eaa4a916fafca14b18910bf"
+        "sha256": "5a35f6bf75bb9a877d537d32561480a7c5f4bb5799fea05d29790a34bb652bf8"
       },
       "pdf": {
         "path": "full-plans/plan-project/template.pdf",
-        "sha256": "e7942358bd4e5cf7244e2223ca810a5639d13b5c91568fe23d04a4441f26a138"
+        "sha256": "8afbe0625903c7ea4f83a38e82a1073ed8da849d6c692f9bffb4adf07ceffe86"
       },
       "preview": {
         "path": "full-plans/plan-project/preview.png",
-        "sha256": "d3e37f51f532fb4bb0f33d1a2d80856fb035a17346645d6acc464e59a533519d"
+        "sha256": "04f27421ab932d3d610125405e7fb589520fd570b1e95539222856edc420f2e9"
       },
       "fill": {
         "path": "full-plans/plan-project/manifest.json",
-        "sha256": "f0a9d84931d74c3e6c5133b211e136d220d905abaac923920991abc2f8fe718e"
+        "sha256": "5b1c1153698e22b897239d370cdad6fffef167902725ea92f04f5cf0906dbf2c"
       },
       "verification": {
         "evidence": {
           "path": "full-plans/plan-project/evidence.json",
-          "sha256": "445224e4e91b1e5b931a4b439e7618ef461ce5f5bfaeeb603031f4ecbb05090c"
+          "sha256": "849f21affae9b463edec51389fc16a3f9052c0b398a5b0a7413e5f6c88ecf76c"
         },
         "tested_edits": [
           {

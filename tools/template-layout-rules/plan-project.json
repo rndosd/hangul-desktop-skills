@@ -18,7 +18,7 @@
   "count": 33
  },
  "heading|0|①|1500": {
-  "align": "JUSTIFY",
+  "align": "LEFT",
   "left": 0,
   "hanging": -2296,
   "lineSpacing": 150,
@@ -55,7 +55,33 @@
     8516,
     29191,
     8500
-   ]
+   ],
+   "trimEmptyParagraphs": true
+  },
+  {
+   "id": "1809160020",
+   "dropFullWidthSpaces": true,
+   "useTableMargin": true,
+   "columns": {
+    "0": {
+     "align": "CENTER",
+     "hanging": 0,
+     "charPr": "11"
+    },
+    "1": {
+     "align": "LEFT",
+     "hanging": 0
+    }
+   }
   }
- ]
+ ],
+ "_fontSubstitutes": {
+  "HCI Poppy": "바탕",
+  "한양신명조": "바탕",
+  "명조": "바탕"
+ },
+ "_wordBreak": {
+  "breakNonLatinWord": "BREAK_WORD",
+  "breakLatinWord": "KEEP_WORD"
+ }
 }
