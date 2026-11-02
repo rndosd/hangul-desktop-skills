@@ -37,5 +37,12 @@
  },
  "_itemText|1300": {
   "charPr": "46"
- }
+ },
+ "_tables": [
+  {
+   "id": "1582124079",
+   "minimumRowHeightsMm": [9, 10],
+   "verticalAlignment": "CENTER"
+  }
+ ]
 }

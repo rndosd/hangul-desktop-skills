@@ -18,6 +18,8 @@ Template-wide keys, written by hand into rules.json:
                     centred cells of one row line up and rows keep only the height they need.
   _tables[].dropFullWidthSpaces  remove full-width space controls left inside placeholders.
   _tables[].useTableMargin  cells drop their own margins and use the table's inner margin.
+  _tables[].minimumRowHeightsMm  compact minimum heights; Hangul expands rows for longer content.
+  _tables[].verticalAlignment  common cell vertical alignment for that table.
   _tables[].columns {"col": {"align", "hanging", "charPr"}}: one format for that column's body
                     cells (rows from firstBodyRow, default 1).
 """
@@ -172,6 +174,28 @@ def apply(source, target, role_rules):
             raise ValueError('table not found: ' + spec['id'])
         if 'pageBreak' in spec:
             table.set('pageBreak', spec['pageBreak'])
+        if 'minimumRowHeightsMm' in spec:
+            heights = [round(value * 7200 / 25.4) for value in spec['minimumRowHeightsMm']]
+            if len(heights) != int(table.get('rowCnt')) or any(value <= 0 for value in heights):
+                raise ValueError('minimumRowHeightsMm must match positive table row heights')
+            for cell in (n for n in table.iter() if rules._local(n) == 'tc'):
+                addr = next(n for n in cell if rules._local(n) == 'cellAddr')
+                span = next(n for n in cell if rules._local(n) == 'cellSpan')
+                start, count = int(addr.get('rowAddr')), int(span.get('rowSpan'))
+                if start + count > len(heights):
+                    raise ValueError('cell span exceeds table rows')
+                next(n for n in cell if rules._local(n) == 'cellSz').set('height', str(sum(heights[start:start + count])))
+            next(n for n in table if rules._local(n) == 'sz').set('height', str(sum(heights)))
+            table.set('noAdjust', '0')
+        if 'verticalAlignment' in spec:
+            if spec['verticalAlignment'] not in ('TOP', 'CENTER', 'BOTTOM'):
+                raise ValueError('invalid vertical alignment')
+            for cell in (n for n in table.iter() if rules._local(n) == 'tc'):
+                next(n for n in cell if rules._local(n) == 'subList').set('vertAlign', spec['verticalAlignment'])
+        if 'minimumRowHeightsMm' in spec or 'verticalAlignment' in spec:
+            for paragraph in (n for n in table.iter() if rules._local(n) == 'p'):
+                for cached in [n for n in paragraph if rules._local(n) == 'linesegarray']:
+                    paragraph.remove(cached)
         if 'widths' in spec:
             total = sum(int(next(c for c in tc if rules._local(c) == 'cellSz').get('width'))
                         for tc in next(tr for tr in table if rules._local(tr) == 'tr') if rules._local(tc) == 'tc')

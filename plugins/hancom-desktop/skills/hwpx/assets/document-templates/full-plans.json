@@ -33,24 +33,24 @@
       },
       "document": {
         "path": "full-plans/plan-school/template.hwpx",
-        "sha256": "a50d2a365aedc3da7c9bf4431e8d4a87d9425878eff64fbfdd9c584032c93ac2"
+        "sha256": "c9cf3447d264e9902ab0d302190e927bce500ae9cfbf86b82ca48e5619251a46"
       },
       "pdf": {
         "path": "full-plans/plan-school/template.pdf",
-        "sha256": "c5292a0ef0fbf4b0549adf1e0dff985401f35dd363f77be0056a6c329ef34c4e"
+        "sha256": "fbc6c7218a67ca33c86bc775df4202758829e1152a6bc052d64e198f881d8951"
       },
       "preview": {
         "path": "full-plans/plan-school/preview.png",
-        "sha256": "5bc8fc89c1af59fb84fa812c827a293d93f4bb912083aedcefc251337adb5c76"
+        "sha256": "472ca6c1135ed642d8ed6564c8d7a2ee7ce2bf5c4b59ea8381acc8c256f6bdf3"
       },
       "fill": {
         "path": "full-plans/plan-school/manifest.json",
-        "sha256": "5865d1fc9d6e5f7e95cfe3354a77e40c92bb159e82b476025851bd5e437ced99"
+        "sha256": "fa8206cd16528064c65721ef584187538901ee83a2ca4bb446c255643d9bef23"
       },
       "verification": {
         "evidence": {
           "path": "full-plans/plan-school/evidence.json",
-          "sha256": "4160efaea532c66c7182fcebb2af3141d3120f9d0c32fd93ec635fa72244690f"
+          "sha256": "e6526c769ba3584d5925174a88c5bb99ebd14489e2595eaa2982f163811ff195"
         },
         "tested_edits": [
           {
@@ -100,11 +100,11 @@
       },
       "document": {
         "path": "full-plans/plan-education/template.hwpx",
-        "sha256": "4bc1c8b6019bcb3757301af7d56bc1f1334bc9ff5f5365eeb692177ad2997c95"
+        "sha256": "222922e59402161a2793cd74a62e7c268c0eadf43c0dec5c9104c868ebebe492"
       },
       "pdf": {
         "path": "full-plans/plan-education/template.pdf",
-        "sha256": "91dab5554e5791b837b38fdfa48b017739aed2c4f90519e77445549c118b157b"
+        "sha256": "eacee58f76486be48061011e79f4f934a5ff796de8400665a96ba6fadd0a52ae"
       },
       "preview": {
         "path": "full-plans/plan-education/preview.png",
@@ -112,12 +112,12 @@
       },
       "fill": {
         "path": "full-plans/plan-education/manifest.json",
-        "sha256": "fdb163df3d7450dff750e75cd9ef2e5b3539274ede2d1eb1a2a2c81aaf0386e1"
+        "sha256": "611b9dc6493861b913b12eb380dbe67e95faca3ef455531fc8bdb9331dfa38f2"
       },
       "verification": {
         "evidence": {
           "path": "full-plans/plan-education/evidence.json",
-          "sha256": "5e07a4637884978681bef4c0a13c160a2852db4632e824c9b0c1efb2742da0e6"
+          "sha256": "bc8aa1bde846a8c7aad7aec57b900d84cfb20f8410746957724136365cbd0afb"
         },
         "tested_edits": [
           {

@@ -19,7 +19,7 @@
       "label": "학교 교육활동 운영계획",
       "status": "active_source",
       "path": "full-plans/plan-school/template.hwpx",
-      "sha256": "a50d2a365aedc3da7c9bf4431e8d4a87d9425878eff64fbfdd9c584032c93ac2",
+      "sha256": "c9cf3447d264e9902ab0d302190e927bce500ae9cfbf86b82ca48e5619251a46",
       "preview": "full-plans/plan-school/template.pdf",
       "limitations": [
         "준비본 복사이며 새 내용 반영·실제 출력은 별도 확인. 채움은 full-plans.json 사용."
@@ -30,7 +30,7 @@
       "label": "교육사업 추진계획 · 표지형",
       "status": "active_source",
       "path": "full-plans/plan-education/template.hwpx",
-      "sha256": "4bc1c8b6019bcb3757301af7d56bc1f1334bc9ff5f5365eeb692177ad2997c95",
+      "sha256": "222922e59402161a2793cd74a62e7c268c0eadf43c0dec5c9104c868ebebe492",
       "preview": "full-plans/plan-education/template.pdf",
       "limitations": [
         "준비본 복사이며 새 내용 반영·실제 출력은 별도 확인. 채움은 full-plans.json 사용."
