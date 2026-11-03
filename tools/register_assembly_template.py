@@ -3,8 +3,8 @@
   1. propose_assembly_map.py: part map and self-reproduction outline
   2. build_assembly_template.py: parts and manifest; a part that fails to build is redrawn as a block
      (its role, or its paragraph for a table) and the build runs again
-  3. check 1, self reproduction: the outline assembled must have the source's page count and start every
-     page where the source does (source pages from its saved line positions; source.pdf is kept to look at)
+  3. check 1, self reproduction, no large misalignment: about the source's page count (source pages from its saved
+     line positions), no empty page, chapter numbers as in the source; lines may move between pages
   4. check 2, other lengths: "more", "fewer" and "long" outlines must assemble (PASS_NATIVE)
   5. report.json: the checks, the blocks and their source wording to review, pages to look at
 Checks 3 to 5 of tools/assembly-maps/README.md (source wording, describe-only use, approval) stay with the person.
@@ -174,8 +174,18 @@ def main():
     if repro['status'] == 'PASS_NATIVE':
         expected = source_page_starts(source)
         found = page_starts(work / 'repro.pdf')
+        # Lines may move between pages (letter spacing an author squeezed by hand does not carry over); only large
+        # misalignments fail: another page count, an empty page, or chapter numbers that differ from the source's.
+        numbers = summary.get('chapterNumbers', [])
+        problems = []
+        if abs(len(found) - len(expected)) > max(1, round(len(expected) * 0.1)):
+            problems.append(f'쪽 수가 크게 다름: 원본 {len(expected)}, 재현 {len(found)}')
+        if '' in found:
+            problems.append(f'빈 쪽: {[i + 1 for i, f in enumerate(found) if not f]}')
+        if numbers and numbers != [str(n) for n in range(1, len(numbers) + 1)]:
+            problems.append(f'장 번호가 원본과 다름: 원본 {numbers}, 조립은 1부터 차례로')
         check1.update(sourcePages=len(expected), sourcePageStarts=[e[:16] for e in expected], pageStarts=found,
-                      ok=len(expected) == len(found) and all(same_start(f, e) for f, e in zip(found, expected)))
+                      sameStarts=sum(same_start(f, e) for f, e in zip(found, expected)), problems=problems, ok=not problems)
     else:
         check1.update(ok=False, error=repro['error'])
     report['check1'] = check1

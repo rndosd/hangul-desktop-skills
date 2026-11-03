@@ -232,12 +232,30 @@ def propose(source, template_id, exclude=()):
     # the cover may hold tables (a title band); the body starts at the first chapter or vocabulary line
     first = next((i for i, r in enumerate(roles) if r['role'] not in ('empty', 'block', 'table') and i > 0), None)
     need(first is not None, '공통 어휘로 읽히는 문단이 없습니다')
+    # number tabs (1 | 타시·도 전출) under Roman-numbered chapters are first-level titles drawn as tabs
+    tabs = [i for i, r in enumerate(roles) if r['role'] == 'chapter' and r.get('table') and r['number'].strip('.').isdigit()]
+    if tabs and any(r['role'] == 'chapter' and r.get('number', r.get('text', ' '))[0] in ROMAN for r in roles):
+        for i in tabs:
+            roles[i] = dict(roles[i], role='heading1', text=roles[i]['title'])
     chapters = [i for i, r in enumerate(roles) if r['role'] == 'chapter']
     need(chapters, '장(Ⅰ 제목)이 없어 조립 양식으로 만들 수 없습니다. 빈칸 채우기로 등록하세요.')
     heights = {c.get('id'): int(c.get('height')) for c in header.iter(HH + 'charPr')}
     cover_end = cover_end_of(top[:first], heights)
     cover, cover_value = cover_spec(top[:cover_end], heights)
     parts, notes = {}, []
+
+    def chapter_number(i):
+        info = roles[i]
+        mark = (info['number'] if info.get('table') else re.match(NUMBERED_PREFIX['chapter'], info['text']).group(0)).strip(' .')
+        return str(ROMAN.index(mark) + 1) if mark in ROMAN else mark
+
+    # Chapter numbers that start again at 1 mean a summary page before the body (요약): it stays as the source has it
+    restart = next((k for k in range(1, len(chapters)) if chapter_number(chapters[k]) == '1'), None)
+    if restart is not None:
+        for j in range(cover_end, chapters[restart]):
+            if roles[j]['role'] != 'empty':
+                roles[j] = dict(role='block', why='본문 앞 요약쪽')
+        chapters = chapters[restart:]
     parts['cover'] = dict(range=[0, cover_end], kind='cover', keepFaces=True, **cover)
 
     # the empty line most later chapters have above them becomes the spacer part (left out atop a new page)
@@ -278,7 +296,11 @@ def propose(source, template_id, exclude=()):
         if others:
             notes.append(f'{role}: 모양 {len({look(top[j]) for j in found})}가지 중 가장 많은 것으로 부품을 만듦({others}줄은 그 모양으로 들어감)')
         spec = dict(range=[i, i + 1], placeholder='[항목]')
-        if role.startswith('heading'):
+        if role.startswith('heading') and roles[i].get('table'):
+            tab = next((j for j in found if roles[j].get('table')), i)  # a number tab: number and title in its cells
+            spec.update(range=[tab, tab + 1], kind='heading', level=1, placeholder='[1단계 제목]', numberPlaceholder='[번호]',
+                        numbering='digit', fitTitleCell=True, replace={roles[tab]['number']: '[번호]', roles[tab]['title']: '[1단계 제목]'})
+        elif role.startswith('heading'):
             spec.update(kind='heading', level=int(role[-1]), placeholder=f'[{role[-1]}단계 제목]')
         elif role in ('task', 'point'):
             spec.update(kind=role, placeholder='[과제 제목]' if role == 'task' else '[점 내용]', numberPlaceholder='[번호]',
@@ -303,7 +325,7 @@ def propose(source, template_id, exclude=()):
             return
         count['block'] += 1
         name = f'block{count["block"]}'
-        spec = dict(range=[block_start, end], kind='block')
+        spec = dict(range=[block_start, end], kind='block', keepFaces=True)  # as the source has it, fonts too
         if any(t.find(HP + 'pos').get('treatAsChar') != '1' for p in top[block_start:end] for t in own_tables(p)):
             spec['tableAsChar'] = True
         parts[name] = spec
@@ -324,7 +346,8 @@ def propose(source, template_id, exclude=()):
         if info['role'] == 'chapter':
             node = dict(t='chapter', text=clean(info['title'] if info.get('table') else re.sub(NUMBERED_PREFIX['chapter'], '', info['text'])))
         elif info['role'].startswith('heading'):
-            node = dict(t='heading', level=int(info['role'][-1]), text=clean(re.sub(NUMBERED_PREFIX[info['role']], '', info['text'])))
+            text = info['text'] if info.get('table') else re.sub(NUMBERED_PREFIX[info['role']], '', info['text'])
+            node = dict(t='heading', level=int(info['role'][-1]), text=clean(text))
         elif info['role'] in ('task', 'point'):
             node = dict(t=info['role'], text=clean(re.sub(NUMBERED_PREFIX[info['role']], '', info['text'])))
         elif info['role'] in TEXT_ROLES:
@@ -350,6 +373,7 @@ def propose(source, template_id, exclude=()):
                     rules=rules, deepIndentHwp=1000, parts=parts)
     outline = dict(schema='hwpx.assembly-outline.v1', template=template_id, cover=cover_value, nodes=nodes)
     summary = dict(parts=sorted(parts), blocks=sum(n['t'] == 'block' for n in nodes), nodes=len(nodes),
+                   chapterNumbers=[chapter_number(i) for i in chapters],
                    roles=dict(Counter(r['role'] for r in roles[cover_end:] if r['role'] != 'empty')), notes=notes)
     return part_map, outline, summary
 
