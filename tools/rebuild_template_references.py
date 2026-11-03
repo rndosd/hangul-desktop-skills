@@ -22,7 +22,7 @@ SKILLS = ROOT / 'plugins/hancom-desktop/skills'
 PLANS = SKILLS / 'hwpx/assets/document-templates/full-plans'
 FINALIZE = SKILLS / 'hwpx-windows-finalize/scripts'
 sys.path.insert(0, str(FINALIZE))
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(SKILLS / 'hwpx/scripts'))
 import normalize_template_layout as normalize  # noqa: E402
 from hancom_completion_gate import preview_pdf  # noqa: E402
 

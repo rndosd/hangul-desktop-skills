@@ -1,6 +1,6 @@
 # 조립 양식 등록 기준
 
-남의 계획서를 조립 양식으로 등록할 때 쓰는 기준이다. 부품 지도(`<id>.json`)를 쓰고 `tools/build_assembly_template.py`로 빌드한다. 지도에 쓸 수 있는 키는 그 도구의 설명을 본다.
+남의 계획서를 조립 양식으로 등록할 때 쓰는 기준이다. 부품 지도(`<id>.json`)를 쓰고 스킬의 `scripts/build_assembly_template.py`로 빌드한다. 지도에 쓸 수 있는 키는 그 도구의 설명을 본다.
 
 ## 1. 부분마다 조립·고정·블록 정하기
 
@@ -12,7 +12,8 @@
 
 - 칸이 정해진 문서 전체(신청서, 신고서, 동의서)는 조립 대신 빈칸 채우기로 등록한다.
 - 블록 안의 번호 줄(1., 가., 1))은 조립이 이어 센다. 빌드는 그런 줄을 `numberedLines`로 남기고, 조립 결과는 경고한다.
-- 자동 등록은 `tools/register_assembly_template.py 원본 작업폴더 --id ID`로 한다. 제안(`tools/propose_assembly_map.py`) → 빌드(실패한 부품은 블록으로 내림) → ①·② → `report.json` 순서다.
+- 자동 등록은 실행기의 `register 원본 --id ID --out 작업폴더`(스킬 `scripts/register_assembly_template.py`)로 한다. 제안(`scripts/propose_assembly_map.py`) → 빌드(실패한 부품은 블록으로 내림) → ①·② → `report.json` 순서다. 칸 서식이 섞였지만 칸 배치가 규칙적인 표는 가장 흔한 줄(`unitRow`)로 반복 표가 되고, 날짜 머리글이면 `schedule`, ○로 시작하는 열이 있으면 그 열 앞 기호(`prefixColumn`)가 된다.
+- 사람 확인(③·⑤)은 미리보기 승인 하나로 묻는다. 블록 원문은 `sourceWording`의 개수·예만 알린다.
 - 장 번호가 1로 다시 시작하면 그 앞을 본문 앞 요약쪽으로 보고 블록으로 둔다. 로마 숫자 장 아래의 숫자 번호 탭은 1단계 제목이다.
 
 ## 2. 합격 기준

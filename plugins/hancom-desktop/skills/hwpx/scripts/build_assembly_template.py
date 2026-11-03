@@ -12,7 +12,8 @@ this tool then rewrites each saved part so that no source wording ships:
                the first body character
   table parts  headerRows rows stay (default 1) and one unit of unitRows rows (default 1; cells
                may merge inside it) is kept empty for native_assembly to repeat per outline row;
-               "repeat": false keeps a fixed table filled once. Optionally resized first (map
+               "repeat": false keeps a fixed table filled once; "unitRow" (body row index) picks another
+               source row as the unit. Optionally resized first (map
                "size": width, row and character height, holder margins) so tables from different
                source pages match. Every cell wraps by word, and a prefixed first column is left
                aligned with a hanging indent ("prefixColumn" names another column for the prefix)
@@ -59,8 +60,8 @@ from lxml import etree
 
 from normalize_template_layout import substitute_fonts
 
-ROOT = Path(__file__).resolve().parents[1]
-TEMPLATES = ROOT / 'plugins/hancom-desktop/skills/hwpx/assets/document-templates/assembly'
+HERE = Path(__file__).resolve().parent
+TEMPLATES = HERE.parent / 'assets/document-templates/assembly'  # the skill's own templates (the repository's when built there)
 HP = '{http://www.hancom.co.kr/hwpml/2011/paragraph}'
 HH = '{http://www.hancom.co.kr/hwpml/2011/head}'
 HC = '{http://www.hancom.co.kr/hwpml/2011/core}'
@@ -98,7 +99,7 @@ def need(ok, message):
 def native(plan, work, name):
     plan_path = work / f'{name}.json'
     plan_path.write_text(json.dumps(plan, ensure_ascii=False, indent=1), encoding='utf-8')
-    argv = ['powershell', '-NoProfile', '-STA', '-File', str(ROOT / 'tools/assembly_native.ps1'), '-PlanPath', str(plan_path)]
+    argv = ['powershell', '-NoProfile', '-STA', '-File', str(HERE / 'assembly_native.ps1'), '-PlanPath', str(plan_path)]
     done = subprocess.run(argv, capture_output=True, text=True, encoding='utf-8-sig', errors='replace')
     (work / f'{name}.result.json').write_text(done.stdout + done.stderr, encoding='utf-8')
     need(done.returncode == 0, f'Hangul step {name} failed: {done.stdout[-600:]} {done.stderr[-600:]}')
@@ -267,6 +268,17 @@ def normalize_table(section, header_xml, spec):
     heads, size, feet = spec.get('headerRows', 1), spec.get('unitRows', 1), spec.get('footerRows', 0)
     rows = table.findall(HP + 'tr')
     need(len(rows) >= heads + size + feet, 'table has fewer rows than headerRows + unitRows + footerRows')
+    pick = spec.get('unitRow', 0)  # the body row whose look the units take (a source may highlight its first row)
+    if pick:
+        need(heads + pick + size <= len(rows) - feet and all(row_span(c)[1] - row_span(c)[0] == 1 for r in rows[heads:len(rows) - feet]
+                                                            for c in r.findall(HP + 'tc')), 'unitRow needs single-row units in range')
+        for row in rows[heads:heads + pick]:
+            table.remove(row)
+        for row in rows[heads + pick:]:  # the rows after the dropped ones move up
+            for cell in row.findall(HP + 'tc'):
+                address = cell.find(HP + 'cellAddr')
+                address.set('rowAddr', str(int(address.get('rowAddr')) - pick))
+        rows = rows[:heads] + rows[heads + pick:]
     for row in rows[heads + size:len(rows) - feet]:
         table.remove(row)
     for row in rows[len(rows) - feet:]:  # footer rows follow the unit directly

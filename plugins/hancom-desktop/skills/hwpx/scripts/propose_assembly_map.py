@@ -90,6 +90,10 @@ def chapter_cells(table):
     return (number, max(titles, key=len)) if number and titles and len(''.join(titles)) < 40 else None
 
 
+def row_pictures(row):
+    return (e for c in row for e in c.iter() if e.tag.split('}')[1] in ('pic', 'ole', 'container', 'rect'))
+
+
 def table_shape(table):
     """How a table can be drawn: repeat (header, units, optional total row), labels (fixed, named rows), steps or block."""
     rows = cells_of(table)
@@ -112,9 +116,17 @@ def table_shape(table):
     # a table part fills every cell in one look per column: cells mixing looks (smaller notes, squeezed lines) would grow
     uniform = all(len(set().union(*(looks(row[c]) for row in units if c < len(row)))) <= 1 for c in range(len(units[0]))) if units else False
     if (all(l == layout[0] for l in layout) and all(s == (1, 1) for l in layout for s in l)
-            and heads == 1 and len(rows[0]) == len(units[0]) and uniform):  # column headers over the unit's cells
-        return dict(kind='repeat', headerRows=heads, unitRows=1, footerRows=footer,
-                    footerLabels=sorted({t for t in texts[-1] if t.replace(' ', '') in [x.replace(' ', '') for x in TOTALS]}) if footer else [])
+            and heads == 1 and len(rows[0]) == len(units[0])):  # column headers over the unit's cells
+        shape = dict(kind='repeat', headerRows=heads, unitRows=1, footerRows=footer,
+                     footerLabels=sorted({t for t in texts[-1] if t.replace(' ', '') in [x.replace(' ', '') for x in TOTALS]}) if footer else [])
+        if not uniform:
+            # One highlighted row or a squeezed note mixes the looks of a column; the part keeps the row whose looks
+            # are the most common ones (and holds no picture) and draws every outline row in it.
+            common = [Counter(frozenset(looks(row[c])) for row in units).most_common(1)[0][0] for c in range(len(units[0]))]
+            score = [(sum(frozenset(looks(row[c])) == common[c] for c in range(len(row))), not any(True for _ in row_pictures(row)))
+                     for row in units]
+            shape['unitRow'] = max(range(len(units)), key=lambda k: (score[k], -k))
+        return shape
     first = [row[0] for row in body if row and row[0].find(HP + 'cellAddr').get('colAddr') == '0']
     if (len(first) == len(body) and all(span(c)[0] == 1 for c in first)
             and all(0 < len(flat_text(c)) <= 12 for c in first) and len({flat_text(c) for c in first}) == len(first)
@@ -391,6 +403,27 @@ def propose(source, template_id, exclude=()):
     return part_map, outline, summary
 
 
+SCHEDULE_HEADS = ('일정', '기간', '시기', '일시', '날짜', '추진 일정')
+
+
+def table_roles(rows, shape):
+    """What an outline calls a repeating table: schedule when a header names dates, grid otherwise, with the
+    header texts as column names, and the item symbol most unit cells of one column start with as its prefix."""
+    heads = shape['headerRows']
+    header = [flat_text(c) for c in rows[heads - 1]] if heads else []
+    names = [re.sub(r'\s+', '', h) for h in header]
+    found = dict(role='schedule' if any(any(k.replace(' ', '') in n for k in SCHEDULE_HEADS) for n in names) else 'grid')
+    if header and all(header):
+        found['columns'] = [re.sub(r'(?<=\S) (?=\S( |$))', '', h) for h in header]  # 기 간 -> 기간
+    body = rows[heads:len(rows) - shape.get('footerRows', 0)]
+    for column in range(len(body[0]) if body else 0):
+        starts = Counter(m.group(0) for row in body if column < len(row) for m in [re.match(r'^[○◦ㅇ∘●◯]', flat_text(row[column]))] if m)
+        if starts and starts.most_common(1)[0][1] * 2 > len(body):
+            found.update(firstColumnPrefix=starts.most_common(1)[0][0] + ' ', **({'prefixColumn': column} if column else {}))
+            break
+    return found
+
+
 def table_node(i, p, info, parts, tables):
     """The outline node of a table; the first table of each shape and size gives the part."""
     table = own_tables(p)[0]
@@ -405,6 +438,10 @@ def table_node(i, p, info, parts, tables):
         spec = dict(headerRows=shape['headerRows'], unitRows=shape['unitRows'], role='grid', keepWrap=True)  # the source's own wrap
         if shape['kind'] == 'repeat' and shape.get('footerRows'):
             spec.update(footerRows=1, footerLabels=shape['footerLabels'])
+        if shape['kind'] == 'repeat':
+            spec.update(table_roles(rows, shape))
+        if shape.get('unitRow'):
+            spec['unitRow'] = shape['unitRow']
         if shape['kind'] == 'labels':
             spec.update(repeat=False, labelColumn=0)
         if shape['kind'] == 'steps':
@@ -418,6 +455,12 @@ def table_node(i, p, info, parts, tables):
     if shape['kind'] == 'repeat':
         body = rows[heads:len(rows) - shape.get('footerRows', 0)]
         node['rows'] = [[cell_value(c) for c in row] for row in body]
+        spec = parts[name]['table']
+        if spec.get('firstColumnPrefix'):  # the part draws the symbol; the outline holds the text after it
+            column = spec.get('prefixColumn', 0)
+            for row in node['rows']:
+                if isinstance(row[column], str):
+                    row[column] = re.sub(rf'^\s*{re.escape(spec["firstColumnPrefix"].strip())}\s*', '', row[column])
         if shape.get('footerRows'):
             node['footer'] = [cell_value(c) for c in rows[-1] if flat_text(c) not in shape['footerLabels']]
     elif shape['kind'] == 'labels':
