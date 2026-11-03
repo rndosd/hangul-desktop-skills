@@ -487,7 +487,6 @@ def prepare(name, spec, raw, out_dir, deep_indent):
         # numbering. Its source wording ships, so every text is listed for the person to review, and lines that look
         # like dates or numbered titles (the outline's numbering does not count them) are listed apart.
         texts = [piece.strip() for t in section.iter(HP + 't') for piece in [t.text, *(c.tail for c in t)] if piece and piece.strip()]
-        need(texts, f'{name}: block part has no text')
         lines = [''.join(t.text or '' for run in p.findall(HP + 'run') for t in run.findall(HP + 't')).strip() for p in section.findall(HP + 'p')]
         entry.update(texts=texts,
                      numberedLines=[line for line in lines if re.match(r'^([ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]|\d{1,2}\.|[가-하]\.|\d{1,2}\))\s', line)],
@@ -653,6 +652,8 @@ def main():
         except Exception as error:  # register_assembly_template.py redraws a failed part as a block
             raise ValueError(f'part {name}: {error}') from error
     for name, entry in parts.items():
+        if entry['kind'] == 'block':
+            continue  # a block ships its source wording on purpose; its texts are listed in the manifest for review
         placeholders = entry.get('placeholder', {})
         allowed = flat(placeholders.values()) if isinstance(placeholders, dict) else [placeholders]
         allowed += [entry['numberPlaceholder']] if 'numberPlaceholder' in entry else []
@@ -660,7 +661,6 @@ def main():
         allowed += part_map['parts'].get(name, {}).get('table', {}).get('fixedTexts', [])
         allowed += part_map['parts'].get(name, {}).get('table', {}).get('footerLabels', [])
         allowed += [row['label'] for row in entry.get('table', {}).get('rowLabels', [])]  # names of a fixed table's rows
-        allowed += entry.get('texts', [])  # a block ships its source wording, listed in the manifest for review
         allowed += [entry['symbol']] if entry.get('symbol') else []  # the source's own leading symbol
         left = leftover_wording(out_dir / entry['file'], allowed + entry.get('table', {}).get('header', []))
         need(not left, f'part {name}: source wording left in the prepared part: {left[:60]!r}')

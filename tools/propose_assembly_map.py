@@ -128,24 +128,30 @@ def role_of(p, numbered_shapes):
         if shape['kind'] == 'block' or text.strip():
             return dict(role='block', why=shape.get('why', '표와 글이 한 문단'))
         return dict(role='table', shape=shape, inline=tables[0].find(HP + 'pos').get('treatAsChar') == '1')
-    if 'pic' in tags or 'container' in tags or 'ole' in tags:
-        return dict(role='block', why='그림·도형')
+    if 'pic' in tags or 'ole' in tags:
+        return dict(role='block', why='그림')
+    drawn_text = ''.join(t.text or '' for d in p.iter(HP + 'drawText') for t in d.iter(HP + 't')).strip()
+    if ('container' in tags or 'rect' in tags) and (drawn_text or not text.strip()):
+        return dict(role='block', why='글상자·도형')
     if 'footNote' in tags or 'endNote' in tags:
         return dict(role='block', why='각주')
     if not text.strip():
         return dict(role='block', why='글상자·도형 안 글') if ''.join(t.text or '' for t in p.iter(HP + 't')).strip() else dict(role='empty')
+    # what is left with drawings is a line led by a small drawn square (one rectangle or a group of them)
     body = text.strip()
     for role, pattern in PATTERNS:
         if re.match(pattern, body):
             return dict(role=role, text=body)
-    if 'rect' in tags:
+    if 'rect' in tags or 'container' in tags:
         return dict(role='subhead', text=body, drawn=True)  # a small drawn square before the title
     return dict(role='block', why='공통 어휘가 아닌 문단')
 
 
 def look(p):
-    run = p.find(HP + 'run')
-    return p.get('paraPrIDRef'), run.get('charPrIDRef') if run is not None else None
+    """Paragraph format and the character format of the first letters (not of a leading symbol run): authors
+    often condense one line's letter spacing to fit it, which is a look of its own."""
+    runs = [r for r in p.findall(HP + 'run') if re.search('[가-힣A-Za-z0-9]', ''.join(t.text or '' for t in r.findall(HP + 't')))]
+    return p.get('paraPrIDRef'), runs[0].get('charPrIDRef') if runs else None
 
 
 def page_numbers(section):
@@ -156,19 +162,49 @@ def page_numbers(section):
     return dict(position=position, format=number.get('formatType', 'DIGIT').capitalize(), sideChar=number.get('sideChar', ''))
 
 
-def cover_spec(paragraphs):
-    """Placeholders for the cover's title, organization and date; other words are dropped, ornaments kept."""
+DATE = r'(19|20)\d\d\.\s?\d{1,2}\.(\s?\d{1,2}\.)?(\s?\(.\))?'
+ORG = r'(교육청|교육지원청|학교|센터|위원회|과|팀|부|원)\)?$'
+
+
+def pieces_of(p, heights):
+    """(text, character height) of every run text of a paragraph, tables and boxes included."""
+    return [(piece.strip(), heights.get(run.get('charPrIDRef'), 0)) for run in p.iter(HP + 'run') for t in run.findall(HP + 't')
+            for piece in [t.text, *(c.tail for c in t)] if piece and piece.strip()]
+
+
+def cover_end_of(paragraphs, heights):
+    """Where the cover ends: after the title (the largest letters), at the first paragraph holding body text
+    (a long line that is neither the title, an organization nor a date), such as an introduction box."""
+    found = [(i, x, h) for i, p in enumerate(paragraphs) for x, h in pieces_of(p, heights) if re.search('[가-힣A-Za-z]', x)]
+    if not found:
+        return len(paragraphs)
+    top_height = max(h for _, _, h in found)
+    title_at = max(i for i, _, h in found if h >= top_height * 0.7)
+    for i in range(title_at + 1, len(paragraphs)):
+        if any(len(x) > 20 and h < top_height * 0.7 and not re.search(ORG, x) and not re.fullmatch(DATE, x)
+               for x, h in pieces_of(paragraphs[i], heights)):
+            return i
+    return len(paragraphs)
+
+
+def cover_spec(paragraphs, heights):
+    """Placeholders for the cover's title (its largest letters, lines joined), organization and date; other
+    words are dropped, ornaments kept."""
     # exact run texts (replace matches them inside their runs); repeated ones are replaced once, so they are skipped
-    raw = [piece.strip() for p in paragraphs for t in p.iter(HP + 't') for piece in [t.text, *(c.tail for c in t)] if piece and piece.strip()]
-    pieces = [x for x in dict.fromkeys(raw) if raw.count(x) == 1 or not re.search('[가-힣A-Za-z0-9]', x)]
+    raw = [x for p in paragraphs for x in pieces_of(p, heights)]
+    texts = [x for x, _ in raw]
+    pieces = [(x, h) for x, h in dict.fromkeys(raw) if texts.count(x) == 1 or not re.search('[가-힣A-Za-z0-9]', x)]
     replace, fields, keep = {}, {}, []
-    dates = [x for x in pieces if re.fullmatch(r'(19|20)\d\d\.\s?\d{1,2}\.(\s?\d{1,2}\.)?(\s?\(.\))?', x)]
-    orgs = [x for x in pieces if x not in dates and re.search(r'(교육청|교육지원청|학교|센터|위원회|과|팀|부|원)\)?$', x) and len(x) <= 40]
-    words = [x for x in pieces if x not in dates and x not in orgs and re.search('[가-힣A-Za-z]', x)]
-    title = max(words, key=len) if words else None
-    for x in pieces:
-        if x == title:
-            replace[x], fields['title'] = '[제목]', '[제목]'
+    lettered = [h for x, h in pieces if re.search('[가-힣A-Za-z]', x)]
+    need(lettered, '표지에서 제목을 찾지 못했습니다')
+    big = [x for x, h in pieces if re.search('[가-힣A-Za-z]', x) and h >= max(lettered) * 0.7]
+    titles = [x for x in big if not (re.search(ORG, x) and len(x) <= 20)] or big  # a large organization name is not the title
+    dates = [x for x, _ in pieces if x not in titles and re.fullmatch(DATE, x)]
+    orgs = [x for x, _ in pieces if x not in titles and x not in dates and re.search(ORG, x) and len(x) <= 40]
+    for x, _ in pieces:
+        if x in titles:
+            replace[x] = '[제목]' if x == titles[0] else ''  # a title of several lines goes in as one
+            fields['title'] = '[제목]'
         elif dates and x == dates[0]:
             replace[x], fields['date'] = '[날짜]', '[날짜]'
         elif orgs and x == orgs[0]:
@@ -177,8 +213,7 @@ def cover_spec(paragraphs):
             replace[x] = ''  # other source words do not ship
         else:
             keep.append(x)  # ornaments, such as a Wingdings letter
-    need('title' in fields, '표지에서 제목을 찾지 못했습니다')
-    value = {'title': clean(title), **({'date': clean(dates[0])} if 'date' in fields else {}),
+    value = {'title': clean(' '.join(titles)), **({'date': clean(dates[0])} if 'date' in fields else {}),
              **({'organization': clean(orgs[0])} if 'organization' in fields else {})}
     return dict(replace=replace, fields=fields, keep=sorted(set(keep))), value
 
@@ -194,12 +229,14 @@ def propose(source, template_id, exclude=()):
     for index, info in enumerate(roles):
         if info['role'] in exclude or f'p{index}' in exclude:
             info.update(role='block', why=f'{info["role"]} 부품 빌드 실패로 블록')
-    first = next((i for i, r in enumerate(roles) if r['role'] not in ('empty', 'block') and i > 0), None)
+    # the cover may hold tables (a title band); the body starts at the first chapter or vocabulary line
+    first = next((i for i, r in enumerate(roles) if r['role'] not in ('empty', 'block', 'table') and i > 0), None)
     need(first is not None, '공통 어휘로 읽히는 문단이 없습니다')
     chapters = [i for i, r in enumerate(roles) if r['role'] == 'chapter']
     need(chapters, '장(Ⅰ 제목)이 없어 조립 양식으로 만들 수 없습니다. 빈칸 채우기로 등록하세요.')
-    cover_end = first
-    cover, cover_value = cover_spec(top[:cover_end])
+    heights = {c.get('id'): int(c.get('height')) for c in header.iter(HH + 'charPr')}
+    cover_end = cover_end_of(top[:first], heights)
+    cover, cover_value = cover_spec(top[:cover_end], heights)
     parts, notes = {}, []
     parts['cover'] = dict(range=[0, cover_end], kind='cover', keepFaces=True, **cover)
 
@@ -230,7 +267,7 @@ def propose(source, template_id, exclude=()):
             continue
         common = Counter(look(top[i]) for i in found).most_common(1)[0][0]
         i = next(i for i in found if look(top[i]) == common)
-        if role in TEXT_ROLES and not roles[i].get('drawn'):
+        if role in TEXT_ROLES and role not in ('task', 'point') and not roles[i].get('drawn'):  # numbered symbols differ by number
             # a line of the role written with another symbol in another look (※ among small * notes) is a different
             # thing the vocabulary has no second part for: it stays as the source has it
             for j in found:

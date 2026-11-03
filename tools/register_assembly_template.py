@@ -156,7 +156,7 @@ def main():
         catalog, ok, (failed, message) = build(work, attempt, part_map, source)
         if ok:
             break
-        if failed in (None, 'cover', 'chapter', 'chapter_first') or attempt > args.retries:
+        if failed in (None, 'cover', 'chapter', 'chapter_first') or failed not in part_map['parts']                 or part_map['parts'][failed]['kind'] == 'block' or attempt > args.retries:  # a block has nothing to fall back to
             report.update(status='FAIL_BUILD', part=failed, error=message, proposal=summary)
             write(work / 'report.json', report)
             print(json.dumps(report, ensure_ascii=False, indent=1))
