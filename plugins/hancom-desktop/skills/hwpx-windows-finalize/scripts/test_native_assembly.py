@@ -20,7 +20,18 @@ def outline(*nodes):
 
 
 def labels(plan):
-    return [s['text'].split(' ')[0] for s in plan['steps'] if s['op'] == 'text' and s['find'] in ('[장 제목]', '[1단계 제목]', '[2단계 제목]', '[3단계 제목]')]
+    """Title numbers in order: typed before the title (가.), or the number cell of a fitted title box (Ⅰ, 1)."""
+    found = []
+    for s in plan['steps']:
+        if s['op'] == 'text' and s['find'] in ('[장 제목]', '[1단계 제목]', '[2단계 제목]', '[3단계 제목]'):
+            found.append(s['text'].split(' ')[0])
+        elif s['op'] == 'insert' and s['part'].split('@')[0] in ('chapter_first', 'chapter', 'heading1') and 'expect' in s:
+            found.append(s['expect']['texts'][0])
+    return found
+
+
+def parts(plan):
+    return [s['part'].split('@')[0] for s in plan['steps'] if s['op'] == 'insert']
 
 
 CHAPTER = {'t': 'chapter', 'text': '개요'}
@@ -51,7 +62,7 @@ class AssemblyTest(unittest.TestCase):
             a.build_plan(copy.deepcopy(self.manifest), value, next(self.tables))
 
     def table_copy(self, plan):
-        step = next(s for s in plan['steps'] if 'expect' in s)
+        step = next(s for s in plan['steps'] if 'tableRows' in s.get('expect', {}))
         with zipfile.ZipFile(plan['parts'][step['part']]['path']) as package:
             table = next(ElementTree.fromstring(package.read('Contents/section0.xml')).iter(a.HP + 'tbl'))
         cells = [[[''.join(t.text or '' for t in p.iter(a.HP + 't')) for p in tc.iter(a.HP + 'p')] for tc in tr.iter(a.HP + 'tc')]
@@ -61,11 +72,13 @@ class AssemblyTest(unittest.TestCase):
 
     def test_manifest_lists_every_kind_with_existing_hashed_parts(self):
         kinds = {p['kind'] for p in self.manifest['parts'].values()}
-        self.assertEqual(kinds, {'cover', 'chapter_first', 'chapter', 'heading', 'table', 'spacer', 'item', 'dash', 'dot', 'note'})
+        self.assertEqual(kinds, {'cover', 'chapter_first', 'chapter', 'heading', 'task', 'table', 'item', 'dash', 'dot', 'note'})
         self.assertLessEqual(kinds, set(a.PART_KINDS))
         self.assertEqual({p['level'] for p in self.manifest['parts'].values() if p['kind'] == 'heading'}, {1, 2, 3})
         self.assertTrue(all(Path(p['path']).is_file() for p in self.manifest['parts'].values()))
-        self.assertIn('교육부', self.manifest['source']['attribution'])
+        self.assertIn('경기도교육청', self.manifest['source']['attribution'])
+        with zipfile.ZipFile(self.manifest['parts']['cover']['path']) as package:  # the agency logo is left out
+            self.assertFalse([n for n in package.namelist() if n.startswith('BinData/')])
 
     def test_parts_name_no_legacy_hft_face(self):
         head = '{http://www.hancom.co.kr/hwpml/2011/head}'
@@ -81,45 +94,49 @@ class AssemblyTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             copy_dir = Path(temp) / 'plan-official'
             shutil.copytree(CATALOG / 'plan-official', copy_dir)
-            with (copy_dir / 'parts/spacer.hwpx').open('ab') as handle:
+            with (copy_dir / 'parts/note.hwpx').open('ab') as handle:
                 handle.write(b'x')
-            with self.assertRaisesRegex(ValueError, 'manifest와 다릅니다: spacer'):
+            with self.assertRaisesRegex(ValueError, 'manifest와 다릅니다: note'):
                 a.load_template(temp, 'plan-official')
         with self.assertRaisesRegex(ValueError, '조립 양식이 없습니다'):
             a.load_template(CATALOG, 'missing')
 
     def test_numbering_follows_the_outline(self):
         plan = self.plan(CHAPTER, H1, H2, H3, ITEM, H3, H2, H1, H2, CHAPTER, H1, CHAPTER)
-        self.assertEqual(labels(plan), ['Ⅰ.', '1.', '가.', '1)', '2)', '나.', '2.', '가.', 'Ⅱ.', '1.', 'Ⅲ.'])
+        self.assertEqual(labels(plan), ['Ⅰ', '1', '가.', '1)', '2)', '나.', '2', '가.', 'Ⅱ', '1', 'Ⅲ'])
 
     def test_dropping_a_section_renumbers_without_a_gap(self):
         full = [CHAPTER, H1, ITEM, dict(H1, text='삭제될 절'), ITEM, H1, H2, H2, CHAPTER, H1]
         short = full[:3] + full[5:]
-        self.assertEqual(labels(self.plan(*full)), ['Ⅰ.', '1.', '2.', '3.', '가.', '나.', 'Ⅱ.', '1.'])
-        self.assertEqual(labels(self.plan(*short)), ['Ⅰ.', '1.', '2.', '가.', '나.', 'Ⅱ.', '1.'])
+        self.assertEqual(labels(self.plan(*full)), ['Ⅰ', '1', '2', '3', '가.', '나.', 'Ⅱ', '1'])
+        self.assertEqual(labels(self.plan(*short)), ['Ⅰ', '1', '2', '가.', '나.', 'Ⅱ', '1'])
 
     def test_items_under_level_three_use_the_deep_parts(self):
         plan = self.plan(CHAPTER, H1, ITEM, H2, H3, ITEM, {'t': 'dash', 'text': '세부'}, H2, ITEM)
-        inserted = [s['part'] for s in plan['steps'] if s['op'] == 'insert']
-        self.assertEqual(inserted, ['chapter_first', 'heading1', 'item', 'heading2', 'heading3', 'item-deep', 'dash-deep', 'heading2', 'item'])
+        self.assertEqual(parts(plan), ['chapter_first', 'heading1', 'item', 'heading2', 'heading3', 'item', 'dash', 'heading2', 'item'])
+        deep = copy.deepcopy(self.manifest)
+        deep['rules']['deepItemsUnderHeadingLevel'] = 3  # a source that indents items under 1) one step more
+        plan = a.build_plan(deep, outline(CHAPTER, H1, ITEM, H2, H3, ITEM, {'t': 'dash', 'text': '세부'}, H2, ITEM), next(self.tables))
+        self.assertEqual(parts(plan), ['chapter_first', 'heading1', 'item', 'heading2', 'heading3', 'item-deep', 'dash-deep', 'heading2', 'item'])
 
-    def test_body_section_spacer_page_numbers_and_box_width(self):
+    def test_cover_page_numbers_and_title_box_width(self):
         plan = self.plan(CHAPTER, H1, CHAPTER)
-        ops = [(s['op'], s.get('part')) for s in plan['steps']][4:]
-        self.assertEqual(ops[:3], [('section', None), ('insert', 'chapter_first'), ('pageNumbers', None)])
-        self.assertIn(('insert', 'spacer'), ops)
-        self.assertLess(ops.index(('insert', 'spacer')), ops.index(('insert', 'chapter')))
-        widths = [s['width'] for s in plan['steps'] if s['op'] == 'boxWidth']
-        box = self.manifest['parts']['chapter_first']['box']
-        self.assertEqual(a.box_width(box, box['sourceTitle']), box['sourceWidthHwp'])
-        longer = self.plan(dict(CHAPTER, text='개요 및 추진 배경'))
-        self.assertGreater([s['width'] for s in longer['steps'] if s['op'] == 'boxWidth'][0], widths[0])
+        ops = [(s['op'], s.get('part', '').split('@')[0] or None) for s in plan['steps']]
+        start = ops.index(('pageNumbers', None))
+        self.assertEqual(ops[start:start + 3], [('pageNumbers', None), ('pageBreak', None), ('insert', 'chapter_first')])
+        fit = self.manifest['parts']['chapter_first']['fit']
+        self.assertEqual(fit['placeholder'], '[장 제목]')
+        short = next(s for s in plan['steps'] if s.get('part', '').startswith('chapter_first@'))
+        longer = self.plan(dict(CHAPTER, text='개요 및 추진 배경과 운영 방향'))
+        long_step = next(s for s in longer['steps'] if s.get('part', '').startswith('chapter_first@'))
+        self.assertEqual(short['expect']['texts'], ['Ⅰ', '개요'])
+        self.assertEqual(long_step['expect']['texts'], ['Ⅰ', '개요 및 추진 배경과 운영 방향'])
 
     def test_table_rows_are_written_into_a_part_copy(self):
-        plan = self.plan(CHAPTER, {'t': 'table', 'part': 'schedule', 'rows': [['안내', '3. 15.', ''], ['실시', '9. 15.', ['각 학교', '교육청']]]})
+        plan = self.plan(CHAPTER, {'t': 'table', 'part': 'schedule', 'rows': [['3. 15.', '안내', ''], ['9. 15.', '실시', ['각 학교', '교육청']]]})
         step, count, cells, rows = self.table_copy(plan)
-        self.assertEqual((step['op'], step['part'], step['expect']['tableRows'], count), ('insert', 'schedule@1', 3, '3'))
-        self.assertEqual(cells[1:], [[[' ○ 안내'], ['3. 15.'], ['']], [[' ○ 실시'], ['9. 15.'], ['각 학교', '교육청']]])
+        self.assertEqual((step['op'], step['part'].split('@')[0], step['expect']['tableRows'], count), ('insert', 'schedule', 3, '3'))
+        self.assertEqual(cells[1:], [[['3. 15.'], ['○ 안내'], ['']], [['9. 15.'], ['○ 실시'], ['각 학교', '교육청']]])  # the prefix goes in the task column
         self.assertEqual(rows, [['0'] * 3, ['1'] * 3, ['2'] * 3])
         self.assertEqual(sorted(step['expect']['texts']), sorted(['안내', '3. 15.', '실시', '9. 15.', '각 학교', '교육청']))
         self.rejects('칸 수가 3이 아닙니다', CHAPTER, {'t': 'table', 'part': 'schedule', 'rows': [['안내', '3. 15.']]})
@@ -206,8 +223,11 @@ class AssemblyTest(unittest.TestCase):
                     for paragraph in cell.iter(a.HP + 'p'):
                         brk = shapes[paragraph.get('paraPrIDRef')].find(head + 'breakSetting')
                         self.assertEqual((brk.get('breakNonLatinWord'), brk.get('breakLatinWord')), ('BREAK_WORD', 'KEEP_WORD'), name)
-            first = [list(row.iter(a.HP + 'tc'))[0].find(f'{a.HP}subList/{a.HP}p').get('paraPrIDRef') for row in rows[1:]]
+            column = part['table'].get('prefixColumn', 0)
+            first = [list(row.iter(a.HP + 'tc'))[column].find(f'{a.HP}subList/{a.HP}p').get('paraPrIDRef') for row in rows[1:]]
             self.assertEqual(len(set(first)), 1, name)
+            for row in rows[1:]:  # an outline value wraps; it is not squeezed onto one line
+                self.assertEqual({c.find(a.HP + 'subList').get('lineWrap') for c in row.iter(a.HP + 'tc')} - {None}, {'BREAK'}, name)
             if part['table'].get('firstColumnPrefix'):
                 shape = shapes[first[0]]
                 self.assertEqual(shape.find(head + 'align').get('horizontal'), 'LEFT', name)
@@ -224,7 +244,6 @@ class AssemblyTest(unittest.TestCase):
         self.rejects('줄바꿈', CHAPTER, dict(ITEM, text='한 줄\n두 줄'))
         self.rejects('자리표시', CHAPTER, dict(ITEM, text='[항목] 그대로'))
         self.rejects('level 1~3', CHAPTER, dict(H1, level=4))
-        self.rejects('상자가 본문 폭을 넘습니다', dict(CHAPTER, text='아주 긴 장 제목을 한 줄에 넣으면 상자가 본문 폭을 넘어서게 됨'))
         self.rejects('title·date 필수', CHAPTER, cover={'title': '제목만'})
         self.rejects('장은 12개까지', *[CHAPTER] * 13)
 
@@ -364,7 +383,7 @@ class CommonVocabularyTest(unittest.TestCase):
     def test_subhead_on_the_official_template_becomes_a_numbered_heading(self):
         _, notes = self.plan('plan-official', {'title': '가상', 'date': '2027.'},
                              [{'t': 'chapter', 'text': '개요'}, {'t': 'subhead', 'text': '소제목'}, {'t': 'lead', 'text': '문단'}])
-        self.assertEqual([(n['role'], n['used']) for n in notes], [('subhead', 'heading1'), ('lead', 'item')])
+        self.assertEqual([(n['role'], n['used']) for n in notes], [('subhead', 'task'), ('lead', 'item')])
 
     def test_tables_are_picked_by_role_then_by_cell_count(self):
         plan, notes = self.plan('plan-school', {'title': '가상'}, [
@@ -408,10 +427,11 @@ class CommonVocabularyTest(unittest.TestCase):
         manifest = a.load_template(CATALOG, 'plan-official')
         value = {'schema': a.OUTLINE_SCHEMA, 'template': 'plan-official', 'cover': {'title': '가상', 'date': '2027.'},
                  'nodes': [{'t': 'chapter', 'text': '개요'}, {'t': 'heading', 'level': 2, 'text': '바로 가.'}]}
+        temp = tempfile.TemporaryDirectory(); self.addCleanup(temp.cleanup)
         with self.assertRaisesRegex(ValueError, '2단계 제목 앞에 1단계'):
-            a.build_plan(copy.deepcopy(manifest), copy.deepcopy(value))
+            a.build_plan(copy.deepcopy(manifest), copy.deepcopy(value), Path(temp.name) / 't1')
         manifest['rules']['headingLevelsMaySkip'] = True  # sources that put 가. right under a task
-        plan = a.build_plan(manifest, value)
+        plan = a.build_plan(manifest, value, Path(temp.name) / 't2')
         self.assertIn('가.', [s['text'].split(' ')[0] for s in plan['steps'] if s['op'] == 'text'])
 
 
@@ -426,12 +446,12 @@ class RegisteredSourceTest(unittest.TestCase):
     def test_titles_with_nothing_under_them_do_not_keep_with_the_next(self):
         plan = self.plan([CHAPTER, dict(H1, text='기간: 3월'), dict(H1, text='장소: 강당'), H1, ITEM, {'t': 'chapter', 'text': '계획'}])
         heads = [s['part'] for s in plan['steps'] if s['op'] == 'insert' and s['part'].startswith('heading')]
-        self.assertEqual(['@' in p for p in heads], [True, True, False])  # the last 1. title has an item under it
-        with zipfile.ZipFile(plan['parts'][heads[0]]['path']) as package:
-            header = ElementTree.fromstring(package.read('Contents/header.xml'))
-            ids = {p.get('paraPrIDRef') for p in ElementTree.fromstring(package.read('Contents/section0.xml')).findall(a.HP + 'p')}
-        keeps = [b.get('keepWithNext') for s in header.iter(a.HH + 'paraPr') if s.get('id') in ids for b in s.iter(a.HH + 'breakSetting')]
-        self.assertEqual(set(keeps), {'0'})
+        def keeps(part):
+            with zipfile.ZipFile(plan['parts'][part]['path']) as package:
+                header = ElementTree.fromstring(package.read('Contents/header.xml'))
+                ids = {p.get('paraPrIDRef') for p in ElementTree.fromstring(package.read('Contents/section0.xml')).findall(a.HP + 'p')}
+            return {b.get('keepWithNext') for s in header.iter(a.HH + 'paraPr') if s.get('id') in ids for b in s.iter(a.HH + 'breakSetting')}
+        self.assertEqual(['1' in keeps(p) for p in heads], [False, False, True])  # the last 1. title has an item under it
 
     def test_later_paragraphs_in_a_numbered_cell_are_not_numbered(self):
         header = a.etree.fromstring(  # lxml, like the parts native_assembly edits

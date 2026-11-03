@@ -1,0 +1,198 @@
+{
+ "schema": "hwpx.assembly-part-map.v1",
+ "id": "plan-official",
+ "label": "공문서형 시행·운영계획",
+ "source": {
+  "sha256": "4dd8a4abcb5fdbadb768e4154e014a0de6aac42056a20313731f6f13607febca",
+  "title": "2027. 3. 1.자 공립 유·초등교원 시·도간 교류 추진 계획",
+  "publisher": "경기도교육청",
+  "license": "공공저작물(저작권법 제24조의2), 출처표시",
+  "attribution": "이 조립 양식의 서식은 경기도교육청 「2027. 3. 1.자 공립 유·초등교원 시·도간 교류 추진 계획」에서 가져왔으며 원문 문구와 기관 로고는 포함하지 않는다."
+ },
+ "rules": {
+  "spacerBeforeLaterChapters": false,
+  "bodyStartsNewSection": false,
+  "deepItemsUnderHeadingLevel": 9,
+  "pageNumbers": {
+   "position": "BottomCenter",
+   "format": "Digit",
+   "sideChar": "-"
+  },
+  "headingLevelsMaySkip": false,
+  "textBeforeFirstChapter": false
+ },
+ "deepIndentHwp": 1000,
+ "parts": {
+  "cover": {
+   "range": [
+    0,
+    18
+   ],
+   "kind": "cover",
+   "replace": {
+    "2027. 3. 1.자 공립 유·초등교원": "[제목]",
+    "시·도간 교류 추진 계획": "",
+    "2026. 9.": "[날짜]",
+    "경기도교육청": "[기관]",
+    "교원인사정책과)": "",
+    "(": ""
+   },
+   "fields": {
+    "title": "[제목]",
+    "date": "[날짜]",
+    "organization": "[기관]"
+   },
+   "dropPictures": true
+  },
+  "chapter_first": {
+   "range": [
+    26,
+    27
+   ],
+   "kind": "chapter_first",
+   "placeholder": "[장 제목]",
+   "numberPlaceholder": "[장 번호]",
+   "replace": {
+    "Ⅰ": "[장 번호]",
+    "목적 및 근거": "[장 제목]"
+   },
+   "numbering": "roman-bare",
+   "fitTitleCell": true,
+   "pageBreakBefore": true
+  },
+  "chapter": {
+   "range": [
+    38,
+    39
+   ],
+   "kind": "chapter",
+   "placeholder": "[장 제목]",
+   "numberPlaceholder": "[장 번호]",
+   "replace": {
+    "Ⅱ": "[장 번호]",
+    "방 침": "[장 제목]"
+   },
+   "numbering": "roman-bare",
+   "fitTitleCell": true
+  },
+  "heading1": {
+   "range": [
+    43,
+    44
+   ],
+   "placeholder": "[1단계 제목]",
+   "kind": "heading",
+   "level": 1,
+   "numberPlaceholder": "[번호]",
+   "numbering": "digit",
+   "fitTitleCell": true,
+   "replace": {
+    "1": "[번호]",
+    "타시·도 전출": "[1단계 제목]"
+   }
+  },
+  "heading2": {
+   "range": [
+    158,
+    159
+   ],
+   "placeholder": "[2단계 제목]",
+   "kind": "heading",
+   "level": 2
+  },
+  "heading3": {
+   "range": [
+    102,
+    103
+   ],
+   "placeholder": "[3단계 제목]",
+   "kind": "heading",
+   "level": 3
+  },
+  "item": {
+   "range": [
+    78,
+    79
+   ],
+   "placeholder": "[항목]",
+   "kind": "item",
+   "prefix": "\\s*○\\s*",
+   "symbol": "○",
+   "baseLeftHwp": 0
+  },
+  "dash": {
+   "range": [
+    162,
+    163
+   ],
+   "placeholder": "[항목]",
+   "kind": "dash",
+   "baseLeftHwp": 0
+  },
+  "dot": {
+   "range": [
+    167,
+    168
+   ],
+   "placeholder": "[항목]",
+   "kind": "dot",
+   "prefix": "\\s*•\\s*",
+   "symbol": "•",
+   "baseLeftHwp": 0
+  },
+  "note": {
+   "range": [
+    161,
+    162
+   ],
+   "placeholder": "[항목]",
+   "kind": "note",
+   "baseLeftHwp": 0
+  },
+  "task": {
+   "range": [
+    224,
+    225
+   ],
+   "placeholder": "[과제 제목]",
+   "kind": "task",
+   "numberPlaceholder": "[번호]",
+   "numbering": "boxed",
+   "replace": {
+    "󰊱": "[번호]",
+    "타시도 전출": "[과제 제목]"
+   }
+  },
+  "schedule": {
+   "range": [
+    137,
+    138
+   ],
+   "kind": "table",
+   "table": {
+    "role": "schedule",
+    "columns": [
+     "기간",
+     "주요 업무 내용",
+     "비고"
+    ],
+    "firstColumnPrefix": "○ ",
+    "prefixColumn": 1
+   }
+  },
+  "two-column": {
+   "range": [
+    21,
+    22
+   ],
+   "kind": "table",
+   "table": {
+    "role": "grid",
+    "columns": [
+     "구분",
+     "내용"
+    ]
+   }
+  }
+ }
+}
