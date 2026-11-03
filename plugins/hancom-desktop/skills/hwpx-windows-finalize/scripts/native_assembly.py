@@ -45,6 +45,7 @@ COVER_CARRY = {'subtitle': ('title', ' - '), 'date': ('organization', ' · '), '
 STEP_OPS = ('text', 'section', 'insert', 'pageNumbers', 'boxWidth', 'pageBreak')
 MAX_NODES, MAX_ROWS, MAX_TEXT, MAX_CELL_PARAGRAPHS = 400, 100, 2000, 20
 HP = '{http://www.hancom.co.kr/hwpml/2011/paragraph}'
+HH = '{http://www.hancom.co.kr/hwpml/2011/head}'
 
 
 def need(ok, message):
@@ -133,14 +134,43 @@ def _cells(tr):
     return tr.findall(HP + 'tc')
 
 
-def _set_cell(cell, value, prefix=''):
-    """Replace a cell's paragraphs with one copy of its first paragraph per text, in that paragraph's first run format."""
+def _unnumbered(header):
+    """Map a paragraph shape id to a copy without automatic numbering (made once per id, added to header)."""
+    shapes = header.find(HH + 'refList').find(HH + 'paraProperties')
+    made = {}
+
+    def plain(shape_id):
+        if shape_id not in made:
+            shape = next(s for s in shapes.findall(HH + 'paraPr') if s.get('id') == shape_id)
+            heading = shape.find(HH + 'heading')
+            if heading is None or heading.get('type') not in ('NUMBER', 'OUTLINE'):
+                made[shape_id] = shape_id
+            else:
+                clone = copy.deepcopy(shape)
+                clone.set('id', str(max(int(s.get('id')) for s in shapes.findall(HH + 'paraPr')) + 1))
+                clone.find(HH + 'heading').attrib.update({'type': 'NONE', 'idRef': '0', 'level': '0'})
+                shapes.append(clone)
+                shapes.set('itemCnt', str(len(shapes.findall(HH + 'paraPr'))))
+                made[shape_id] = clone.get('id')
+                plain.made = True
+        return made[shape_id]
+    plain.made = False
+    return plain
+
+
+def _set_cell(cell, value, prefix='', plain=None):
+    """Replace a cell's paragraphs with one copy of its first paragraph per text, in that paragraph's first run format.
+
+    A numbered first paragraph (a step's "1.") numbers only the first text: later texts continue it unnumbered
+    through plain (see _unnumbered). Bullets repeat on every text."""
     sub = cell.find(HP + 'subList')
     paragraphs = sub.findall(HP + 'p')
     for paragraph in paragraphs:
         sub.remove(paragraph)
-    for text in value if isinstance(value, list) else [value]:
+    for index, text in enumerate(value if isinstance(value, list) else [value]):
         paragraph = copy.deepcopy(paragraphs[0])
+        if index and plain:
+            paragraph.set('paraPrIDRef', plain(paragraph.get('paraPrIDRef')))
         for child in list(paragraph):
             if child.tag != HP + 'run':
                 paragraph.remove(child)  # saved line layout no longer fits
@@ -161,12 +191,14 @@ def table_instance(part, header, units, target):
         infos = package.infolist()
         data = {info.filename: package.read(info) for info in infos}
     section = etree.fromstring(data['Contents/section0.xml'])
+    shapes = etree.fromstring(data['Contents/header.xml']) if 'Contents/header.xml' in data else None
+    plain = _unnumbered(shapes) if shapes is not None else None
     table = next(section.iter(HP + 'tbl'))
     rows = table.findall(HP + 'tr')
     heads, unit = rows[:spec['headerRows']], rows[spec['headerRows']:]
     if header is not None:
         for cell, value in zip([c for tr in heads for c in _cells(tr)], header):
-            _set_cell(cell, value)
+            _set_cell(cell, value, plain=plain)
     for tr in unit:
         table.remove(tr)
     prefix, fixed = spec.get('firstColumnPrefix', ''), spec.get('fixedCells', [])
@@ -177,7 +209,7 @@ def table_instance(part, header, units, target):
             address = cell.find(HP + 'cellAddr')
             address.set('rowAddr', str(int(address.get('rowAddr')) + index * len(unit)))
         for cell, value in zip([c for i, c in enumerate(cells) if i not in fixed], values):  # fixed cells keep their text
-            _set_cell(cell, value, prefix if cell.find(HP + 'cellAddr').get('colAddr') == '0' and value else '')
+            _set_cell(cell, value, prefix if cell.find(HP + 'cellAddr').get('colAddr') == '0' and value else '', plain)
         for tr in clones:
             table.append(tr)
     count = len(heads) + len(unit) * len(units)
@@ -189,6 +221,8 @@ def table_instance(part, header, units, target):
             for lines in holder.findall(HP + 'linesegarray'):
                 holder.remove(lines)
     data['Contents/section0.xml'] = etree.tostring(section, xml_declaration=True, encoding='UTF-8', standalone=True)
+    if plain and plain.made:  # rewrite the header only when it gained a shape
+        data['Contents/header.xml'] = etree.tostring(shapes, xml_declaration=True, encoding='UTF-8', standalone=True)
     target.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(target, 'x') as out:
         for info in infos:
@@ -201,14 +235,46 @@ def text_width(text, em):
     return sum(em if ord(c) >= 0x1100 else em // 2 for c in text)
 
 
-def fitted_instance(part, values, target):
+def _loosen(data, section):
+    """Clear keep-with-next on the shapes of a part's own paragraphs; rewrites header.xml in data and
+    returns True when a shape changed."""
+    header = etree.fromstring(data['Contents/header.xml'])
+    ids = {p.get('paraPrIDRef') for p in section.findall(HP + 'p')}
+    settings = [s for shape in header.iter(HH + 'paraPr') if shape.get('id') in ids
+                for s in shape.iter(HH + 'breakSetting') if s.get('keepWithNext') == '1']
+    for setting in settings:
+        setting.set('keepWithNext', '0')
+    if settings:
+        data['Contents/header.xml'] = etree.tostring(header, xml_declaration=True, encoding='UTF-8', standalone=True)
+    return bool(settings)
+
+
+def loose_instance(part, target):
+    """Write a copy of a title part that does not keep with the next paragraph; False (nothing written)
+    when the part does not keep with it anyway."""
+    with zipfile.ZipFile(part['path']) as package:
+        infos = package.infolist()
+        data = {info.filename: package.read(info) for info in infos}
+    if not _loosen(data, etree.fromstring(data['Contents/section0.xml'])):
+        return False
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(target, 'x') as out:
+        for info in infos:
+            out.writestr(info, data[info.filename])
+    return True
+
+
+def fitted_instance(part, values, target, loose=False):
     """Write a copy of a part whose title sits in a fixed-width table cell (a numbered tab): the
-    placeholders become the texts and that cell grows by the title's extra width, within the body."""
+    placeholders become the texts and that cell grows by the title's extra width, within the body.
+    A loose copy does not keep with the next paragraph."""
     fit = part['fit']
     with zipfile.ZipFile(part['path']) as package:
         infos = package.infolist()
         data = {info.filename: package.read(info) for info in infos}
     section = etree.fromstring(data['Contents/section0.xml'])
+    if loose:
+        _loosen(data, section)
     for t in section.iter(HP + 't'):
         for placeholder, value in values.items():
             if t.text:
@@ -334,14 +400,22 @@ def build_plan(manifest, outline, tables_dir=None, notes=None):
         steps.append(dict(op='pageNumbers', **rules['pageNumbers']))  # one section: the cover part hides its own number
     instances = {}
 
-    def titled(name, label, title):
+    def inserted(name, loose=False):
+        """Insert step of a part; a loose title is inserted from a copy that does not keep with the next paragraph."""
+        copy_name, target = f'{name}@{len(instances) + 1}', Path(tables_dir or '.') / f'{name}-{len(instances) + 1}.hwpx'
+        if not (loose and tables_dir is not None and loose_instance(parts[name], target)):  # no folder: a check-only plan
+            return dict(op='insert', part=name, keepSection=0)
+        instances[copy_name] = dict(path=str(target.resolve()), sha256=sha(target))
+        return dict(op='insert', part=copy_name, keepSection=0)
+
+    def titled(name, label, title, loose=False):
         """Insert steps of a numbered title; a title in a fixed-width cell gets its own fitted copy."""
         part = parts[name]
         if 'fit' not in part:
-            return [dict(op='insert', part=name, keepSection=0), *numbered(part, label, title)]
+            return [inserted(name, loose), *numbered(part, label, title)]
         need(tables_dir is not None, 'fitted titles need a folder for part copies')
         copy_name, target = f'{name}@{len(instances) + 1}', Path(tables_dir) / f'{name}-{len(instances) + 1}.hwpx'
-        fitted_instance(part, {part['numberPlaceholder']: label, part['placeholder']: title}, target)
+        fitted_instance(part, {part['numberPlaceholder']: label, part['placeholder']: title}, target, loose)
         instances[copy_name] = dict(path=str(target.resolve()), sha256=sha(target))
         return [dict(op='insert', part=copy_name, keepSection=0, expect=dict(texts=[label, title]))]
 
@@ -370,12 +444,32 @@ def build_plan(manifest, outline, tables_dir=None, notes=None):
                 moved['text'] = re.sub(rf'^\s*[{re.escape(KIND_SYMBOLS[role])}]\s+', '', moved['text']) or moved['text']
             return dict(moved, t='heading', level=int(used[-1])) if used.startswith('heading') else dict(moved, t=used)
 
-        out, counters, tasks, points, level, previous = [], [0, 0, 0, 0], 0, 0, 0, None
+        drawn, breaks = [], []
         for position, node in enumerate(nodes, 1):
             where = f'{prefix}[{position}]'
             need(isinstance(node, dict) and isinstance(node.get('t'), str), f'{where}: t가 필요합니다.')
-            node = substitute(node, where)
+            node = dict(node)
+            breaks.append(node.pop('pageBreakBefore', False))  # any node may start a new page
+            need(breaks[-1] in (True, False), f'{where}: pageBreakBefore는 true/false입니다.')
+            drawn.append(substitute(node, where))
+
+        def rank(node):
+            """Title rank (chapter highest), or None for body nodes."""
+            kind = node['t']
+            return 0 if kind == 'chapter' else node.get('level') if kind == 'heading' else 1.5 if kind in ('task', 'subhead') else None
+
+        def bodyless(index):
+            """A title with nothing under it (the next node is a title of its rank or higher, or none) is one line of a
+            list such as □ lines or "1. 기간: ..." lines: kept with the next paragraph, a run of them moves as one block."""
+            following = drawn[index + 1] if index + 1 < len(drawn) else None
+            return following is None or rank(following) is not None and rank(following) <= rank(drawn[index])
+
+        out, counters, tasks, points, level, previous = [], [0, 0, 0, 0], 0, 0, 0, None
+        for position, node in enumerate(drawn, 1):
+            where = f'{prefix}[{position}]'
             kind, after, previous = node['t'], previous, node['t']  # after: the kind drawn just before this node
+            if breaks[position - 1] and kind != 'chapter':  # a chapter breaks after its spacer, below
+                out.append(dict(op='pageBreak'))
             if kind == 'chapter':
                 need(set(node) == {'t', 'text'}, f'{where}: chapter는 t, text만 받습니다.')
                 counters, tasks, points, level = [counters[0] + 1, 0, 0, 0], 0, 0, 0
@@ -390,7 +484,7 @@ def build_plan(manifest, outline, tables_dir=None, notes=None):
                 else:
                     if not first and not summary and rules.get('spacerBeforeLaterChapters'):
                         out.append(dict(op='insert', part=find('spacer'), keepSection=0))
-                    if part.get('pageBreakBefore'):
+                    if part.get('pageBreakBefore') or breaks[position - 1]:
                         out.append(dict(op='pageBreak'))
                     out += titled(name, label, title)
                 if 'box' in part:
@@ -409,7 +503,7 @@ def build_plan(manifest, outline, tables_dir=None, notes=None):
                 name = find('heading', depth)
                 need(name, f'양식에 {depth}단계 제목 부품이 없습니다.')
                 label, title = number(parts[name]['numbering'], counters[depth], f'{depth}단계 제목'), _text(node['text'], where, placeholders)
-                out += titled(name, label, title)
+                out += titled(name, label, title, bodyless(position - 1))
             elif kind in ('task', 'point'):
                 need(set(node) == {'t', 'text'}, f'{where}: {kind}는 t, text만 받습니다.')
                 name = find(kind, after=after)
@@ -419,7 +513,7 @@ def build_plan(manifest, outline, tables_dir=None, notes=None):
                     counters[2:] = [0, 0]  # 가. and 1) titles under a task count from the task
                 else:
                     points += 1
-                out += [dict(op='insert', part=name, keepSection=0),
+                out += [inserted(name, kind == 'task' and bodyless(position - 1)),
                         *numbered(parts[name], number(parts[name]['numbering'], tasks if kind == 'task' else points, '번호 항목'), _text(node['text'], where, placeholders))]
             elif kind in TEXT_KINDS:
                 need(set(node) == {'t', 'text'}, f'{where}: {kind}는 t, text만 받습니다.')
@@ -428,7 +522,7 @@ def build_plan(manifest, outline, tables_dir=None, notes=None):
                 need(name, f'양식에 {kind} 부품이 없습니다.')
                 text = _text(node['text'], where, placeholders)
                 text = re.sub(rf'^\s*[{re.escape(KIND_SYMBOLS[kind])}]\s+', '', text) or text
-                out += [dict(op='insert', part=name, keepSection=0), dict(op='text', find=parts[name]['placeholder'], text=text)]
+                out += [inserted(name, kind == 'subhead' and bodyless(position - 1)), dict(op='text', find=parts[name]['placeholder'], text=text)]
             elif kind == 'table':
                 need({'t', 'rows'} <= set(node) <= {'t', 'role', 'part', 'rows', 'header'} and len({'role', 'part'} & set(node)) == 1,
                      f'{where}: table은 t, rows, role(또는 part) 하나와 선택 header만 받습니다.')

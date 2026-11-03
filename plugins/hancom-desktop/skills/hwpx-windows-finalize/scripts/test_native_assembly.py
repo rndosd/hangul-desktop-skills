@@ -301,8 +301,9 @@ class SchoolEducationTemplateTest(unittest.TestCase):
         self.assertEqual([f for f, t in texts if t == '가상 사업'], ['[사업 계획 제목]', '[본문 사업 제목]'])
         self.assertEqual([f for f, t in texts if t == '가상 기관'], ['[작성 기관·부서]', '[본문 작성 기관]'])
         inserted = [s['part'] for s in plan['steps'] if s['op'] == 'insert']
-        self.assertEqual([p for p in inserted if p.startswith('subhead')], ['subhead', 'subhead_after_table'])
-        self.assertEqual([p for p in inserted if p.startswith('task')], ['task_after_chapter', 'task'])
+        # titles with nothing under them (추진 방침 before a chapter, 평가 at the end) come from loose copies
+        self.assertEqual([p for p in inserted if p.startswith('subhead')], ['subhead', 'subhead_after_table@2'])
+        self.assertEqual([p.split('@')[0] for p in inserted if p.startswith('task')], ['task_after_chapter', 'task'])
         self.assertEqual(sum(s['op'] == 'pageNumbers' for s in plan['steps']), 1)
         with self.assertRaisesRegex(ValueError, 'title·date 필수'):
             self.plan('plan-education', {'title': '가상 사업'}, [{'t': 'chapter', 'text': '운영'}])
@@ -381,6 +382,52 @@ class CommonVocabularyTest(unittest.TestCase):
         manifest['rules']['headingLevelsMaySkip'] = True  # sources that put 가. right under a task
         plan = a.build_plan(manifest, value)
         self.assertIn('가.', [s['text'].split(' ')[0] for s in plan['steps'] if s['op'] == 'text'])
+
+
+class RegisteredSourceTest(unittest.TestCase):
+    """Behaviour found registering outside documents: title lists, numbered cells, source page breaks."""
+
+    def plan(self, nodes):
+        temp = tempfile.TemporaryDirectory(); self.addCleanup(temp.cleanup)
+        value = {'schema': a.OUTLINE_SCHEMA, 'template': 'plan-official', 'cover': {'title': '가상', 'date': '2027.'}, 'nodes': nodes}
+        return a.build_plan(a.load_template(CATALOG, 'plan-official'), value, Path(temp.name) / 'tables')
+
+    def test_titles_with_nothing_under_them_do_not_keep_with_the_next(self):
+        plan = self.plan([CHAPTER, dict(H1, text='기간: 3월'), dict(H1, text='장소: 강당'), H1, ITEM, {'t': 'chapter', 'text': '계획'}])
+        heads = [s['part'] for s in plan['steps'] if s['op'] == 'insert' and s['part'].startswith('heading')]
+        self.assertEqual(['@' in p for p in heads], [True, True, False])  # the last 1. title has an item under it
+        with zipfile.ZipFile(plan['parts'][heads[0]]['path']) as package:
+            header = ElementTree.fromstring(package.read('Contents/header.xml'))
+            ids = {p.get('paraPrIDRef') for p in ElementTree.fromstring(package.read('Contents/section0.xml')).findall(a.HP + 'p')}
+        keeps = [b.get('keepWithNext') for s in header.iter(a.HH + 'paraPr') if s.get('id') in ids for b in s.iter(a.HH + 'breakSetting')]
+        self.assertEqual(set(keeps), {'0'})
+
+    def test_later_paragraphs_in_a_numbered_cell_are_not_numbered(self):
+        header = a.etree.fromstring(  # lxml, like the parts native_assembly edits
+            f'<hh:head xmlns:hh="{a.HH[1:-1]}"><hh:refList><hh:paraProperties itemCnt="2">'
+            '<hh:paraPr id="0"><hh:heading type="BULLET" idRef="1" level="0"/></hh:paraPr>'
+            '<hh:paraPr id="1"><hh:heading type="NUMBER" idRef="2" level="0"/></hh:paraPr></hh:paraProperties></hh:refList></hh:head>')
+        cell = a.etree.fromstring(f'<hp:tc xmlns:hp="{a.HP[1:-1]}"><hp:subList><hp:p paraPrIDRef="1"><hp:run charPrIDRef="0"/></hp:p></hp:subList></hp:tc>')
+        bullets = copy.deepcopy(cell)
+        bullets.find(a.HP + 'subList/' + a.HP + 'p').set('paraPrIDRef', '0')
+        plain = a._unnumbered(header)
+        a._set_cell(cell, ['1단계', '신청서 제출', '접수'], plain=plain)
+        a._set_cell(bullets, ['가', '나'], plain=plain)
+        self.assertEqual([p.get('paraPrIDRef') for p in cell.iter(a.HP + 'p')], ['1', '2', '2'])
+        self.assertEqual([p.get('paraPrIDRef') for p in bullets.iter(a.HP + 'p')], ['0', '0'])  # bullets repeat
+        added = [s for s in header.iter(a.HH + 'paraPr') if s.get('id') == '2']
+        self.assertEqual(added[0].find(a.HH + 'heading').get('type'), 'NONE')
+        self.assertEqual(header.find(f'{a.HH}refList/{a.HH}paraProperties').get('itemCnt'), '3')
+
+    def test_any_node_may_start_a_new_page(self):
+        plan = self.plan([CHAPTER, ITEM, dict(ITEM, pageBreakBefore=True), {'t': 'chapter', 'text': '계획', 'pageBreakBefore': True}, ITEM])
+        ops = [s['op'] if s['op'] != 'insert' else s['part'].split('@')[0] for s in plan['steps']]
+        body = ops[ops.index('chapter_first'):]
+        self.assertEqual(body.count('pageBreak'), 2)
+        self.assertEqual(body[body.index('pageBreak') + 1], 'item')
+        self.assertEqual(body[len(body) - 1 - body[::-1].index('pageBreak') + 1], 'chapter')
+        with self.assertRaisesRegex(ValueError, 'pageBreakBefore'):
+            self.plan([CHAPTER, dict(ITEM, pageBreakBefore='yes')])
 
 
 if __name__ == '__main__':
