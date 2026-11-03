@@ -36,7 +36,7 @@ TABLE_GAP_AFTER = 850  # HWPUNIT (3 mm) below a table that splits across pages
 ROLE_LABELS = {'chapter': '장', 'heading1': '1. 제목', 'heading2': '가. 제목', 'heading3': '1) 제목', 'task': '네모 번호 과제',
                'subhead': '□ 소제목', 'lead': '❍ 머리 문단', 'item': '○ 항목', 'dash': '- 항목', 'dot': '‧ 항목', 'note': '※ 참고',
                'arrow': '⇒ 결과', 'point': '① 원 번호 줄', 'box': '◈ 강조 상자'}
-FALLBACKS = {'heading1': ['task', 'subhead'], 'heading2': ['heading1'], 'heading3': ['heading2'], 'task': ['heading1', 'subhead'],
+FALLBACKS = {'chapter': ['subhead', 'heading1', 'task'], 'heading1': ['task', 'subhead'], 'heading2': ['heading1'], 'heading3': ['heading2'], 'task': ['heading1', 'subhead'],
              'subhead': ['task', 'heading1'], 'lead': ['item'], 'dash': ['item'], 'dot': ['dash'], 'note': ['dash'], 'arrow': ['dash'],
              'point': ['item'], 'box': ['lead']}
 TABLE_ROLES = {'schedule': '업무·일정 목록', 'grid': '구분·내용 표', 'steps': '가로 단계 흐름', 'targets': '대상별 현황', 'indicators': '과제별 성과지표'}
@@ -76,7 +76,9 @@ def load_template(catalog, template_id):
         need(path.parent.parent == folder.resolve() and path.is_file(), f'부품 파일이 없습니다: {name}')
         need(sha(path) == part['sha256'], f'부품 파일이 manifest와 다릅니다: {name}')
         part['path'] = str(path)
-    required = ('cover', 'chapter_first', 'chapter', *(('spacer',) if manifest['rules'].get('spacerBeforeLaterChapters') else ()))
+    chaptered = any(p['kind'] in ('chapter_first', 'chapter') for p in parts.values())  # a one-page report has none
+    required = ('cover', *(('chapter_first', 'chapter') if chaptered else ()),
+                *(('spacer',) if manifest['rules'].get('spacerBeforeLaterChapters') else ()))
     for kind in required:
         need(sum(p['kind'] == kind for p in parts.values()) == 1, f'조립 양식에 {kind} 부품이 하나 있어야 합니다.')
     return manifest

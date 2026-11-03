@@ -30,7 +30,7 @@ table cells, or number and title in separate runs; a prepared source may already
 page. "fromAltSource" parts come from the map's altSource (the original of a prepared source), and the
 map's "rules" override the default page numbering, section and spacer rules ("textBeforeFirstChapter"
 lets an outline open with bars and text). Other part options: "tableAsChar" saves a floating table from a
-copy where it sits in the line, "keepFaces" keeps a cover's display faces, "dropPictures" removes its pictures (a logo), "context": "after-<kind>" marks a
+copy where it sits in the line, "keepFaces" keeps a cover's display faces, "dropPictures" removes its pictures (a logo), "dropHeaderFooter" its header and footer, "context": "after-<kind>" marks a
 spacing variant used right after an outline node of that kind, table "role" (schedule, grid, steps, targets,
 indicators) and "columns" (names of the unit cells) let an outline pick a table by role, table "fixedTexts" cells (step arrows) keep
 their text and take no value, and table "holderLineSpacing" sets the holding line's spacing. Table "footerRows" keeps the source's last rows (a total or remarks
@@ -433,6 +433,9 @@ def prepare(name, spec, raw, out_dir, deep_indent):
     if spec.get('dropPictures'):  # an agency logo on a cover is the source's mark, not its layout
         for picture in list(section.iter(HP + 'pic')):
             picture.getparent().remove(picture)
+    if spec.get('dropHeaderFooter'):  # a header or footer the range took from the document it was cut from
+        for control in [c for c in section.iter(HP + 'ctrl') if c.find(HP + 'header') is not None or c.find(HP + 'footer') is not None]:
+            control.getparent().remove(control)
     kind, entry, previews, variants = spec['kind'], {'kind': spec['kind']}, [], []
     if spec.get('context'):
         # "summary": used on the summary page, which spaces lines more tightly; "after-<kind>": right after an outline

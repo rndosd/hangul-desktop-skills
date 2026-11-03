@@ -385,6 +385,13 @@ class CommonVocabularyTest(unittest.TestCase):
                              [{'t': 'chapter', 'text': '개요'}, {'t': 'subhead', 'text': '소제목'}, {'t': 'lead', 'text': '문단'}])
         self.assertEqual([(n['role'], n['used']) for n in notes], [('subhead', 'task'), ('lead', 'item')])
 
+    def test_a_template_without_chapters_draws_them_as_bars(self):
+        plan, notes = self.plan('report-brief', {'title': '가상 결과', 'subtitle': '결과'},
+                                [{'t': 'chapter', 'text': '운영 개요'}, {'t': 'item', 'text': '(기간) 3월'}])
+        self.assertEqual([(n['role'], n['used']) for n in notes], [('chapter', 'subhead')])
+        self.assertIn(('[소제목]', '운영 개요'), [(s['find'], s['text']) for s in plan['steps'] if s['op'] == 'text'])
+        self.assertIn('chapter', a.describe(a.load_template(CATALOG, 'event-plan'))['substitutes'])
+
     def test_tables_are_picked_by_role_then_by_cell_count(self):
         plan, notes = self.plan('plan-school', {'title': '가상'}, [
             {'t': 'chapter', 'text': '일정'}, {'t': 'table', 'role': 'steps', 'rows': [['가', '나', '다', '라', '1', '2', '3', '4']]}])

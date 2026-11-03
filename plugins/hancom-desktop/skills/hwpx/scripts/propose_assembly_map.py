@@ -11,7 +11,11 @@ For each vocabulary role the most common look (paragraph and character format) g
 block paragraphs give one block part each. The outline repeats the source in that vocabulary, with its page
 breaks, so assembling it should give the source back (registration acceptance check 1).
 
-Usage: propose_assembly_map.py SOURCE.hwpx OUT_DIR --id ID [--exclude ROLE ...]
+A source without chapters (□ titles lead, as in a one-page report) gets no chapter parts; an outline's chapters are
+then drawn as □ titles.
+
+Usage: propose_assembly_map.py SOURCE.hwpx OUT_DIR --id ID [--exclude ROLE ...] [--start TEXT]
+  --start TEXT    register from the first paragraph holding TEXT (an attachment after a press release)
   --exclude ROLE  draw that role (or pN, the paragraph N) as blocks: a part that failed to build
 Writes OUT_DIR/map.json and OUT_DIR/outline.json and prints a summary.
 """
@@ -221,10 +225,15 @@ def cover_spec(paragraphs, heights):
     need(lettered, '표지에서 제목을 찾지 못했습니다')
     big = [x for x, h in pieces if re.search('[가-힣A-Za-z]', x) and h >= max(lettered) * 0.7]
     titles = [x for x in big if not (re.search(ORG, x) and len(x) <= 20)] or big  # a large organization name is not the title
+    # a short word as large as the title beside it is a label box (붙임, 참고), not part of the title
+    labels = [x for x in titles if len(re.sub(r'\s', '', x)) <= 4] if any(len(re.sub(r'\s', '', x)) > 4 for x in titles) else []
+    titles = [x for x in titles if x not in labels]
     dates = [x for x, _ in pieces if x not in titles and re.fullmatch(DATE, x)]
     orgs = [x for x, _ in pieces if x not in titles and x not in dates and re.search(ORG, x) and len(x) <= 40]
     for x, _ in pieces:
-        if x in titles:
+        if labels and x == labels[0]:
+            replace[x], fields['subtitle'] = '[부제목]', '[부제목]'
+        elif x in titles:
             replace[x] = '[제목]' if x == titles[0] else ''  # a title of several lines goes in as one
             fields['title'] = '[제목]'
         elif dates and x == dates[0]:
@@ -235,38 +244,51 @@ def cover_spec(paragraphs, heights):
             replace[x] = ''  # other source words do not ship
         else:
             keep.append(x)  # ornaments, such as a Wingdings letter
-    value = {'title': clean(' '.join(titles)), **({'date': clean(dates[0])} if 'date' in fields else {}),
+    value = {'title': clean(' '.join(titles)), **({'subtitle': clean(labels[0])} if labels else {}),
+             **({'date': clean(dates[0])} if 'date' in fields else {}),
              **({'organization': clean(orgs[0])} if 'organization' in fields else {})}
     return dict(replace=replace, fields=fields, keep=sorted(set(keep))), value
 
 
-def propose(source, template_id, exclude=()):
+def start_of(top, text):
+    """Index of the first top paragraph whose text (its tables included) holds text: an attachment (붙임) of a
+    press release, say, registered without the pages before it."""
+    flat = re.sub(r'\s+', '', text)
+    found = [i for i, p in enumerate(top) if flat in re.sub(r'\s+', '', ''.join(t.text or '' for t in p.iter(HP + 't')))]
+    need(found, f'--start 문구를 찾지 못했습니다: {text}')
+    # the body may name the attachment first ("붙임: ... 계획"); its title box (a table) is where it starts
+    return next((i for i in found if own_tables(top[i])), found[0])
+
+
+def propose(source, template_id, exclude=(), start_text=None):
     with zipfile.ZipFile(source) as package:
         header = etree.fromstring(package.read('Contents/header.xml'))
         section = etree.fromstring(package.read('Contents/section0.xml'))
         sections = [n for n in package.namelist() if re.fullmatch(r'Contents/section\d+\.xml', n)]
     numbered = {s.get('id') for s in header.iter(HH + 'paraPr') if s.find(HH + 'heading') is not None and s.find(HH + 'heading').get('type') != 'NONE'}
     top = section.findall(HP + 'p')
-    roles = [role_of(p, numbered) for p in top]
+    start = start_of(top, start_text) if start_text else 0
+    roles = [role_of(p, numbered) if i >= start else dict(role='empty') for i, p in enumerate(top)]
     for index, info in enumerate(roles):
         if info['role'] in exclude or f'p{index}' in exclude:
             info.update(role='block', why=f'{info["role"]} 부품 빌드 실패로 블록')
     # the cover may hold tables (a title band); the body starts at the first chapter or vocabulary line
-    first = next((i for i, r in enumerate(roles) if r['role'] not in ('empty', 'block', 'table') and i > 0), None)
+    first = next((i for i, r in enumerate(roles) if r['role'] not in ('empty', 'block', 'table') and i > start), None)
     need(first is not None, '공통 어휘로 읽히는 문단이 없습니다')
     # number tabs (1 | 타시·도 전출) under Roman-numbered chapters are first-level titles drawn as tabs
     tabs = [i for i, r in enumerate(roles) if r['role'] == 'chapter' and r.get('table') and r['number'].strip('.').isdigit()]
     if tabs and any(r['role'] == 'chapter' and r.get('number', r.get('text', ' '))[0] in ROMAN for r in roles):
         for i in tabs:
             roles[i] = dict(roles[i], role='heading1', text=roles[i]['title'])
-    chapters = [i for i, r in enumerate(roles) if r['role'] == 'chapter']
-    need(chapters, '장(Ⅰ 제목)이 없어 조립 양식으로 만들 수 없습니다. 빈칸 채우기로 등록하세요.')
+    chapters = [i for i, r in enumerate(roles) if r['role'] == 'chapter']  # none: □ titles lead (a one-page report)
+    need(chapters or any(r['role'] in ('subhead', 'heading1', 'task') for r in roles),
+         '장(Ⅰ)도 □·1.·① 제목도 없어 조립 양식으로 만들 수 없습니다. 빈칸 채우기로 등록하세요.')
     heights = {c.get('id'): int(c.get('height')) for c in header.iter(HH + 'charPr')}
     # lines whose letters the author squeezed (negative spacing) to fit them: parts draw one look, so these may wrap
     condensed = {c.get('id') for c in header.iter(HH + 'charPr') if int(c.find(HH + 'spacing').get('hangul')) < 0}
     squeezed = sum(1 for i, r in enumerate(roles) if r['role'] not in ('empty', 'block', 'table', 'chapter') and look(top[i])[1] in condensed)
-    cover_end = cover_end_of(top[:first], heights)
-    cover, cover_value = cover_spec(top[:cover_end], heights)
+    cover_end = start + cover_end_of(top[start:first], heights)
+    cover, cover_value = cover_spec(top[start:cover_end], heights)
     parts, notes = {}, []
 
     def chapter_number(i):
@@ -281,7 +303,9 @@ def propose(source, template_id, exclude=()):
             if roles[j]['role'] != 'empty':
                 roles[j] = dict(role='block', why='본문 앞 요약쪽')
         chapters = chapters[restart:]
-    parts['cover'] = dict(range=[0, cover_end], kind='cover', keepFaces=True, **cover)
+    parts['cover'] = dict(range=[start, cover_end], kind='cover', keepFaces=True, **cover,
+                          # an attachment carries the main document's header, footer and logos: not its own
+                          **({'dropPictures': True, 'dropHeaderFooter': True} if start else {}))
 
     # the empty line most later chapters have above them becomes the spacer part (left out atop a new page)
     later = [i for i in chapters[1:] if top[i].get('pageBreak') != '1']
@@ -301,8 +325,9 @@ def propose(source, template_id, exclude=()):
             spec['fitTitleCell'] = True
         return spec
 
-    parts['chapter_first'] = chapter_part(chapters[0], 'chapter_first')
-    parts['chapter'] = chapter_part(chapters[1] if len(chapters) > 1 else chapters[0], 'chapter')
+    if chapters:
+        parts['chapter_first'] = chapter_part(chapters[0], 'chapter_first')
+        parts['chapter'] = chapter_part(chapters[1] if len(chapters) > 1 else chapters[0], 'chapter')
     # one part per vocabulary role, from its most common look
     for role in ('heading1', 'heading2', 'heading3', *TEXT_ROLES):
         found = [i for i, r in enumerate(roles) if r['role'] == role and i >= cover_end]
@@ -478,8 +503,9 @@ def main():
     parser.add_argument('out')
     parser.add_argument('--id', required=True)
     parser.add_argument('--exclude', action='append', default=[])
+    parser.add_argument('--start')
     args = parser.parse_args()
-    part_map, outline, summary = propose(Path(args.source).resolve(strict=True), args.id, args.exclude)
+    part_map, outline, summary = propose(Path(args.source).resolve(strict=True), args.id, args.exclude, args.start)
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     (out / 'map.json').write_text(json.dumps(part_map, ensure_ascii=False, indent=1), encoding='utf-8')

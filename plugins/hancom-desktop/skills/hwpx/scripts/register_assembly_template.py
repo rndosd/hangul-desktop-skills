@@ -9,7 +9,7 @@
   5. report.json: the checks, the blocks and their source wording to review, pages to look at
 Checks 3 to 5 of tools/assembly-maps/README.md (source wording, describe-only use, approval) stay with the person.
 
-Usage: register_assembly_template.py SOURCE.hwpx WORK_DIR --id ID [--retries 4]
+Usage: register_assembly_template.py SOURCE.hwpx WORK_DIR --id ID [--retries 4] [--start TEXT]
 Requires Windows, Hangul and the reviewed security module of the installed skill.
 """
 import argparse
@@ -28,6 +28,17 @@ from propose_assembly_map import propose  # noqa: E402
 from build_assembly_template import native  # noqa: E402
 
 
+def settle(limit=60):
+    """Wait until no Hangul process is left: the previous step's own instance may still be closing, and every native
+    step refuses to start beside a running Hangul. Nothing is closed here; a Hangul the person opened stays."""
+    import time
+    for _ in range(limit):
+        done = subprocess.run(['tasklist', '/FI', 'IMAGENAME eq Hwp.exe', '/NH'], capture_output=True, text=True, errors='replace')
+        if 'Hwp.exe' not in done.stdout:
+            return
+        time.sleep(1)
+
+
 def write(path, value):
     path.write_text(json.dumps(value, ensure_ascii=False, indent=1), encoding='utf-8')
 
@@ -36,6 +47,7 @@ def build(work, attempt, part_map, source):
     folder = work / f'build-{attempt}'
     folder.mkdir()
     write(folder / 'map.json', part_map)
+    settle()
     done = subprocess.run([PYTHON, '-X', 'utf8', str(HERE / 'build_assembly_template.py'), str(folder / 'map.json'), str(source),
                            str(folder / 'work'), '--out', str(folder / 'catalog' / part_map['id'])],
                           capture_output=True, text=True, encoding='utf-8', errors='replace')
@@ -47,6 +59,7 @@ def build(work, attempt, part_map, source):
 def assemble(catalog, template_id, outline, work, name):
     path = work / f'{name}.json'
     write(path, outline)
+    settle()
     done = subprocess.run(['powershell', '-NoProfile', '-File', str(TASK), 'assemble', '--template', template_id, '--outline', str(path),
                            '--output', str(work / f'{name}.hwpx'), '--pdf', str(work / f'{name}.pdf'), '--run', str(work / f'run-{name}'),
                            '--context', 'ordinary-shell', '--catalog', str(catalog)],
@@ -60,23 +73,24 @@ def assemble(catalog, template_id, outline, work, name):
                 error=result.get('error') or result.get('reason'), pdf=str(work / f'{name}.pdf'))
 
 
-def source_page_starts(source):
+def source_page_starts(source, start=0):
     """Text of the paragraph that starts each page of the source, from the line positions Hangul saved
-    (they restart at 0 on every page); a PDF of the source may print two pages per sheet."""
+    (they restart at 0 on every page); a PDF of the source may print two pages per sheet. With start (a top
+    paragraph index), only the pages from the one that paragraph opens."""
     import zipfile
     from lxml import etree
     hp = '{http://www.hancom.co.kr/hwpml/2011/paragraph}'
     with zipfile.ZipFile(source) as package:
         section = etree.fromstring(package.read('Contents/section0.xml'))
     starts, last = [], None
-    for p in section.findall(hp + 'p'):
+    for index, p in enumerate(section.findall(hp + 'p')):
         lines = p.find(hp + 'linesegarray')
         if lines is None or not len(lines):
             continue
-        if last is None or int(lines[0].get('vertpos')) < last:
-            starts.append(re.sub(r'\s+', '', ''.join(p.itertext())))
+        if last is None or int(lines[0].get('vertpos')) < last or index == start:
+            starts.append((index, re.sub(r'\s+', '', ''.join(p.itertext()))))
         last = int(lines[-1].get('vertpos'))
-    return starts
+    return [text for index, text in starts if index >= start]
 
 
 def same_start(found, expected):
@@ -147,12 +161,13 @@ def main():
     parser.add_argument('work')
     parser.add_argument('--id', required=True)
     parser.add_argument('--retries', type=int, default=4)
+    parser.add_argument('--start', help='register from the first paragraph holding this text (an attachment)')
     args = parser.parse_args()
     source, work = Path(args.source).resolve(strict=True), Path(args.work).resolve()
     work.mkdir(parents=True, exist_ok=False)
     report, exclude = dict(source=str(source), id=args.id, demoted=[]), []
     for attempt in range(1, args.retries + 2):
-        part_map, outline, summary = propose(source, args.id, exclude)
+        part_map, outline, summary = propose(source, args.id, exclude, args.start)
         catalog, ok, (failed, message) = build(work, attempt, part_map, source)
         if ok:
             break
@@ -168,11 +183,12 @@ def main():
     write(work / 'outline.json', outline)
     report.update(proposal=summary, catalog=str(catalog))
     # check 1: self reproduction against the source's own pages
+    settle()
     native(dict(source=str(source), blocks=[], renders=[dict(part=str(source), pdf=str(work / 'source.pdf'))]), work, 'render-source')
     repro = assemble(catalog, args.id, outline, work, 'repro')
     check1 = dict(status=repro['status'], pages=repro['pages'], blocks=repro['blocks'])
     if repro['status'] == 'PASS_NATIVE':
-        expected = source_page_starts(source)
+        expected = source_page_starts(source, part_map['parts']['cover']['range'][0])
         found = page_starts(work / 'repro.pdf')
         # Lines may move between pages (letter spacing an author squeezed by hand does not carry over); only large
         # misalignments fail: another page count, an empty page, or chapter numbers that differ from the source's.

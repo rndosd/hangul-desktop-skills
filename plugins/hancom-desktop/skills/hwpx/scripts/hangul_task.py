@@ -226,14 +226,14 @@ def assemble(template, outline, output, pdf, run_dir, context, catalog=None, tim
         result['pageLayout']=page_layout(pdf)
     return result
 
-def register(source, template_id, out):
+def register(source, template_id, out, start=None):
     """Register a user's plan as an assembly template (propose, build, self reproduction, other lengths) and report
     only what the person decides on: the preview, what an outline can use, and source wording left in blocks."""
     import subprocess
     need(re.fullmatch(r'[a-z0-9][a-z0-9-]{1,40}',template_id),'--id: 소문자·숫자·- 2~41자')
     work=Path(out).resolve()
     need(not work.exists(),f'already exists: {work}')
-    done=subprocess.run([sys.executable,'-X','utf8',str(Path(__file__).with_name('register_assembly_template.py')),str(Path(source).resolve(strict=True)),str(work),'--id',template_id],
+    done=subprocess.run([sys.executable,'-X','utf8',str(Path(__file__).with_name('register_assembly_template.py')),str(Path(source).resolve(strict=True)),str(work),'--id',template_id,*(['--start',start] if start else [])],
                         capture_output=True,text=True,encoding='utf-8',errors='replace')
     need((work/'report.json').is_file(),'registration stopped: '+(done.stderr.strip().splitlines() or ['no report'])[-1])
     report=read(work/'report.json')
@@ -298,7 +298,7 @@ def main():
     sub.add_parser('doctor');s=sub.add_parser('schema');s.add_argument('operation',choices=['table'])
     s=sub.add_parser('tool');s.add_argument('script');s.add_argument('arguments',nargs=argparse.REMAINDER)
     s=sub.add_parser('compose');s.add_argument('--request',required=True);s.add_argument('--output',required=True);s.add_argument('--pdf',required=True);s.add_argument('--run',required=True);s.add_argument('--context',choices=['ordinary-shell','host-approved'],required=True);s.add_argument('--timeout',type=int,default=120)
-    s=sub.add_parser('register');s.add_argument('source');s.add_argument('--id',required=True);s.add_argument('--out',required=True)
+    s=sub.add_parser('register');s.add_argument('source');s.add_argument('--id',required=True);s.add_argument('--out',required=True);s.add_argument('--start')
     s=sub.add_parser('assemble');s.add_argument('--template',required=True);s.add_argument('--describe',action='store_true');s.add_argument('--outline');s.add_argument('--output');s.add_argument('--pdf');s.add_argument('--run');s.add_argument('--context',choices=['ordinary-shell','host-approved']);s.add_argument('--catalog');s.add_argument('--timeout',type=int,default=240)
     s=sub.add_parser('fill');s.add_argument('--template');s.add_argument('--values');s.add_argument('--content');s.add_argument('--output');s.add_argument('--styles');s.add_argument('--catalog',default=str(ROOT/'assets/document-templates/full-plans.json'));s.add_argument('--dry-run',action='store_true')
     s=sub.add_parser('preview');s.add_argument('pdf');s.add_argument('--output',required=True)
@@ -328,7 +328,7 @@ def main():
             else:
                 need(all([a.outline,a.output,a.pdf,a.run,a.context]),'assemble needs --outline --output --pdf --run --context (or --describe)')
                 result=assemble(a.template,read(a.outline),a.output,a.pdf,a.run,a.context,a.catalog,a.timeout)
-        elif a.command=='register':result=register(a.source,a.id,a.out)
+        elif a.command=='register':result=register(a.source,a.id,a.out,a.start)
         elif a.command=='schema':result=schema(a.operation)
         elif a.command=='preview':result=preview(a.pdf,a.output)
         elif a.command=='layout-check':result=layout_check(a.source,a.pdf)

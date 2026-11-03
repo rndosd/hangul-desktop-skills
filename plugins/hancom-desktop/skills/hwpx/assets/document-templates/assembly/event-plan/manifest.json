@@ -1,0 +1,78 @@
+{
+ "schema": "hwpx.assembly-template.v1",
+ "id": "event-plan",
+ "label": "행사계획형(붙임 개요·프로그램)",
+ "source": {
+  "sha256": "47f91a2275e2f7a396f63eb9ba6afb158805a57ba5a2a01ea28ef58fa6613e30",
+  "title": "동아제약 현장방문 개요",
+  "publisher": "산업통상부",
+  "license": "공공누리 제1유형(출처표시, 텍스트)",
+  "attribution": "이 조립 양식의 서식은 산업통상부 「동아제약 현장방문 개요」(정책브리핑, 공공누리 제1유형)에서 가져왔으며 원문 문구·그림은 포함하지 않는다.",
+  "url": "https://www.korea.kr/briefing/pressReleaseView.do?newsId=156787748"
+ },
+ "rules": {
+  "spacerBeforeLaterChapters": false,
+  "bodyStartsNewSection": false,
+  "pageNumbers": null,
+  "deepItemsUnderHeadingLevel": 9,
+  "headingLevelsMaySkip": true,
+  "textBeforeFirstChapter": true,
+  "deepIndentHwp": 1000
+ },
+ "parts": {
+  "cover": {
+   "kind": "cover",
+   "placeholder": {
+    "subtitle": "[부제목]",
+    "title": "[제목]"
+   },
+   "file": "parts/cover.hwpx",
+   "sha256": "5fdd2de2cebbcd68d7f0c26e9c2c5175f79a17c1354cda79bd250491676b0745"
+  },
+  "subhead": {
+   "kind": "subhead",
+   "placeholder": "[소제목]",
+   "file": "parts/subhead.hwpx",
+   "sha256": "24fabe24018561fecbc7b3ec3fe3f00288e1eff39efe7a4d0976abf724dfeb9a"
+  },
+  "item": {
+   "kind": "item",
+   "symbol": "ㅇ",
+   "placeholder": "[항목]",
+   "depth": 0,
+   "file": "parts/item.hwpx",
+   "sha256": "b371cbb2fc2e5c53d740e56b9140a67c9883999d2730ab43a372fc1b7d298170"
+  },
+  "item-deep": {
+   "kind": "item",
+   "symbol": "ㅇ",
+   "placeholder": "[항목]",
+   "depth": 1,
+   "file": "parts/item-deep.hwpx",
+   "sha256": "96df6d4819c44b24e6d5c0329c09bbe9d472a3971ca09d76dbbc675a427294cf"
+  },
+  "table1": {
+   "kind": "table",
+   "table": {
+    "headerRows": 1,
+    "unitRows": 1,
+    "headerCells": 3,
+    "unitCells": 3,
+    "repeat": true,
+    "header": [
+     "시간",
+     "내용",
+     "비고"
+    ],
+    "role": "schedule",
+    "columns": [
+     "시간",
+     "내용",
+     "비고"
+    ]
+   },
+   "file": "parts/table1.hwpx",
+   "sha256": "07337af67f29fb81908ddb16098c04502ebde9caf79c58293a9baa7251ad277e"
+  }
+ }
+}
