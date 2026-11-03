@@ -10,7 +10,8 @@ this tool then rewrites each saved part so that no source wording ships:
                (the source indents items under a level-3 heading by that much). Hangul renders a
                wrapping text in each and the hanging indent is set so wrapped lines start under
                the first body character
-  table parts  the header row stays; data rows lose their text and get the first data row's
+  table parts  optionally resized first (map "size": width, row and character height, holder
+               margins) so tables from different source pages match; the header row stays; data rows lose their text and get the first data row's
                height, cell margins and formats, so rows grow only with their new content; every
                cell wraps by word, and a prefixed first column is left aligned with a hanging indent
                calibrated like the items; the holding paragraph gets at least 100% line spacing so
@@ -138,6 +139,31 @@ def own_shape(header, pid):
     return clone
 
 
+def resize_table(table, header_xml, size):
+    """Give a table part another part's measures (map "size"): total width with columns scaled in proportion,
+    every row's height and the character height of every cell. Tables block-saved from different pages of
+    one source can differ in these, which shows when an outline puts them side by side."""
+    rows = table.findall(HP + 'tr')
+    widths = [int(cell.find(HP + 'cellSz').get('width')) for cell in rows[0].findall(HP + 'tc')]
+    scaled = [round(w * size['widthHwp'] / sum(widths)) for w in widths]
+    scaled[-1] += size['widthHwp'] - sum(scaled)
+    chars, clones = header_xml.find(f'.//{HH}charProperties'), {}
+    for row in rows:
+        for column, cell in enumerate(row.findall(HP + 'tc')):
+            cell.find(HP + 'cellSz').attrib.update({'width': str(scaled[column]), 'height': str(size['rowHeightHwp'])})
+            for run in cell.iter(HP + 'run'):
+                old = run.get('charPrIDRef')
+                if old not in clones:
+                    clone = copy.deepcopy(chars.find(f'{HH}charPr[@id="{old}"]'))
+                    clone.set('id', str(max(int(c.get('id')) for c in chars) + 1))
+                    clone.set('height', str(size['charHeight']))
+                    chars.append(clone)
+                    clones[old] = clone.get('id')
+                run.set('charPrIDRef', clones[old])
+    chars.set('itemCnt', str(len(chars)))
+    table.find(HP + 'sz').set('width', str(size['widthHwp']))
+
+
 def first_column_shape(header, section):
     """Paragraph format of the first data cell in the first column; normalize_table gives that column its own."""
     cell = next(section.iter(HP + 'tbl')).findall(HP + 'tr')[1].find(HP + 'tc')
@@ -148,6 +174,8 @@ def normalize_table(section, header_xml, spec):
     table = next(section.iter(HP + 'tbl'))
     rows = table.findall(HP + 'tr')
     need(len(rows[0].findall(HP + 'tc')) == spec['cols'], 'table column count differs from the part map')
+    if spec.get('size'):
+        resize_table(table, header_xml, spec['size'])
     first = rows[1].findall(HP + 'tc')
     height = int(first[0].find(HP + 'cellSz').get('height'))
     header = [text_of(cell) for cell in rows[0].findall(HP + 'tc')]
@@ -304,6 +332,8 @@ def prepare(name, spec, raw, out_dir, deep_indent):
     elif kind == 'table':
         entry['table'] = normalize_table(section, header, spec['table'])
         holder = next(p for p in section.findall(HP + 'p') if p.find(f'.//{HP}tbl') is not None)
+        for margin_name, value in spec['table'].get('size', {}).get('holderMargins', {}).items():
+            shape_margin(shape_of(header, section, holder), margin_name, value)  # where the table starts on the line
         for spacing in shape_of(header, section, holder).iter(HH + 'lineSpacing'):
             if spacing.get('type') == 'PERCENT' and int(spacing.get('value')) < 100:
                 spacing.set('value', '100')  # below 100% the next line overlaps a table that grew

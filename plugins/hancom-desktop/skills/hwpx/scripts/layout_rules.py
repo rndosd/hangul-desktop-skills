@@ -28,7 +28,7 @@ import zipfile
 from lxml import etree
 
 CIRCLES = set('◦○❍')
-LEVEL = {**{c: 1 for c in CIRCLES}, '-': 2, '–': 2, '⇒': 2, '‧': 2, '·': 3, 'ㆍ': 3}
+LEVEL = {**{c: 1 for c in CIRCLES}, '-': 2, '–': 2, '⇒': 2, '‧': 3, '·': 3, 'ㆍ': 3}
 # Hancom private-use circled numbers (U+F02B1..) and ①-⑳ used as numbered sub-headings.
 CIRCLED = {chr(c) for c in range(0xF02B1, 0xF02C5)} | {chr(c) for c in range(0x2460, 0x2474)}
 ROMAN = tuple('ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ')
@@ -211,4 +211,5 @@ def check(path):
 
 
 if __name__ == '__main__':
+    sys.stdout.reconfigure(encoding='utf-8')  # a Korean Windows console (cp949) cannot print symbols such as ‧
     print(json.dumps(check(sys.argv[1]), ensure_ascii=False, indent=2))

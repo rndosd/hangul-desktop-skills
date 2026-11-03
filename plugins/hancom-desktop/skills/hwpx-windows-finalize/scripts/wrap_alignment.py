@@ -16,7 +16,7 @@ import sys
 
 PT_TO_MM = 25.4 / 72
 TOLERANCE_MM = 0.6
-LEVEL = {'◦': 1, '○': 1, '❍': 1, '•': 1, '-': 2, '–': 2, '⇒': 2, '‧': 2, '·': 3}
+LEVEL = {'◦': 1, '○': 1, '❍': 1, '•': 1, '-': 2, '–': 2, '⇒': 2, '‧': 3, '·': 3}
 # Symbol fonts export ❍ as the letter it is mapped to in Wingdings.
 SYMBOL_FONT_LETTERS = {'m': '❍', '': '❍', '': '•'}
 
