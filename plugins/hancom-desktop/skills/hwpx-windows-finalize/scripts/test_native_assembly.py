@@ -143,6 +143,13 @@ class AssemblyTest(unittest.TestCase):
         self.rejects('rows\\[1\\]\\[3\\]\\[2\\]: 빈 문구', CHAPTER, {'t': 'table', 'part': 'schedule', 'rows': [['안내', '3. 15.', ['a', '']]]})
         self.rejects("표 부품 'item'", CHAPTER, {'t': 'table', 'part': 'item', 'rows': [['a']]})
 
+    def test_rows_in_the_old_schedule_order_are_stopped(self):
+        """기간 | 업무 | 비고 given as 업무 | 기간 | 비고 would print tasks in the date column without an error."""
+        swapped = [['시행계획 수립', '2027. 1. ○.', '교무부'], ['배치고사 실시', '2027. 2. ○.(○)', '전 교직원']]
+        self.rejects('칸 순서는 기간, 주요 업무 내용, 비고', CHAPTER, {'t': 'table', 'role': 'schedule', 'rows': swapped})
+        self.plan(CHAPTER, {'t': 'table', 'role': 'schedule', 'rows': [[b, a, c] for a, b, c in swapped]})
+        self.plan(CHAPTER, {'t': 'table', 'role': 'schedule', 'rows': [['상시', '민원 응대', ''], ['3월 중', '2차 협의(3. 15.)', '']]})
+
     def test_a_unit_of_merged_rows_repeats(self):
         """Unit of two rows whose first cell spans both: each repeat shifts row addresses and keeps the span."""
         cell = ('<hp:tc><hp:subList><hp:p paraPrIDRef="1"><hp:run charPrIDRef="1"/></hp:p></hp:subList>'

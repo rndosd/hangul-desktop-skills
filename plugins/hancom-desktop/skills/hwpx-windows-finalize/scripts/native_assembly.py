@@ -325,6 +325,23 @@ def fitted_instance(part, values, target, loose=False):
             out.writestr(info, data[info.filename])
 
 
+DATE_HEADS = ('기간', '일정', '시기', '일시', '시간', '날짜')
+DATE_LIKE = re.compile(r'\d{1,2}\s*[.월/:]|[○◯]\s*[.월]|상시|수시|연중|학기|분기|[상중하]순')
+
+
+def _check_date_column(spec, rows, where):
+    """A table whose first column holds dates (기간 | 업무 | 비고) given rows in another order (업무 | 기간 | 비고) would
+    fill without error and print every task in the date column: most rows that look swapped stop the plan."""
+    columns = spec.get('columns') or spec.get('header') or []
+    if not columns or not any(h in re.sub(r'\s+', '', columns[0]) for h in DATE_HEADS) or spec['unitCells'] < 2:
+        return
+    def plain(cell):
+        return ' '.join(cell) if isinstance(cell, list) else cell
+    swapped = [r for r, row in enumerate(rows, 1) if not DATE_LIKE.search(plain(row[0])) and DATE_LIKE.search(plain(row[1]))]
+    need(len(swapped) * 2 <= len(rows), f'{where}: 이 표의 칸 순서는 {", ".join(columns)}입니다. {swapped[:5]}행은 둘째 칸에 날짜가 있어 '
+         f'순서가 바뀐 것 같습니다. 첫 칸에 {columns[0]}을 적으세요.')
+
+
 def _by_label(spec, values, where):
     """The one unit of a fixed table with named rows, from {row name: [value cells]}; rows left out stay empty."""
     labels = spec.get('rowLabels')
@@ -597,6 +614,7 @@ def build_plan(manifest, outline, tables_dir=None, notes=None):
                 for r, row in enumerate(rows, 1):
                     need(isinstance(row, list) and len(row) == spec['unitCells'], f'{where}: {r}행의 칸 수가 {spec["unitCells"]}이 아닙니다.')
                     rows[r - 1] = [_cell(cell, f'{where}.rows[{r}][{c}]', placeholders) for c, cell in enumerate(row, 1)]
+                _check_date_column(spec, rows, where)
                 need(tables_dir is not None, 'table nodes need a folder for table copies')
                 name = f'{table_name}@{len(instances) + 1}'
                 target = Path(tables_dir) / f'{table_name}-{len(instances) + 1}.hwpx'

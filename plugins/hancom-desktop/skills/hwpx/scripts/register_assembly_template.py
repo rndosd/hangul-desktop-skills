@@ -114,6 +114,49 @@ def page_starts(pdf):
     return starts
 
 
+def empty_blocks(folder, part_map):
+    """Block parts that came out holding nothing (no text, table or picture): the source range was not saved."""
+    import zipfile
+    manifest = json.loads((folder / 'manifest.json').read_text(encoding='utf-8'))
+    found = []
+    for name, part in manifest['parts'].items():
+        if part['kind'] != 'block':
+            continue
+        with zipfile.ZipFile(folder / part['file']) as package:
+            section = package.read('Contents/section0.xml').decode('utf-8')
+        if not re.search(r'<hp:t>[^<]*\S|<hp:tbl |<hp:pic ', section):
+            found.append(f'빈 블록: {name} (원본 문단 {part_map["parts"][name]["range"]})')
+    return found
+
+
+def cover_problems(pdf, cover):
+    """The cover's title must be on the first page in one piece, with nothing above it but other cover values (a
+    header the source carried, or a label holding the title, show here)."""
+    import pymupdf
+    with pymupdf.open(pdf) as document:
+        lines = [re.sub(r'\s+', '', line) for line in document[0].get_text(sort=True).splitlines()]
+    lines = [line for line in lines if line]
+    text = ''.join(lines)
+    title = re.sub(r'\s+', '', cover.get('title', ''))
+    if not title:
+        return []
+    if len(title) >= 16 and re.search(r'(.{8,}).*\1', title):  # read from a header that repeats the title, say
+        return [f'표지 제목으로 읽은 글에 같은 구절이 두 번 있음: {cover["title"][:40]}']
+    at = text.find(title)
+    if at < 0:
+        return ['표지 제목이 첫 쪽에 한 덩어리로 나오지 않음(제목 자리가 다른 칸에 들어갔을 수 있음)']
+    if text.count(title) > 1:
+        return ['표지 제목이 첫 쪽에 두 번 나옴(원본의 머리말 같은 것이 따라왔을 수 있음)']
+    starts = [sum(map(len, lines[:i])) for i in range(len(lines) + 1)]
+    spread = sum(1 for i in range(len(lines)) if starts[i] < at + len(title) and starts[i + 1] > at)
+    if spread > 3:  # a title wraps to two or three lines; more means it went into a narrow cell
+        return [f'표지 제목이 {spread}줄로 쪼개짐(좁은 칸에 들어갔을 수 있음)']
+    before = text[:at]
+    for value in sorted((re.sub(r'\s+', '', str(v)) for k, v in cover.items() if k != 'title'), key=len, reverse=True):
+        before = before.replace(value, '', 1)
+    return [f'표지 제목 위에 다른 글자: {before[:30]}'] if len(before) > 3 else []
+
+
 def variants(outline, part_map):
     """Other-length outlines: more lines and rows, fewer chapters and rows, longer texts."""
     def repeats(node):
@@ -202,6 +245,8 @@ def main():
             problems.append(f'빈 쪽: {[i + 1 for i, f in enumerate(found) if not f]}')
         if numbers and numbers != [str(n) for n in range(1, len(numbers) + 1)]:
             problems.append(f'장 번호가 원본과 다름: 원본 {numbers}, 조립은 1부터 차례로')
+        # page counts alone pass a reproduction that lost a block or drew the cover wrong
+        problems += empty_blocks(catalog / args.id, part_map) + cover_problems(work / 'repro.pdf', outline['cover'])
         check1.update(sourcePages=len(expected), sourcePageStarts=[e[:16] for e in expected], pageStarts=found,
                       sameStarts=sum(same_start(f, e) for f, e in zip(found, expected)), problems=problems, ok=not problems)
     else:
