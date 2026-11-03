@@ -168,7 +168,9 @@ def assemble(template, outline, output, pdf, run_dir, context, catalog=None, tim
     from wrap_alignment import measure
     from page_layout import measure as page_layout
     manifest=load_template(catalog or ROOT/'assets/document-templates/assembly',template)
-    plan=build_plan(manifest,outline)
+    tables=Path(run_dir).with_name(Path(run_dir).name+'-tables')  # table copies; the run folder itself must be new
+    need(not tables.exists(),f'already exists: {tables}')
+    plan=build_plan(manifest,outline,tables)
     result=run(plan['base']['path'],'SaveAs',output,pdf,run_dir,context,timeout,composition=plan)
     result['template']=dict(id=manifest['id'],label=manifest['label'],source=manifest['source'].get('attribution'))
     if result['status']=='PASS_NATIVE':

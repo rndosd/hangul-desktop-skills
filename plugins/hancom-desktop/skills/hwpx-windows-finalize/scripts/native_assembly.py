@@ -1,14 +1,21 @@
 """Assemble one-source template parts in outline order (hwpx.assembly-outline.v1).
 
-Pure Python: template manifest loading, outline validation, numbering, chapter box widths and the
-resolved native plan (hwpx.native-assemble.v1) that Hancom.Assembly.ps1 executes step by step.
-Every check here runs before Hangul starts.
+Python side: template manifest loading, outline validation, numbering, chapter box widths, table
+instances and the resolved native plan (hwpx.native-assemble.v1) that Hancom.Assembly.ps1 executes
+step by step. Every check here runs before Hangul starts.
+
+A table part is header rows plus one unit of rows that repeats (a unit may span rows, with cells
+merged inside it). Each outline table becomes its own copy of the part with the unit repeated and
+every cell's text written into the file; Hangul lays the rows out when it inserts that copy.
 """
+import copy
 import hashlib
 import json
 import re
 import zipfile
 from pathlib import Path
+
+from lxml import etree
 
 TEMPLATE_SCHEMA = 'hwpx.assembly-template.v1'
 OUTLINE_SCHEMA = 'hwpx.assembly-outline.v1'
@@ -17,8 +24,8 @@ ROMAN = 'ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩⅪⅫ'
 HANGUL = '가나다라마바사아자차카타파하'
 ITEM_KINDS = ('item', 'dash', 'dot', 'note')
 PART_KINDS = ('cover', 'chapter_first', 'chapter', 'heading', 'table', 'spacer', *ITEM_KINDS)
-STEP_OPS = ('text', 'section', 'insert', 'pageNumbers', 'boxWidth', 'table')
-MAX_NODES, MAX_ROWS, MAX_TEXT = 400, 100, 2000
+STEP_OPS = ('text', 'section', 'insert', 'pageNumbers', 'boxWidth')
+MAX_NODES, MAX_ROWS, MAX_TEXT, MAX_CELL_PARAGRAPHS = 400, 100, 2000, 20
 HP = '{http://www.hancom.co.kr/hwpml/2011/paragraph}'
 
 
@@ -80,8 +87,83 @@ def _text(value, where, placeholders, allow_empty=False):
     return value
 
 
-def build_plan(manifest, outline):
-    """Validate the outline against the template and resolve it into native steps."""
+def _cell(value, where, placeholders):
+    """A cell is one paragraph (string, may be empty) or several paragraphs (list of non-empty strings)."""
+    if isinstance(value, list):
+        need(1 <= len(value) <= MAX_CELL_PARAGRAPHS, f'{where}: 칸 안 문단은 1~{MAX_CELL_PARAGRAPHS}개입니다.')
+        return [_text(v, f'{where}[{i}]', placeholders) for i, v in enumerate(value, 1)]
+    return _text(value, where, placeholders, allow_empty=True)
+
+
+def _cells(tr):
+    return tr.findall(HP + 'tc')
+
+
+def _set_cell(cell, value, prefix=''):
+    """Replace a cell's paragraphs with one copy of its first paragraph per text, in that paragraph's first run format."""
+    sub = cell.find(HP + 'subList')
+    paragraphs = sub.findall(HP + 'p')
+    for paragraph in paragraphs:
+        sub.remove(paragraph)
+    for text in value if isinstance(value, list) else [value]:
+        paragraph = copy.deepcopy(paragraphs[0])
+        for child in list(paragraph):
+            if child.tag != HP + 'run':
+                paragraph.remove(child)  # saved line layout no longer fits
+        runs = paragraph.findall(HP + 'run')
+        for extra in runs[1:]:
+            paragraph.remove(extra)
+        for child in list(runs[0]):
+            runs[0].remove(child)
+        if text:
+            etree.SubElement(runs[0], HP + 't').text = prefix + text
+        sub.append(paragraph)
+
+
+def table_instance(part, header, units, target):
+    """Write a copy of a table part with the outline's header cells and units; returns the row count."""
+    spec = part['table']
+    with zipfile.ZipFile(part['path']) as package:
+        infos = package.infolist()
+        data = {info.filename: package.read(info) for info in infos}
+    section = etree.fromstring(data['Contents/section0.xml'])
+    table = next(section.iter(HP + 'tbl'))
+    rows = table.findall(HP + 'tr')
+    heads, unit = rows[:spec['headerRows']], rows[spec['headerRows']:]
+    if header is not None:
+        for cell, value in zip([c for tr in heads for c in _cells(tr)], header):
+            _set_cell(cell, value)
+    for tr in unit:
+        table.remove(tr)
+    prefix = spec.get('firstColumnPrefix', '')
+    for index, values in enumerate(units):
+        clones = [copy.deepcopy(tr) for tr in unit]
+        for cell, value in zip([c for tr in clones for c in _cells(tr)], values):
+            address = cell.find(HP + 'cellAddr')
+            address.set('rowAddr', str(int(address.get('rowAddr')) + index * len(unit)))
+            _set_cell(cell, value, prefix if address.get('colAddr') == '0' and value else '')
+        for tr in clones:
+            table.append(tr)
+    count = len(heads) + len(unit) * len(units)
+    size = table.find(HP + 'sz')
+    size.set('height', str(int(size.get('height')) * count // len(rows)))  # Hangul sets the real height on layout
+    table.set('rowCnt', str(count))
+    for holder in section.iter(HP + 'p'):
+        if holder.find(f'.//{HP}tbl') is table:
+            for lines in holder.findall(HP + 'linesegarray'):
+                holder.remove(lines)
+    data['Contents/section0.xml'] = etree.tostring(section, xml_declaration=True, encoding='UTF-8', standalone=True)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(target, 'x') as out:
+        for info in infos:
+            out.writestr(info, data[info.filename])
+    return count
+
+
+def build_plan(manifest, outline, tables_dir=None):
+    """Validate the outline against the template and resolve it into native steps.
+
+    Table nodes are written as part copies into tables_dir (a new folder)."""
     parts = manifest['parts']
     by_kind = {}
     for name, part in parts.items():
@@ -100,7 +182,7 @@ def build_plan(manifest, outline):
     nodes = outline.get('nodes')
     need(isinstance(nodes, list) and 1 <= len(nodes) <= MAX_NODES, f'nodes는 1~{MAX_NODES}개입니다.')
     need(isinstance(nodes[0], dict) and nodes[0].get('t') == 'chapter', '본문은 장(chapter)으로 시작해야 합니다.')
-    counters, level = [0, 0, 0, 0], 0
+    counters, level, instances = [0, 0, 0, 0], 0, {}
     for position, node in enumerate(nodes, 1):
         where = f'nodes[{position}]'
         need(isinstance(node, dict) and 't' in node, f'{where}: t가 필요합니다.')
@@ -145,22 +227,27 @@ def build_plan(manifest, outline):
             need(part is not None and part['kind'] == 'table', f'{where}: 표 부품 {node["part"]!r}이 양식에 없습니다.')
             spec, rows, header = part['table'], node['rows'], node.get('header')
             if header is not None:
-                need(isinstance(header, list) and len(header) == spec['cols'], f'{where}: header 칸 수가 {spec["cols"]}이 아닙니다.')
+                need(isinstance(header, list) and len(header) == spec['headerCells'], f'{where}: header 칸 수가 {spec["headerCells"]}이 아닙니다.')
                 for c, cell in enumerate(header, 1):
                     _text(cell, f'{where}.header[{c}]', placeholders)
-            need(isinstance(rows, list) and 1 <= len(rows) <= MAX_ROWS, f'{where}: rows는 1~{MAX_ROWS}행입니다.')
+            most = MAX_ROWS if spec['repeat'] else 1
+            need(isinstance(rows, list) and 1 <= len(rows) <= most, f'{where}: rows는 1~{most}묶음입니다.')
             for r, row in enumerate(rows, 1):
-                need(isinstance(row, list) and len(row) == spec['cols'], f'{where}: {r}행의 칸 수가 {spec["cols"]}이 아닙니다.')
-                for c, cell in enumerate(row, 1):
-                    _text(cell, f'{where}.rows[{r}][{c}]', placeholders, allow_empty=True)
-            name = node['part']
-            steps += [dict(op='insert', part=name, keepSection=0),
-                      dict(op='table', have=spec['dataRows'], cols=spec['cols'], prefix=spec.get('firstColumnPrefix', ''), header=header, rows=rows)]
+                need(isinstance(row, list) and len(row) == spec['unitCells'], f'{where}: {r}행의 칸 수가 {spec["unitCells"]}이 아닙니다.')
+                rows[r - 1] = [_cell(cell, f'{where}.rows[{r}][{c}]', placeholders) for c, cell in enumerate(row, 1)]
+            need(tables_dir is not None, 'table nodes need a folder for table copies')
+            name = f'{node["part"]}@{position}'
+            target = Path(tables_dir) / f'{node["part"]}-{position}.hwpx'
+            count = table_instance(part, header, rows, target)
+            instances[name] = dict(path=str(target.resolve()), sha256=sha(target))
+            texts = [p for row in [header or [], *rows] for cell in row for p in (cell if isinstance(cell, list) else [cell]) if p]
+            steps.append(dict(op='insert', part=name, keepSection=0, expect=dict(tableRows=count, texts=texts)))
         else:
             raise ValueError(f'{where}: 알 수 없는 t {kind!r} (chapter, heading, item, dash, dot, note, table)')
     used = {step['part'] for step in steps if step['op'] == 'insert'}
+    files = {**parts, **instances}
     return dict(schema=PLAN_SCHEMA, base=dict(path=parts[cover_part]['path'], sha256=parts[cover_part]['sha256']),
-                parts={name: dict(path=parts[name]['path'], sha256=parts[name]['sha256']) for name in sorted(used)},
+                parts={name: dict(path=files[name]['path'], sha256=files[name]['sha256']) for name in sorted(used)},
                 steps=steps)
 
 
@@ -189,9 +276,10 @@ def check_output(path, plan):
     text = ''.join(t.text or '' for root in roots for t in root.iter(HP + 't'))
     finds = {step['find'] for step in plan['steps'] if step['op'] == 'text'}
     wanted = [step['text'] for step in plan['steps'] if step['op'] == 'text' and step['text']]
-    wanted += [cell for step in plan['steps'] if step['op'] == 'table' for row in [step.get('header') or [], *step['rows']] for cell in row if cell]
+    tables_expected = [step['expect'] for step in plan['steps'] if 'expect' in step]
+    wanted += [text for expect in tables_expected for text in expect['texts']]
     tables = [int(t.get('rowCnt')) for root in roots for t in root.iter(HP + 'tbl')]
-    expected = [len(step['rows']) + 1 for step in plan['steps'] if step['op'] == 'table']
+    expected = [expect['tableRows'] for expect in tables_expected]
     result = dict(placeholdersLeft=sorted(p for p in finds if p in text), missingTexts=[t for t in wanted if t not in text],
                   tableRows=dict(expected=expected, actual=tables[len(tables) - len(expected):] if expected else []))
     result['ok'] = not result['placeholdersLeft'] and not result['missingTexts'] and result['tableRows']['expected'] == result['tableRows']['actual']

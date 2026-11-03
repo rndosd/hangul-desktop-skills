@@ -32,53 +32,9 @@ function Get-HancomLastControl($Hwp,[string]$Id) {
     return $last
 }
 
-function Enter-HancomLastTable($Hwp) {
-    $table=Get-HancomLastControl $Hwp 'tbl'
-    [void]$Hwp.SetPosBySet($table.GetAnchorPos(0));[void]$Hwp.FindCtrl()
-    [void]$Hwp.HAction.Run('ShapeObjTableSelCell');[void]$Hwp.HAction.Run('Cancel')
-}
-
-function Set-HancomCellText($Hwp,[string]$Value) {
-    [void]$Hwp.HAction.Run('MoveListBegin');[void]$Hwp.HAction.Run('MoveSelListEnd')
-    if($Value -eq '') { [void]$Hwp.HAction.Run('Delete');return }  # an empty insert would keep the old text
-    $insert=$Hwp.HParameterSet.HInsertText
-    [void]$Hwp.HAction.GetDefault('InsertText',$insert.HSet);$insert.Text=$Value
-    [void]$Hwp.HAction.Execute('InsertText',$insert.HSet)
-}
-
-function Set-HancomTableRows($Hwp,$Step) {
-    $have=[int]$Step.have;$rows=@($Step.rows);$need=$rows.Count;$columns=[int]$Step.cols
-    Enter-HancomLastTable $Hwp
-    if($need -lt $have) {
-        for($i=0;$i -le $need;$i++){[void]$Hwp.HAction.Run('TableLowerCell')}
-        for($i=0;$i -lt $have-$need;$i++){if($Hwp.HAction.Run('TableDeleteRow') -eq $false){throw 'ASSEMBLY_ROW_DELETE_FAILED'}}
-    } elseif($need -gt $have) {
-        for($i=0;$i -lt $have;$i++){[void]$Hwp.HAction.Run('TableLowerCell')}
-        for($i=0;$i -lt $need-$have;$i++){if($Hwp.HAction.Run('TableAppendRow') -eq $false){throw 'ASSEMBLY_ROW_APPEND_FAILED'}}
-    }
-    Enter-HancomLastTable $Hwp
-    if($Step.header) {
-        for($column=0;$column -lt $columns;$column++) {
-            Set-HancomCellText $Hwp ([string]@($Step.header)[$column])
-            if($column -lt $columns-1){[void]$Hwp.HAction.Run('TableRightCell')}
-        }
-    }
-    foreach($row in $rows) {
-        [void]$Hwp.HAction.Run('TableLowerCell');[void]$Hwp.HAction.Run('TableColBegin')
-        for($column=0;$column -lt $columns;$column++) {
-            $value=[string]@($row)[$column]
-            if($column -eq 0 -and $value -ne ''){$value=[string]$Step.prefix+$value}
-            Set-HancomCellText $Hwp $value
-            if($column -lt $columns-1){[void]$Hwp.HAction.Run('TableRightCell')}
-        }
-    }
-    [void]$Hwp.HAction.Run('Cancel')
-    return @{have=$have;rows=$need;cols=$columns;header=[bool]$Step.header}
-}
-
 function Invoke-HancomAssembly($Hwp,$Plan,$Report) {
     $parts=@{};foreach($property in $Plan.parts.PSObject.Properties){$parts[$property.Name]=$property.Value}
-    $Report.assembly=@{steps=0;texts=0;tables=@();boxes=@();pageNumbers=$null}
+    $Report.assembly=@{steps=0;texts=0;boxes=@();pageNumbers=$null}
     $index=0
     foreach($step in $Plan.steps) {
         Write-HancomStage "assemble-$index-$($step.op)"
@@ -111,7 +67,6 @@ function Invoke-HancomAssembly($Hwp,$Plan,$Report) {
                 if([Math]::Abs($actual-[int]$step.width) -gt 2) { throw "ASSEMBLY_BOX_WIDTH_FAILED: $actual" }
                 $Report.assembly.boxes+=@{requested=[int]$step.width;actual=$actual}
             }
-            'table' { $Report.assembly.tables+=(Set-HancomTableRows $Hwp $step) }
             default { throw "ASSEMBLY_UNKNOWN_STEP: $($step.op)" }
         }
         $Report.assembly.steps++

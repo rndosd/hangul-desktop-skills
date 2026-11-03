@@ -24,8 +24,8 @@
     "dot": {"range": [97, 98], "kind": "dot", "placeholder": "[항목]", "baseLeftHwp": 1272, "check": {"paragraph": 97, "startsWith": "‧ 점자"}},
     "note": {"range": [108, 109], "kind": "note", "placeholder": "[항목]", "baseLeftHwp": 700, "check": {"paragraph": 108, "startsWith": "※ 응시원서"}},
     "spacer": {"range": [263, 264], "kind": "spacer"},
-    "schedule": {"range": [80, 81], "kind": "table", "table": {"cols": 3, "firstColumnPrefix": " ○ "}},
-    "two-column": {"range": [120, 121], "kind": "table", "table": {"cols": 2,
+    "schedule": {"range": [80, 81], "kind": "table", "table": {"firstColumnPrefix": " ○ "}},
+    "two-column": {"range": [120, 121], "kind": "table", "table": {
       "size": {"widthHwp": 45910, "rowHeightHwp": 2322, "charHeight": 1100, "holderMargins": {"left": 0, "intent": 0}}}}
   }
 }

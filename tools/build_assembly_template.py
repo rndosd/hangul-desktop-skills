@@ -1,7 +1,7 @@
 """Build an assembly template from one source HWPX (build tool; also the "register my form" helper).
 
 Input is a part map (tools/assembly-maps/<id>.json): part name -> source paragraph range, kind,
-heading level or table columns. Installed Hangul block-saves every range (assembly_native.ps1);
+heading level or table rows. Installed Hangul block-saves every range (assembly_native.ps1);
 this tool then rewrites each saved part so that no source wording ships:
   fonts        every legacy (HFT) face a character format names becomes TrueType 바탕
   text parts   the text after the leading spaces and symbol becomes one plain run holding the
@@ -10,10 +10,12 @@ this tool then rewrites each saved part so that no source wording ships:
                (the source indents items under a level-3 heading by that much). Hangul renders a
                wrapping text in each and the hanging indent is set so wrapped lines start under
                the first body character
-  table parts  optionally resized first (map "size": width, row and character height, holder
-               margins) so tables from different source pages match; the header row stays; data rows lose their text and get the first data row's
-               height, cell margins and formats, so rows grow only with their new content; every
-               cell wraps by word, and a prefixed first column is left aligned with a hanging indent
+  table parts  headerRows rows stay (default 1) and one unit of unitRows rows (default 1; cells
+               may merge inside it) is kept empty for native_assembly to repeat per outline row;
+               "repeat": false keeps a fixed table filled once. Optionally resized first (map
+               "size": width, row and character height, holder margins) so tables from different
+               source pages match. Every cell wraps by word, and a prefixed first column is left
+               aligned with a hanging indent
                calibrated like the items; the holding paragraph gets at least 100% line spacing so
                the next line clears a grown table
   chapter box  kept with the next paragraph, like headings. Hangul renders calibration strings
@@ -144,6 +146,8 @@ def resize_table(table, header_xml, size):
     every row's height and the character height of every cell. Tables block-saved from different pages of
     one source can differ in these, which shows when an outline puts them side by side."""
     rows = table.findall(HP + 'tr')
+    need(all(cell.find(HP + 'cellSpan').attrib == {'colSpan': '1', 'rowSpan': '1'} for row in rows for cell in row.findall(HP + 'tc')),
+         'table size applies to tables without merged cells')
     widths = [int(cell.find(HP + 'cellSz').get('width')) for cell in rows[0].findall(HP + 'tc')]
     scaled = [round(w * size['widthHwp'] / sum(widths)) for w in widths]
     scaled[-1] += size['widthHwp'] - sum(scaled)
@@ -164,57 +168,61 @@ def resize_table(table, header_xml, size):
     table.find(HP + 'sz').set('width', str(size['widthHwp']))
 
 
-def first_column_shape(header, section):
-    """Paragraph format of the first data cell in the first column; normalize_table gives that column its own."""
-    cell = next(section.iter(HP + 'tbl')).findall(HP + 'tr')[1].find(HP + 'tc')
+def first_column_shape(header, section, header_rows):
+    """Paragraph format of the first unit cell in the first column; normalize_table gives that cell its own."""
+    cell = next(section.iter(HP + 'tbl')).findall(HP + 'tr')[header_rows].find(HP + 'tc')
     return header.find(f'.//{HH}paraPr[@id="{cell.find(f"{HP}subList/{HP}p").get("paraPrIDRef")}"]')
 
 
+def row_span(cell):
+    address, span = cell.find(HP + 'cellAddr'), cell.find(HP + 'cellSpan')
+    return int(address.get('rowAddr')), int(address.get('rowAddr')) + int(span.get('rowSpan'))
+
+
 def normalize_table(section, header_xml, spec):
+    """Keep the header rows and one unit (unitRows rows that repeat, merges allowed inside it), empty the unit."""
     table = next(section.iter(HP + 'tbl'))
+    heads, size = spec.get('headerRows', 1), spec.get('unitRows', 1)
     rows = table.findall(HP + 'tr')
-    need(len(rows[0].findall(HP + 'tc')) == spec['cols'], 'table column count differs from the part map')
+    need(len(rows) >= heads + size, 'table has fewer rows than headerRows + unitRows')
+    for row in rows[heads + size:]:
+        table.remove(row)
+    rows = rows[:heads + size]
+    for row in rows:
+        for cell in row.findall(HP + 'tc'):
+            top, bottom = row_span(cell)
+            need(bottom <= heads or heads <= top and bottom <= heads + size, 'a merged cell crosses the header or the unit boundary')
     if spec.get('size'):
         resize_table(table, header_xml, spec['size'])
-    first = rows[1].findall(HP + 'tc')
-    height = int(first[0].find(HP + 'cellSz').get('height'))
-    header = [text_of(cell) for cell in rows[0].findall(HP + 'tc')]
-    for cell in rows[0].findall(HP + 'tc'):
+    header_cells = [cell for row in rows[:heads] for cell in row.findall(HP + 'tc')]
+    unit_cells = [cell for row in rows[heads:] for cell in row.findall(HP + 'tc')]
+    header = [text_of(cell) for cell in header_cells]
+    for cell in header_cells:
         for paragraph in cell.iter(HP + 'p'):
             paragraph.set('paraPrIDRef', own_shape(header_xml, paragraph.get('paraPrIDRef')).get('id'))
-    shapes, styles = [], []
-    for column, model in enumerate(first):
-        paragraph = model.find(f'{HP}subList/{HP}p')
-        shape = own_shape(header_xml, paragraph.get('paraPrIDRef'))
-        if column == 0 and spec.get('firstColumnPrefix'):
+    for cell in unit_cells:
+        sub = cell.find(HP + 'subList')
+        paragraphs = sub.findall(HP + 'p')
+        for extra in paragraphs[1:]:
+            sub.remove(extra)
+        keep = paragraphs[0]
+        runs = keep.findall(HP + 'run')
+        for child in list(keep):
+            if child is not runs[0]:
+                keep.remove(child)
+        for child in list(runs[0]):
+            runs[0].remove(child)
+        shape = own_shape(header_xml, keep.get('paraPrIDRef'))
+        if cell.find(HP + 'cellAddr').get('colAddr') == '0' and spec.get('firstColumnPrefix'):
             shape.find(HH + 'align').set('horizontal', 'LEFT')  # justified lines widen the space after the prefix
             shape_margin(shape, 'intent', 0)  # calibrate_hanging measures and sets the hanging indent
-        shapes.append(shape.get('id'))
-        styles.append((paragraph.get('styleIDRef'), paragraph.find(HP + 'run').get('charPrIDRef')))
-    for row in rows[1:]:
-        for column, cell in enumerate(row.findall(HP + 'tc')):
-            model = first[column]
-            cell.set('hasMargin', model.get('hasMargin'))
-            cell.replace(cell.find(HP + 'cellMargin'), copy.deepcopy(model.find(HP + 'cellMargin')))
-            cell.find(HP + 'cellSz').set('height', str(height))
-            sub = cell.find(HP + 'subList')
-            sub.set('vertAlign', model.find(HP + 'subList').get('vertAlign'))
-            paragraphs = sub.findall(HP + 'p')
-            for extra in paragraphs[1:]:
-                sub.remove(extra)
-            keep = paragraphs[0]
-            runs = keep.findall(HP + 'run')
-            for child in list(keep):
-                if child is not runs[0]:
-                    keep.remove(child)
-            for child in list(runs[0]):
-                runs[0].remove(child)
-            keep.set('paraPrIDRef', shapes[column])
-            keep.set('styleIDRef', styles[column][0])
-            runs[0].set('charPrIDRef', styles[column][1])
-    table.find(HP + 'sz').set('height', str(int(rows[0].find(HP + 'tc/' + HP + 'cellSz').get('height')) + height * (len(rows) - 1)))
+        keep.set('paraPrIDRef', shape.get('id'))
     table.set('rowCnt', str(len(rows)))
-    return dict(dataRows=len(rows) - 1, cols=spec['cols'], header=header, rowHeightHwp=height,
+    heights = [min((int(c.find(HP + 'cellSz').get('height')) for c in row.findall(HP + 'tc') if row_span(c)[1] - row_span(c)[0] == 1), default=0)
+               for row in rows]
+    table.find(HP + 'sz').set('height', str(sum(heights)))  # rows dropped; Hangul lays out the real height
+    return dict(headerRows=heads, unitRows=size, headerCells=len(header_cells), unitCells=len(unit_cells),
+                repeat=spec.get('repeat', True), header=header,
                 **({'firstColumnPrefix': spec['firstColumnPrefix']} if spec.get('firstColumnPrefix') else {}))
 
 
@@ -398,7 +406,7 @@ def calibrate_hanging(parts, out_dir, work):
     def render(name, entry, attempt):
         pdf = str(work / f'hanging-{attempt}-{name}.pdf')
         if name in tables:
-            return dict(part=str(out_dir / entry['file']), cell=[1, 0], text=entry['table']['firstColumnPrefix'] + WRAP_TEXT, pdf=pdf)
+            return dict(part=str(out_dir / entry['file']), cell=[entry['table']['headerRows'], 0], text=entry['table']['firstColumnPrefix'] + WRAP_TEXT, pdf=pdf)
         return dict(part=str(out_dir / entry['file']), find=entry['placeholder'], text=WRAP_TEXT, pdf=pdf)
     def symbol(name, entry):
         return entry['table']['firstColumnPrefix'].strip() if name in tables else entry.get('symbol', SYMBOL[entry['kind']])
@@ -413,7 +421,7 @@ def calibrate_hanging(parts, out_dir, work):
                 path = out_dir / parts[variant]['file']
                 section, header = load(path)
                 if name in tables:
-                    shape = first_column_shape(header, section)
+                    shape = first_column_shape(header, section, parts[variant]['table']['headerRows'])
                     shape_margin(shape, 'intent', shape_margin(shape, 'intent') - round(offset * 100))
                 else:
                     paragraph = body_paragraphs(section)[0]
