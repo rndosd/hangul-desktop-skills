@@ -42,8 +42,10 @@ TABLE_ROLES = {'schedule': '업무·일정 목록', 'grid': '구분·내용 표'
 COVER_FIELDS = ('title', 'subtitle', 'date', 'organization', 'department')
 # A cover value without a place on this template's cover is added to another field, never dropped.
 COVER_CARRY = {'subtitle': ('title', ' - '), 'date': ('organization', ' · '), 'department': ('organization', ' · ')}
-STEP_OPS = ('text', 'section', 'insert', 'pageNumbers', 'boxWidth', 'pageBreak')
+STEP_OPS = ('text', 'section', 'insert', 'pageNumbers', 'boxWidth', 'pageBreak', 'trimEnd')
 MAX_NODES, MAX_ROWS, MAX_TEXT, MAX_CELL_PARAGRAPHS = 400, 100, 2000, 20
+# Numbered title lines a block keeps as written (1., 가., 1)): the next outline title of that level counts on from them
+BLOCK_TITLES = ((1, r'^\d{1,2}\.\s'), (2, r'^[가-하]\.\s'), (3, r'^\d{1,2}\)\s'))
 HP = '{http://www.hancom.co.kr/hwpml/2011/paragraph}'
 HH = '{http://www.hancom.co.kr/hwpml/2011/head}'
 
@@ -513,9 +515,10 @@ def build_plan(manifest, outline, tables_dir=None, notes=None):
                     out += [dict(op='section'), dict(op='insert', part=name, keepSection=1), dict(op='pageNumbers', **rules['pageNumbers']),
                             *numbered(part, label, title)]
                 else:
-                    if not first and not summary and rules.get('spacerBeforeLaterChapters'):
-                        out.append(dict(op='insert', part=find('spacer'), keepSection=0))
-                    if part.get('pageBreakBefore') or breaks[position - 1]:
+                    new_page = part.get('pageBreakBefore') or breaks[position - 1]
+                    if not first and not summary and rules.get('spacerBeforeLaterChapters') and not breaks[position - 1]:
+                        out.append(dict(op='insert', part=find('spacer'), keepSection=0))  # no spacer atop a page the outline starts
+                    if new_page:
                         out.append(dict(op='pageBreak'))
                     out += titled(name, label, title)
                 if 'box' in part:
@@ -596,6 +599,11 @@ def build_plan(manifest, outline, tables_dir=None, notes=None):
                      f"{where}: 블록 부품 {node['part']!r}이 없습니다 (이 양식의 블록: {', '.join(n for n, p in parts.items() if p['kind'] == 'block') or '없음'}).")
                 part = parts[node['part']]
                 out.append(dict(op='insert', part=node['part'], keepSection=0))
+                for line in part.get('numberedLines', []):  # titles written in the block count like the outline's own
+                    depth = next((d for d, pattern in BLOCK_TITLES if re.match(pattern, line)), None)
+                    if depth:
+                        counters[depth] += 1
+                        counters[depth + 1:] = [0] * (3 - depth)
                 notes.append(dict(at=where, role='block', used=node['part'], texts=part['texts'],
                                   **({'numberedLines': part['numberedLines']} if part.get('numberedLines') else {}),
                                   **({'reviewTexts': part['reviewTexts']} if part.get('reviewTexts') else {}),
@@ -613,6 +621,7 @@ def build_plan(manifest, outline, tables_dir=None, notes=None):
         steps += [dict(op='insert', part=name, keepSection=0), dict(op='text', find=parts[name]['placeholder'], text=_text(summary['title'], 'summary.title', placeholders)),
                   *body(summary['nodes'], 'summary.nodes', True)]
     steps += body(outline.get('nodes'), 'nodes', False)
+    steps.append(dict(op='trimEnd'))  # the last part's empty trailer would start an empty page after a full one
     used = {step['part'] for step in steps if step['op'] == 'insert'}
     files = {**parts, **instances}
     return dict(schema=PLAN_SCHEMA, base=dict(path=parts[cover_part]['path'], sha256=parts[cover_part]['sha256']),

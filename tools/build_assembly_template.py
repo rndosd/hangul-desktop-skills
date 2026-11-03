@@ -383,6 +383,9 @@ def use_truetype_faces(header, section):
 
 def prepare(name, spec, raw, out_dir, deep_indent):
     section, header = load(raw)
+    # The block-save trailer takes the page break of the source paragraph after the range; inserted, it would start
+    # a page. Page breaks come from the outline (pageBreakBefore) or the part's own "pageBreakBefore".
+    section.findall(HP + 'p')[-1].set('pageBreak', '0')
     if not spec.get('keepFaces'):  # a cover may keep its display faces: centred lines carry no indents to drift
         use_truetype_faces(header, section)
     kind, entry, previews, variants = spec['kind'], {'kind': spec['kind']}, [], []
@@ -645,7 +648,10 @@ def main():
 
     parts = {}
     for name, spec in part_map['parts'].items():
-        parts.update(prepare(name, spec, raw_dir / f'{name}.hwpx', out_dir, part_map['deepIndentHwp']))
+        try:
+            parts.update(prepare(name, spec, raw_dir / f'{name}.hwpx', out_dir, part_map['deepIndentHwp']))
+        except Exception as error:  # register_assembly_template.py redraws a failed part as a block
+            raise ValueError(f'part {name}: {error}') from error
     for name, entry in parts.items():
         placeholders = entry.get('placeholder', {})
         allowed = flat(placeholders.values()) if isinstance(placeholders, dict) else [placeholders]
@@ -657,7 +663,7 @@ def main():
         allowed += entry.get('texts', [])  # a block ships its source wording, listed in the manifest for review
         allowed += [entry['symbol']] if entry.get('symbol') else []  # the source's own leading symbol
         left = leftover_wording(out_dir / entry['file'], allowed + entry.get('table', {}).get('header', []))
-        need(not left, f'{name}: source wording left in the prepared part: {left[:60]!r}')
+        need(not left, f'part {name}: source wording left in the prepared part: {left[:60]!r}')
 
     residual = calibrate_hanging(parts, out_dir, work)
     need(all(abs(value) <= 0.3 for value in residual.values()), f'hanging calibration did not converge: {residual}')

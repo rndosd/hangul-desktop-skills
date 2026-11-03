@@ -83,6 +83,14 @@ function Invoke-HancomAssembly($Hwp,$Plan,$Report) {
                 if([Math]::Abs($actual-[int]$step.width) -gt 2) { throw "ASSEMBLY_BOX_WIDTH_FAILED: $actual" }
                 $Report.assembly.boxes+=@{requested=[int]$step.width;actual=$actual}
             }
+            'trimEnd' {
+                # The last part's empty trailer paragraph ends the body; on a full last page it starts an empty page.
+                Move-HancomBodyEnd $Hwp
+                $position=$Hwp.GetPosBySet()
+                if([int]$position.Item('Pos') -eq 0 -and [int]$position.Item('Para') -gt 0) {
+                    if($Hwp.HAction.Run('DeleteBack') -eq $false) { throw 'ASSEMBLY_TRIM_FAILED' }
+                }
+            }
             default { throw "ASSEMBLY_UNKNOWN_STEP: $($step.op)" }
         }
         $Report.assembly.steps++
