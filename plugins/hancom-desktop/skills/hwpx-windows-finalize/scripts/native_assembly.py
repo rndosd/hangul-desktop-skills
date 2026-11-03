@@ -22,9 +22,12 @@ OUTLINE_SCHEMA = 'hwpx.assembly-outline.v1'
 PLAN_SCHEMA = 'hwpx.native-assemble.v1'
 ROMAN = 'ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩⅪⅫ'
 HANGUL = '가나다라마바사아자차카타파하'
-ITEM_KINDS = ('item', 'dash', 'dot', 'note')
-PART_KINDS = ('cover', 'chapter_first', 'chapter', 'heading', 'table', 'spacer', *ITEM_KINDS)
-STEP_OPS = ('text', 'section', 'insert', 'pageNumbers', 'boxWidth')
+ITEM_KINDS = ('item', 'dash', 'dot', 'note', 'arrow')
+# One placeholder, no numbering: the outline node {"t": kind, "text": ...} fills it.
+TEXT_KINDS = (*ITEM_KINDS, 'box', 'subhead')
+PART_KINDS = ('cover', 'chapter_first', 'chapter', 'heading', 'task', 'table', 'spacer', 'summary', 'summary_chapter', *TEXT_KINDS)
+BOXED_DIGITS = 20  # Hancom private-use squared digits U+F02B1.. (①-style boxes)
+STEP_OPS = ('text', 'section', 'insert', 'pageNumbers', 'boxWidth', 'pageBreak')
 MAX_NODES, MAX_ROWS, MAX_TEXT, MAX_CELL_PARAGRAPHS = 400, 100, 2000, 20
 HP = '{http://www.hancom.co.kr/hwpml/2011/paragraph}'
 
@@ -52,20 +55,31 @@ def load_template(catalog, template_id):
         need(path.parent.parent == folder.resolve() and path.is_file(), f'부품 파일이 없습니다: {name}')
         need(sha(path) == part['sha256'], f'부품 파일이 manifest와 다릅니다: {name}')
         part['path'] = str(path)
-    for kind in ('cover', 'chapter_first', 'chapter', 'spacer'):
+    required = ('cover', 'chapter_first', 'chapter', *(('spacer',) if manifest['rules'].get('spacerBeforeLaterChapters') else ()))
+    for kind in required:
         need(sum(p['kind'] == kind for p in parts.values()) == 1, f'조립 양식에 {kind} 부품이 하나 있어야 합니다.')
     return manifest
 
 
-def number(level, index):
-    """Label of the index-th (1-based) sibling: level 0 Roman chapters, then 1. / 가. / 1)."""
-    if level == 0:
-        need(index <= len(ROMAN), f'장은 {len(ROMAN)}개까지입니다.')
-        return f'{ROMAN[index - 1]}.'
-    if level == 2:
-        need(index <= len(HANGUL), f'2단계 제목은 한 묶음에 {len(HANGUL)}개까지입니다.')
+def number(style, index, what):
+    """Label of the index-th (1-based) sibling in a part's numbering style."""
+    if style in ('roman', 'roman-bare'):
+        need(index <= len(ROMAN), f'{what}은 {len(ROMAN)}개까지입니다.')
+        return ROMAN[index - 1] + ('.' if style == 'roman' else '')
+    if style == 'hangul':
+        need(index <= len(HANGUL), f'{what}은 한 묶음에 {len(HANGUL)}개까지입니다.')
         return f'{HANGUL[index - 1]}.'
-    return f'{index}.' if level == 1 else f'{index})'
+    if style == 'boxed':
+        need(index <= BOXED_DIGITS, f'{what}은 한 묶음에 {BOXED_DIGITS}개까지입니다.')
+        return chr(0xF02B1 + index - 1)
+    return {'decimal': f'{index}.', 'digit': str(index), 'paren': f'{index})'}[style]
+
+
+def numbered(part, label, text):
+    """Text steps of a numbered title: number and title in their own runs, or one 'label text' string."""
+    if part.get('numberPlaceholder'):
+        return [dict(op='text', find=part['numberPlaceholder'], text=label), dict(op='text', find=part['placeholder'], text=text)]
+    return [dict(op='text', find=part['placeholder'], text=f'{label} {text}')]
 
 
 def box_width(box, title):
@@ -160,11 +174,48 @@ def table_instance(part, header, units, target):
     return count
 
 
+def text_width(text, em):
+    """Rough advance (HWPUNIT) of a title: Hangul and other wide characters one em, the rest half."""
+    return sum(em if ord(c) >= 0x1100 else em // 2 for c in text)
+
+
+def fitted_instance(part, values, target):
+    """Write a copy of a part whose title sits in a fixed-width table cell (a numbered tab): the
+    placeholders become the texts and that cell grows by the title's extra width, within the body."""
+    fit = part['fit']
+    with zipfile.ZipFile(part['path']) as package:
+        infos = package.infolist()
+        data = {info.filename: package.read(info) for info in infos}
+    section = etree.fromstring(data['Contents/section0.xml'])
+    for t in section.iter(HP + 't'):
+        for placeholder, value in values.items():
+            if t.text:
+                t.text = t.text.replace(placeholder, value)
+            for child in t:
+                if child.tail:
+                    child.tail = child.tail.replace(placeholder, value)
+    table = next(section.iter(HP + 'tbl'))
+    cell = list(table.iter(HP + 'tc'))[fit['cell']].find(HP + 'cellSz')
+    size = table.find(HP + 'sz')
+    grow = text_width(values[fit['placeholder']], fit['emHwp']) - text_width(fit['sourceText'], fit['emHwp'])
+    grow = max(0, min(grow, fit['maxWidthHwp'] - int(size.get('width'))))
+    cell.set('width', str(int(cell.get('width')) + grow))
+    size.set('width', str(int(size.get('width')) + grow))
+    for paragraph in section.iter(HP + 'p'):
+        for lines in paragraph.findall(HP + 'linesegarray'):
+            paragraph.remove(lines)
+    data['Contents/section0.xml'] = etree.tostring(section, xml_declaration=True, encoding='UTF-8', standalone=True)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(target, 'x') as out:
+        for info in infos:
+            out.writestr(info, data[info.filename])
+
+
 def build_plan(manifest, outline, tables_dir=None):
     """Validate the outline against the template and resolve it into native steps.
 
     Table nodes are written as part copies into tables_dir (a new folder)."""
-    parts = manifest['parts']
+    parts, rules = manifest['parts'], manifest['rules']
     by_kind = {}
     for name, part in parts.items():
         by_kind.setdefault((part['kind'], part.get('level'), part.get('depth', 0)), name)
@@ -172,78 +223,115 @@ def build_plan(manifest, outline, tables_dir=None):
     for part in parts.values():
         value = part.get('placeholder')
         placeholders.update(value.values() if isinstance(value, dict) else [value] if value else [])
+        placeholders.update([part['numberPlaceholder']] if part.get('numberPlaceholder') else [])
     need(isinstance(outline, dict) and outline.get('schema', OUTLINE_SCHEMA) == OUTLINE_SCHEMA, f'outline schema는 {OUTLINE_SCHEMA}입니다.')
-    need(set(outline) <= {'schema', 'template', 'cover', 'nodes'}, '지원 키: schema, template, cover, nodes')
+    need(set(outline) <= {'schema', 'template', 'cover', 'summary', 'nodes'}, '지원 키: schema, template, cover, summary, nodes')
     need(outline.get('template', manifest['id']) == manifest['id'], 'outline의 template이 선택한 양식과 다릅니다.')
     cover, cover_part = outline.get('cover'), next(n for n, p in parts.items() if p['kind'] == 'cover')
     fields = parts[cover_part]['placeholder']
     need(isinstance(cover, dict) and set(cover) <= set(fields) and {'title', 'date'} <= set(cover), f'cover 지원 키: {", ".join(fields)} (title·date 필수)')
     steps = [dict(op='text', find=fields[key], text=_text(cover.get(key, ''), f'cover.{key}', placeholders, key not in ('title', 'date'))) for key in fields]
-    nodes = outline.get('nodes')
-    need(isinstance(nodes, list) and 1 <= len(nodes) <= MAX_NODES, f'nodes는 1~{MAX_NODES}개입니다.')
-    need(isinstance(nodes[0], dict) and nodes[0].get('t') == 'chapter', '본문은 장(chapter)으로 시작해야 합니다.')
-    counters, level, instances = [0, 0, 0, 0], 0, {}
-    for position, node in enumerate(nodes, 1):
-        where = f'nodes[{position}]'
-        need(isinstance(node, dict) and 't' in node, f'{where}: t가 필요합니다.')
-        kind = node['t']
-        if kind == 'chapter':
-            need(set(node) == {'t', 'text'}, f'{where}: chapter는 t, text만 받습니다.')
-            counters, level = [counters[0] + 1, 0, 0, 0], 0
-            name = by_kind[('chapter_first' if counters[0] == 1 else 'chapter', None, 0)]
-            label = f'{number(0, counters[0])} {_text(node["text"], where, placeholders)}'
-            box = parts[name]['box']
-            width = box_width(box, label)
-            need(width <= box['maxWidthHwp'], f'{where}: 장 제목이 길어 상자가 본문 폭을 넘습니다 '
-                 f'(필요 {width / 283.465:.1f}mm, 최대 {box["maxWidthHwp"] / 283.465:.1f}mm). 제목을 줄이세요.')
-            if counters[0] == 1:
-                steps += [dict(op='section'), dict(op='insert', part=name, keepSection=1), dict(op='pageNumbers', **manifest['rules']['pageNumbers'])]
+    if rules.get('pageNumbers') and not rules.get('bodyStartsNewSection'):
+        steps.append(dict(op='pageNumbers', **rules['pageNumbers']))  # one section: the cover part hides its own number
+    instances = {}
+
+    def body(nodes, prefix, summary):
+        """Steps of one node list; the summary list uses the summary chapter part and its own numbering."""
+        need(isinstance(nodes, list) and 1 <= len(nodes) <= MAX_NODES, f'{prefix}는 1~{MAX_NODES}개입니다.')
+        need(isinstance(nodes[0], dict) and nodes[0].get('t') == 'chapter', f'{prefix}는 장(chapter)으로 시작해야 합니다.')
+        out, counters, tasks, level = [], [0, 0, 0, 0], 0, 0
+        for position, node in enumerate(nodes, 1):
+            where = f'{prefix}[{position}]'
+            need(isinstance(node, dict) and 't' in node, f'{where}: t가 필요합니다.')
+            kind = node['t']
+            if kind == 'chapter':
+                need(set(node) == {'t', 'text'}, f'{where}: chapter는 t, text만 받습니다.')
+                counters, tasks, level = [counters[0] + 1, 0, 0, 0], 0, 0
+                first = counters[0] == 1
+                name = by_kind[('summary_chapter', None, 0)] if summary else by_kind[('chapter_first' if first else 'chapter', None, 0)]
+                part = parts[name]
+                label = number(part['numbering'], counters[0], '장')
+                title = _text(node['text'], where, placeholders)
+                if first and not summary and rules.get('bodyStartsNewSection'):
+                    out += [dict(op='section'), dict(op='insert', part=name, keepSection=1), dict(op='pageNumbers', **rules['pageNumbers'])]
+                else:
+                    if not first and not summary and rules.get('spacerBeforeLaterChapters'):
+                        out.append(dict(op='insert', part=by_kind[('spacer', None, 0)], keepSection=0))
+                    if part.get('pageBreakBefore'):
+                        out.append(dict(op='pageBreak'))
+                    out.append(dict(op='insert', part=name, keepSection=0))
+                out += numbered(part, label, title)
+                if 'box' in part:
+                    width = box_width(part['box'], f'{label} {title}')
+                    need(width <= part['box']['maxWidthHwp'], f'{where}: 장 제목이 길어 상자가 본문 폭을 넘습니다 '
+                         f'(필요 {width / 283.465:.1f}mm, 최대 {part["box"]["maxWidthHwp"] / 283.465:.1f}mm). 제목을 줄이세요.')
+                    out.append(dict(op='boxWidth', width=width))
+            elif kind == 'heading':
+                need(set(node) == {'t', 'level', 'text'} and node['level'] in (1, 2, 3), f'{where}: heading은 level 1~3과 text가 필요합니다.')
+                depth = node['level']
+                need(depth == 1 or counters[depth - 1] > 0, f'{where}: {depth}단계 제목 앞에 {depth - 1}단계 제목이 필요합니다.')
+                counters[depth] += 1
+                counters[depth + 1:] = [0] * (3 - depth)
+                tasks, level = 0, depth
+                name = by_kind.get(('heading', depth, 0))
+                need(name, f'양식에 {depth}단계 제목 부품이 없습니다.')
+                label, title = number(parts[name]['numbering'], counters[depth], f'{depth}단계 제목'), _text(node['text'], where, placeholders)
+                if 'fit' in parts[name]:
+                    need(tables_dir is not None, 'fitted titles need a folder for part copies')
+                    copy_name, target = f'{name}@{len(instances) + 1}', Path(tables_dir) / f'{name}-{len(instances) + 1}.hwpx'
+                    fitted_instance(parts[name], {parts[name]['numberPlaceholder']: label, parts[name]['placeholder']: title}, target)
+                    instances[copy_name] = dict(path=str(target.resolve()), sha256=sha(target))
+                    out.append(dict(op='insert', part=copy_name, keepSection=0, expect=dict(texts=[label, title])))
+                else:
+                    out += [dict(op='insert', part=name, keepSection=0), *numbered(parts[name], label, title)]
+            elif kind == 'task':
+                need(set(node) == {'t', 'text'}, f'{where}: task는 t, text만 받습니다.')
+                name = by_kind.get(('task', None, 0))
+                need(name, '양식에 과제 제목(task) 부품이 없습니다.')
+                tasks += 1
+                out += [dict(op='insert', part=name, keepSection=0),
+                        *numbered(parts[name], number(parts[name]['numbering'], tasks, '과제 제목'), _text(node['text'], where, placeholders))]
+            elif kind in TEXT_KINDS:
+                need(set(node) == {'t', 'text'}, f'{where}: {kind}는 t, text만 받습니다.')
+                deep = int(level >= rules['deepItemsUnderHeadingLevel'])
+                name = by_kind.get((kind, None, deep)) or by_kind.get((kind, None, 0))
+                need(name, f'양식에 {kind} 부품이 없습니다.')
+                out += [dict(op='insert', part=name, keepSection=0),
+                        dict(op='text', find=parts[name]['placeholder'], text=_text(node['text'], where, placeholders))]
+            elif kind == 'table':
+                need({'t', 'part', 'rows'} <= set(node) <= {'t', 'part', 'rows', 'header'}, f'{where}: table은 t, part, rows와 선택 header만 받습니다.')
+                part = parts.get(node['part'])
+                need(part is not None and part['kind'] == 'table', f'{where}: 표 부품 {node["part"]!r}이 양식에 없습니다.')
+                spec, rows, header = part['table'], node['rows'], node.get('header')
+                if header is not None:
+                    need(isinstance(header, list) and len(header) == spec['headerCells'], f'{where}: header 칸 수가 {spec["headerCells"]}이 아닙니다.')
+                    for c, cell in enumerate(header, 1):
+                        _text(cell, f'{where}.header[{c}]', placeholders)
+                most = MAX_ROWS if spec['repeat'] else 1
+                need(isinstance(rows, list) and 1 <= len(rows) <= most, f'{where}: rows는 1~{most}묶음입니다.')
+                for r, row in enumerate(rows, 1):
+                    need(isinstance(row, list) and len(row) == spec['unitCells'], f'{where}: {r}행의 칸 수가 {spec["unitCells"]}이 아닙니다.')
+                    rows[r - 1] = [_cell(cell, f'{where}.rows[{r}][{c}]', placeholders) for c, cell in enumerate(row, 1)]
+                need(tables_dir is not None, 'table nodes need a folder for table copies')
+                name = f'{node["part"]}@{len(instances) + 1}'
+                target = Path(tables_dir) / f'{node["part"]}-{len(instances) + 1}.hwpx'
+                count = table_instance(part, header, rows, target)
+                instances[name] = dict(path=str(target.resolve()), sha256=sha(target))
+                texts = [p for row in [header or [], *rows] for cell in row for p in (cell if isinstance(cell, list) else [cell]) if p]
+                out.append(dict(op='insert', part=name, keepSection=0, expect=dict(tableRows=count, texts=texts)))
             else:
-                spacer = by_kind[('spacer', None, 0)]
-                steps.append(dict(op='insert', part=spacer, keepSection=0))
-            steps += [*([] if counters[0] == 1 else [dict(op='insert', part=name, keepSection=0)]),
-                      dict(op='text', find=parts[name]['placeholder'], text=label), dict(op='boxWidth', width=width)]
-        elif kind == 'heading':
-            need(set(node) == {'t', 'level', 'text'} and node['level'] in (1, 2, 3), f'{where}: heading은 level 1~3과 text가 필요합니다.')
-            depth = node['level']
-            need(depth == 1 or counters[depth - 1] > 0, f'{where}: {depth}단계 제목 앞에 {depth - 1}단계 제목이 필요합니다.')
-            counters[depth] += 1
-            counters[depth + 1:] = [0] * (3 - depth)
-            level = depth
-            name = by_kind.get(('heading', depth, 0))
-            need(name, f'양식에 {depth}단계 제목 부품이 없습니다.')
-            label = f'{number(depth, counters[depth])} {_text(node["text"], where, placeholders)}'
-            steps += [dict(op='insert', part=name, keepSection=0), dict(op='text', find=parts[name]['placeholder'], text=label)]
-        elif kind in ITEM_KINDS:
-            need(set(node) == {'t', 'text'}, f'{where}: {kind}는 t, text만 받습니다.')
-            deep = int(level >= manifest['rules']['deepItemsUnderHeadingLevel'])
-            name = by_kind.get((kind, None, deep)) or by_kind.get((kind, None, 0))
-            need(name, f'양식에 {kind} 부품이 없습니다.')
-            steps += [dict(op='insert', part=name, keepSection=0),
-                      dict(op='text', find=parts[name]['placeholder'], text=_text(node['text'], where, placeholders))]
-        elif kind == 'table':
-            need({'t', 'part', 'rows'} <= set(node) <= {'t', 'part', 'rows', 'header'}, f'{where}: table은 t, part, rows와 선택 header만 받습니다.')
-            part = parts.get(node['part'])
-            need(part is not None and part['kind'] == 'table', f'{where}: 표 부품 {node["part"]!r}이 양식에 없습니다.')
-            spec, rows, header = part['table'], node['rows'], node.get('header')
-            if header is not None:
-                need(isinstance(header, list) and len(header) == spec['headerCells'], f'{where}: header 칸 수가 {spec["headerCells"]}이 아닙니다.')
-                for c, cell in enumerate(header, 1):
-                    _text(cell, f'{where}.header[{c}]', placeholders)
-            most = MAX_ROWS if spec['repeat'] else 1
-            need(isinstance(rows, list) and 1 <= len(rows) <= most, f'{where}: rows는 1~{most}묶음입니다.')
-            for r, row in enumerate(rows, 1):
-                need(isinstance(row, list) and len(row) == spec['unitCells'], f'{where}: {r}행의 칸 수가 {spec["unitCells"]}이 아닙니다.')
-                rows[r - 1] = [_cell(cell, f'{where}.rows[{r}][{c}]', placeholders) for c, cell in enumerate(row, 1)]
-            need(tables_dir is not None, 'table nodes need a folder for table copies')
-            name = f'{node["part"]}@{position}'
-            target = Path(tables_dir) / f'{node["part"]}-{position}.hwpx'
-            count = table_instance(part, header, rows, target)
-            instances[name] = dict(path=str(target.resolve()), sha256=sha(target))
-            texts = [p for row in [header or [], *rows] for cell in row for p in (cell if isinstance(cell, list) else [cell]) if p]
-            steps.append(dict(op='insert', part=name, keepSection=0, expect=dict(tableRows=count, texts=texts)))
-        else:
-            raise ValueError(f'{where}: 알 수 없는 t {kind!r} (chapter, heading, item, dash, dot, note, table)')
+                known = sorted({p['kind'] for p in parts.values()} & {'heading', 'task', 'table', *TEXT_KINDS})
+                raise ValueError(f'{where}: 알 수 없는 t {kind!r} (chapter, {", ".join(known)})')
+        return out
+
+    summary = outline.get('summary')
+    if summary is not None:
+        name = by_kind.get(('summary', None, 0))
+        need(name, '이 양식에는 요약(summary) 부품이 없습니다.')
+        need(isinstance(summary, dict) and set(summary) == {'title', 'nodes'}, 'summary는 title과 nodes를 받습니다.')
+        steps += [dict(op='insert', part=name, keepSection=0), dict(op='text', find=parts[name]['placeholder'], text=_text(summary['title'], 'summary.title', placeholders)),
+                  *body(summary['nodes'], 'summary.nodes', True)]
+    steps += body(outline.get('nodes'), 'nodes', False)
     used = {step['part'] for step in steps if step['op'] == 'insert'}
     files = {**parts, **instances}
     return dict(schema=PLAN_SCHEMA, base=dict(path=parts[cover_part]['path'], sha256=parts[cover_part]['sha256']),
@@ -273,14 +361,16 @@ def check_output(path, plan):
         sections = [name for name in package.namelist() if re.fullmatch(r'Contents/section\d+\.xml', name)]
         from xml.etree import ElementTree
         roots = [ElementTree.fromstring(package.read(name)) for name in sorted(sections)]
-    text = ''.join(t.text or '' for root in roots for t in root.iter(HP + 't'))
+    text = ''.join(''.join(t.itertext()) for root in roots for t in root.iter(HP + 't'))
     finds = {step['find'] for step in plan['steps'] if step['op'] == 'text'}
     wanted = [step['text'] for step in plan['steps'] if step['op'] == 'text' and step['text']]
-    tables_expected = [step['expect'] for step in plan['steps'] if 'expect' in step]
-    wanted += [text for expect in tables_expected for text in expect['texts']]
-    tables = [int(t.get('rowCnt')) for root in roots for t in root.iter(HP + 'tbl')]
-    expected = [expect['tableRows'] for expect in tables_expected]
+    copies = [step['expect'] for step in plan['steps'] if 'expect' in step]
+    wanted += [text for expect in copies for text in expect['texts']]
+    # Outline tables appear in order among the design's own tables (bars, boxes), so match them as a subsequence.
+    remaining = iter(int(t.get('rowCnt')) for root in roots for t in root.iter(HP + 'tbl'))
+    expected = [expect['tableRows'] for expect in copies if 'tableRows' in expect]
+    found = [rows for rows in expected if any(count == rows for count in remaining)]
     result = dict(placeholdersLeft=sorted(p for p in finds if p in text), missingTexts=[t for t in wanted if t not in text],
-                  tableRows=dict(expected=expected, actual=tables[len(tables) - len(expected):] if expected else []))
-    result['ok'] = not result['placeholdersLeft'] and not result['missingTexts'] and result['tableRows']['expected'] == result['tableRows']['actual']
+                  tableRows=dict(expected=expected, found=found))
+    result['ok'] = not result['placeholdersLeft'] and not result['missingTexts'] and found == expected
     return result

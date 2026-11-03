@@ -61,7 +61,8 @@ class AssemblyTest(unittest.TestCase):
 
     def test_manifest_lists_every_kind_with_existing_hashed_parts(self):
         kinds = {p['kind'] for p in self.manifest['parts'].values()}
-        self.assertEqual(kinds, set(a.PART_KINDS))
+        self.assertEqual(kinds, {'cover', 'chapter_first', 'chapter', 'heading', 'table', 'spacer', 'item', 'dash', 'dot', 'note'})
+        self.assertLessEqual(kinds, set(a.PART_KINDS))
         self.assertEqual({p['level'] for p in self.manifest['parts'].values() if p['kind'] == 'heading'}, {1, 2, 3})
         self.assertTrue(all(Path(p['path']).is_file() for p in self.manifest['parts'].values()))
         self.assertIn('교육부', self.manifest['source']['attribution'])
@@ -117,7 +118,7 @@ class AssemblyTest(unittest.TestCase):
     def test_table_rows_are_written_into_a_part_copy(self):
         plan = self.plan(CHAPTER, {'t': 'table', 'part': 'schedule', 'rows': [['안내', '3. 15.', ''], ['실시', '9. 15.', ['각 학교', '교육청']]]})
         step, count, cells, rows = self.table_copy(plan)
-        self.assertEqual((step['op'], step['part'], step['expect']['tableRows'], count), ('insert', 'schedule@2', 3, '3'))
+        self.assertEqual((step['op'], step['part'], step['expect']['tableRows'], count), ('insert', 'schedule@1', 3, '3'))
         self.assertEqual(cells[1:], [[[' ○ 안내'], ['3. 15.'], ['']], [[' ○ 실시'], ['9. 15.'], ['각 학교', '교육청']]])
         self.assertEqual(rows, [['0'] * 3, ['1'] * 3, ['2'] * 3])
         self.assertEqual(sorted(step['expect']['texts']), sorted(['안내', '3. 15.', '실시', '9. 15.', '각 학교', '교육청']))
@@ -204,6 +205,47 @@ class AssemblyTest(unittest.TestCase):
         broken['steps'].append({'op': 'insert', 'part': 'unknown'})
         with self.assertRaisesRegex(ValueError, 'unknown part'):
             validate(broken)
+
+
+class ProjectTemplateTest(unittest.TestCase):
+    """plan-project: titles in table cells, summary page, boxed task numbers, a tab that fits its title."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.manifest = a.load_template(CATALOG, 'plan-project')
+
+    def plan(self, outline_value):
+        temp = tempfile.TemporaryDirectory(); self.addCleanup(temp.cleanup)
+        return a.build_plan(copy.deepcopy(self.manifest), outline_value, Path(temp.name) / 'tables')
+
+    def outline(self, nodes, summary=None):
+        value = {'schema': a.OUTLINE_SCHEMA, 'template': 'plan-project', 'cover': {'title': '가상 사업 계획', 'date': '2027. 3.'}, 'nodes': nodes}
+        return dict(value, summary=summary) if summary else value
+
+    def test_summary_tasks_and_chapters_number_in_their_own_styles(self):
+        plan = self.plan(self.outline(
+            [{'t': 'chapter', 'text': '추진 배경'}, {'t': 'task', 'text': '과제 가'}, {'t': 'task', 'text': '과제 나'}, {'t': 'chapter', 'text': '추진 계획'}],
+            {'title': '요약 제목', 'nodes': [{'t': 'chapter', 'text': '요약 장'}, {'t': 'arrow', 'text': '개선 방향'}]}))
+        texts = [(s['find'], s['text']) for s in plan['steps'] if s['op'] == 'text']
+        self.assertIn(('[요약 장 번호]', 'Ⅰ.'), texts)
+        self.assertEqual([t for f, t in texts if f == '[장 번호]'], ['Ⅰ', 'Ⅱ'])
+        self.assertEqual([t for f, t in texts if f == '[과제 번호]'], [chr(0xF02B1), chr(0xF02B2)])
+        ops = [s['op'] for s in plan['steps']]
+        self.assertEqual(ops.count('pageNumbers'), 1)
+        self.assertNotIn('section', ops)
+        first = next(i for i, s in enumerate(plan['steps']) if s.get('part') == 'chapter_first')
+        self.assertEqual(plan['steps'][first - 1]['op'], 'pageBreak')
+
+    def test_numbered_tab_widens_for_a_long_title(self):
+        plan = self.plan(self.outline([{'t': 'chapter', 'text': '계획'}, {'t': 'heading', 'level': 1, 'text': '사업 추진 체계와 기관별 역할'}]))
+        step = next(s for s in plan['steps'] if 'expect' in s)
+        self.assertEqual(step['expect']['texts'], ['1', '사업 추진 체계와 기관별 역할'])
+        width = lambda path: int(next(ElementTree.fromstring(zipfile.ZipFile(path).read('Contents/section0.xml')).iter(a.HP + 'tbl')).find(a.HP + 'sz').get('width'))
+        self.assertGreater(width(plan['parts'][step['part']]['path']), width(self.manifest['parts']['heading1']['path']))
+
+    def test_unknown_kind_lists_the_kinds_of_this_template(self):
+        with self.assertRaisesRegex(ValueError, 'box.*subhead.*task'):
+            self.plan(self.outline([{'t': 'chapter', 'text': '계획'}, {'t': 'bullet', 'text': 'x'}]))
 
 
 if __name__ == '__main__':

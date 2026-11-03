@@ -80,6 +80,23 @@ $planCatalog = Join-Path $taskSkillDir 'assets/document-templates/full-plans.jso
 - 장 제목 상자는 제목 길이에 맞춰 넓어진다. 본문 폭을 넘는 제목은 실행 전에 거부한다.
 - 문구는 줄바꿈·탭 없이 한 문단씩 넣는다. 빈 문구와 `[항목]` 같은 자리표시 문구는 거부한다.
 
+### 사업형(요약·상세) 조립: `plan-project`
+
+완성형 사업형과 같은 디자인(띠 장 제목 Ⅰ, 번호 탭 1, 네모 번호 과제 제목, □ 소제목, ◦ / - / ⇒ / ※, ◈ 상자)을 길이에 관계없이 조립한다. 표지 다음 쪽에 선택 `summary`(요약 쪽)가 오고, 상세 본문은 새 쪽에서 시작한다. 쪽 번호는 표지 다음 쪽부터 붙는다.
+
+```json
+{"schema":"hwpx.assembly-outline.v1","template":"plan-project",
+ "cover":{"title":"사업 추진계획","subtitle":"부제","date":"2027. 3.","organization":"○○교육청","department":"담당 부서"},
+ "summary":{"title":"사업 추진계획","nodes":[{"t":"chapter","text":"추진 배경"},{"t":"item","text":"요약 문장"},{"t":"arrow","text":"개선: 방향"}]},
+ "nodes":[{"t":"chapter","text":"추진 배경"},{"t":"subhead","text":"추진 필요성"},{"t":"item","text":"배경"},
+          {"t":"chapter","text":"중점 추진 과제"},{"t":"task","text":"첫째 과제"},{"t":"item","text":"(목표) ..."},{"t":"dash","text":"세부"},
+          {"t":"chapter","text":"사업 추진 계획"},{"t":"heading","level":1,"text":"성과 관리"},{"t":"box","text":"핵심 문장"},
+          {"t":"table","part":"indicators","rows":[["과제",["지표 1"],["지표 2"]]]}]}
+```
+
+- `t`: `chapter`(Ⅰ 띠, 요약 안에서는 Ⅰ. 글자 제목), `heading` level 1(번호 탭 1·2·3, 긴 제목이면 탭이 넓어진다), `task`(네모 번호 과제 제목, 장·탭마다 다시 1부터), `subhead`(□ 소제목, 번호 없음), `item`·`dash`·`arrow`·`note`, `box`(◈ 상자), `table`.
+- 표 부품: `three-column`(영역·내용·배점 3열, 제목 행은 `header`로 바꾼다), `indicators`(과제 칸이 두 줄에 걸친 2줄 묶음: 칸은 과제·지표 1·지표 2 세 개).
+
 입력 검사가 끝난 뒤 한글을 한 번 열어 표지 부품에 장·제목·항목·표 부품을 차례로 붙이고 저장·재열기·PDF를 만든다. 결과의 `assembly`는 저장본에 자리표시가 남지 않았는지와 요청한 문구·표 행 수를 확인한 값이며, `wrapAlignment`·`pageLayout`은 PDF 배치 경고다. `PASS_NATIVE` 뒤에도 쪽 이미지를 확인한다([preview](#준비된-블록-조합)). 내 양식을 부품으로 등록하는 방법은 저장소의 `tools/build_assembly_template.py`(부품 지도 → 블록 저장 → 자리표시·정규화 → manifest)이며, 등록한 폴더는 `--catalog`로 지정한다.
 
 ## 준비된 양식 채우기

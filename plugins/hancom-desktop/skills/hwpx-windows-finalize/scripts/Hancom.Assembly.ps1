@@ -41,6 +41,7 @@ function Invoke-HancomAssembly($Hwp,$Plan,$Report) {
         switch($step.op) {
             'text' { Set-HancomPlaceholderText $Hwp ([string]$step.find) ([string]$step.text);$Report.assembly.texts++ }
             'section' { Move-HancomBodyEnd $Hwp;if($Hwp.HAction.Run('BreakSection') -eq $false){throw 'ASSEMBLY_BREAK_FAILED'} }
+            'pageBreak' { Move-HancomBodyEnd $Hwp;if($Hwp.HAction.Run('BreakPage') -eq $false){throw 'ASSEMBLY_PAGE_BREAK_FAILED'} }
             'insert' {
                 Move-HancomBodyEnd $Hwp
                 $position=$Hwp.GetPosBySet();$part=$parts[[string]$step.part]

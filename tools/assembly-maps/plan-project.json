@@ -1,0 +1,39 @@
+{
+  "schema": "hwpx.assembly-part-map.v1",
+  "id": "plan-project",
+  "label": "사업형 추진계획(요약·상세)",
+  "source": {
+    "sha256": "5a35f6bf75bb9a877d537d32561480a7c5f4bb5799fea05d29790a34bb652bf8",
+    "title": "완성형 plan-project (교육부 「지역인재육성지원사업 추진계획」에서 준비)",
+    "publisher": "교육부",
+    "license": "완성형 plan-project와 같음",
+    "attribution": "이 조립 양식의 서식은 교육부 「지역인재육성지원사업 추진계획」을 준비한 완성형 사업형(plan-project)에서 가져왔으며 원문 문구는 포함하지 않는다."
+  },
+  "altSource": {"sha256": "189acd8775c1d2e79a4e46f9ec137e55851613491e358472005f21c716daa4f7", "title": "source-library/source-C.hwpx"},
+  "rules": {"spacerBeforeLaterChapters": false, "bodyStartsNewSection": false, "pageNumbers": {"position": "BottomCenter", "format": "Digit", "sideChar": "-"}, "deepItemsUnderHeadingLevel": 9},
+  "deepIndentHwp": 1500,
+  "parts": {
+    "cover": {"range": [0, 1], "kind": "cover", "replace": {},
+      "fields": {"title": "[종합 계획 제목]", "subtitle": "[종합 계획 부제]", "date": "[종합 계획 작성 연월]",
+                 "organization": "[종합 계획 작성 기관]", "department": "[종합 계획 작성 부서]"}},
+    "summary": {"range": [1, 2], "kind": "summary", "replace": {}, "placeholder": "[요약 계획 제목]", "keep": ["[요약]"]},
+    "summary_chapter": {"range": [2, 3], "kind": "summary_chapter", "replace": {"Ⅰ.": "[요약 장 번호]", "추진 배경": "[요약 장 제목]"},
+      "placeholder": "[요약 장 제목]", "numberPlaceholder": "[요약 장 번호]", "numbering": "roman"},
+    "arrow": {"range": [6, 7], "kind": "arrow", "placeholder": "[항목]", "baseLeftHwp": 0},
+    "chapter_first": {"range": [19, 20], "kind": "chapter_first", "replace": {"Ⅰ": "[장 번호]", "추진 배경": "[장 제목]"},
+      "placeholder": "[장 제목]", "numberPlaceholder": "[장 번호]", "numbering": "roman-bare", "pageBreakBefore": true},
+    "chapter": {"range": [19, 20], "kind": "chapter", "replace": {"Ⅰ": "[장 번호]", "추진 배경": "[장 제목]"},
+      "placeholder": "[장 제목]", "numberPlaceholder": "[장 번호]", "numbering": "roman-bare"},
+    "subhead": {"range": [20, 21], "kind": "subhead", "placeholder": "[소제목]"},
+    "item": {"range": [21, 22], "kind": "item", "placeholder": "[항목]", "baseLeftHwp": 0},
+    "task": {"range": [24, 25], "kind": "task", "replace": {"󰊱": "[과제 번호]", "[중점 과제 1 제목]": "[과제 제목]"},
+      "placeholder": "[과제 제목]", "numberPlaceholder": "[과제 번호]", "numbering": "boxed"},
+    "dash": {"range": [27, 28], "kind": "dash", "placeholder": "[항목]", "baseLeftHwp": 0},
+    "heading1": {"range": [37, 38], "kind": "heading", "level": 1, "replace": {"1": "[번호]", "사업 개요": "[제목]"},
+      "placeholder": "[제목]", "numberPlaceholder": "[번호]", "numbering": "digit", "fitTitleCell": true},
+    "three-column": {"range": [148, 149], "kind": "table", "table": {"size": {"rowHeightHwp": 1800}}, "fromAltSource": true},
+    "box": {"range": [51, 52], "kind": "box", "replace": {}, "placeholder": "[평가·환류 개요]"},
+    "indicators": {"range": [56, 57], "kind": "table", "table": {"unitRows": 2}},
+    "note": {"range": [31, 32], "kind": "note", "placeholder": "[항목]", "baseLeftHwp": 0, "fromAltSource": true}
+  }
+}

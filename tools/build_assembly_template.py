@@ -23,7 +23,13 @@ this tool then rewrites each saved part so that no source wording ships:
 and writes manifest.json (schema hwpx.assembly-template.v1) with file hashes.
 Requires Windows, Hangul and the reviewed security module of the installed skill.
 
-Usage: build_assembly_template.py MAP SOURCE.hwpx WORK_DIR [--out DIR]
+A part with "replace" swaps exact source texts for placeholders in their own runs (titles held in
+table cells, or number and title in separate runs; a prepared source may already hold placeholders),
+"fitTitleCell" lets native_assembly widen that title's cell, and "pageBreakBefore" starts it on a new
+page. "fromAltSource" parts come from the map's altSource (the original of a prepared source), and the
+map's "rules" override the default page numbering, section and spacer rules.
+
+Usage: build_assembly_template.py MAP SOURCE.hwpx WORK_DIR [--out DIR] [--alt-source ORIGINAL.hwpx]
 """
 from __future__ import annotations
 
@@ -47,14 +53,17 @@ HP = '{http://www.hancom.co.kr/hwpml/2011/paragraph}'
 HH = '{http://www.hancom.co.kr/hwpml/2011/head}'
 HC = '{http://www.hancom.co.kr/hwpml/2011/core}'
 PREFIX = {'cover': r'\s*', 'chapter_first': r'\s*', 'chapter': r'\s*', 'heading': r'\s*',
-          'item': r'\s*◦\s*', 'dash': r'\s*-\s*', 'dot': r'\s*‧\s*', 'note': r'\s*※\s*'}
-ITEM_KINDS = ('item', 'dash', 'dot', 'note')
+          'item': r'\s*◦\s*', 'dash': r'\s*-\s*', 'dot': r'\s*‧\s*', 'note': r'\s*※\s*', 'arrow': r'\s*⇒\s*', 'subhead': r'\s*□\s*'}
+ITEM_KINDS = ('item', 'dash', 'dot', 'note', 'arrow')
 # Short strings stay on one line; every string ends in 가 so its last character has a successor.
 CALIBRATION = ['가가0123456789가', '.,·‧()-~/:%「」ㆍ가', 'ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ가', 'ABCDEFGHIJKLM가',
                'NOPQRSTUVWXYZ가', 'abcdefghijklm가', 'nopqrstuvwxyz가', "&+=[]'\"!?가 가"]
 CALIBRATION_BOX_HWP = 46000
 WRAP_TEXT = '가나다라마바사 아자차카타 ' * 10
-SYMBOL = {'item': '◦', 'dash': '-', 'dot': '‧', 'note': '※'}
+SYMBOL = {'item': '◦', 'dash': '-', 'dot': '‧', 'note': '※', 'arrow': '⇒'}
+TITLE_KINDS = ('chapter_first', 'chapter', 'heading', 'task', 'subhead', 'summary', 'summary_chapter')
+DEFAULT_RULES = {'spacerBeforeLaterChapters': True, 'bodyStartsNewSection': True,
+                 'pageNumbers': {'position': 'BottomCenter', 'format': 'Digit', 'sideChar': '-'}, 'deepItemsUnderHeadingLevel': 3}
 TRUETYPE_FACE = '바탕'
 
 
@@ -108,6 +117,29 @@ def set_placeholder(paragraph, pattern, placeholder):
     return full
 
 
+def replace_text(section, original, placeholder):
+    """Swap one exact source text for a placeholder inside its run (text or the tail after an inline control)."""
+    slots = [(t, None) for t in section.iter(HP + 't')] + [(t, child) for t in section.iter(HP + 't') for child in t]
+    found = [(t, child) for t, child in slots if original in ((t.text if child is None else child.tail) or '')]
+    need(len(found) == 1, f'{original!r} appears {len(found)} times; one is required')
+    t, child = found[0]
+    if child is None:
+        t.text = t.text.replace(original, placeholder)
+    else:
+        child.tail = child.tail.replace(original, placeholder)
+
+
+def keep_with_next(header, paragraph):
+    """Give the paragraph its own format copy that stays with the next paragraph (titles never end a page)."""
+    shapes = header.find(f'.//{HH}paraProperties')
+    clone = copy.deepcopy(shapes.find(f'{HH}paraPr[@id="{paragraph.get("paraPrIDRef")}"]'))
+    clone.set('id', str(max(int(s.get('id')) for s in shapes) + 1))
+    clone.find(HH + 'breakSetting').set('keepWithNext', '1')
+    shapes.append(clone)
+    shapes.set('itemCnt', str(len(shapes)))
+    paragraph.set('paraPrIDRef', clone.get('id'))
+
+
 def shape_of(header, section, paragraph):
     """The paragraph format of a part paragraph; the block-save trailer paragraph must not share it."""
     pid = paragraph.get('paraPrIDRef')
@@ -149,12 +181,17 @@ def resize_table(table, header_xml, size):
     need(all(cell.find(HP + 'cellSpan').attrib == {'colSpan': '1', 'rowSpan': '1'} for row in rows for cell in row.findall(HP + 'tc')),
          'table size applies to tables without merged cells')
     widths = [int(cell.find(HP + 'cellSz').get('width')) for cell in rows[0].findall(HP + 'tc')]
-    scaled = [round(w * size['widthHwp'] / sum(widths)) for w in widths]
-    scaled[-1] += size['widthHwp'] - sum(scaled)
+    total = size.get('widthHwp', sum(widths))  # each measure is optional
+    scaled = [round(w * total / sum(widths)) for w in widths]
+    scaled[-1] += total - sum(scaled)
     chars, clones = header_xml.find(f'.//{HH}charProperties'), {}
     for row in rows:
         for column, cell in enumerate(row.findall(HP + 'tc')):
-            cell.find(HP + 'cellSz').attrib.update({'width': str(scaled[column]), 'height': str(size['rowHeightHwp'])})
+            cell.find(HP + 'cellSz').set('width', str(scaled[column]))
+            if 'rowHeightHwp' in size:
+                cell.find(HP + 'cellSz').set('height', str(size['rowHeightHwp']))
+            if 'charHeight' not in size:
+                continue
             for run in cell.iter(HP + 'run'):
                 old = run.get('charPrIDRef')
                 if old not in clones:
@@ -165,7 +202,7 @@ def resize_table(table, header_xml, size):
                     clones[old] = clone.get('id')
                 run.set('charPrIDRef', clones[old])
     chars.set('itemCnt', str(len(chars)))
-    table.find(HP + 'sz').set('width', str(size['widthHwp']))
+    table.find(HP + 'sz').set('width', str(total))
 
 
 def first_column_shape(header, section, header_rows):
@@ -285,7 +322,38 @@ def prepare(name, spec, raw, out_dir, deep_indent):
     section, header = load(raw)
     use_truetype_faces(header, section)
     kind, entry, previews, variants = spec['kind'], {'kind': spec['kind']}, [], []
-    if kind == 'cover':
+    if 'replace' in spec:
+        # Titles held in table cells or split over runs (number, period, title): exact source texts become
+        # placeholders in their own runs, so each keeps its format. A prepared source may already hold them.
+        for original, placeholder in spec['replace'].items():
+            replace_text(section, original, placeholder)
+        entry.update({key: spec[key] for key in ('placeholder', 'numberPlaceholder', 'numbering', 'level') if key in spec})
+        if kind == 'cover':
+            entry['placeholder'] = spec['fields']
+        names = list(entry['placeholder'].values()) if isinstance(entry.get('placeholder'), dict) else [entry['placeholder']]
+        names += [entry['numberPlaceholder']] if 'numberPlaceholder' in entry else []
+        text = ''.join(''.join(t.itertext()) for t in section.iter(HP + 't'))  # with text after inline controls
+        need(all(text.count(p) == 1 for p in names), f'{name}: each placeholder must appear once: {names}')
+        previews.extend(names)
+        if kind in TITLE_KINDS:
+            for paragraph in section.findall(HP + 'p')[:-1]:
+                keep_with_next(header, paragraph)
+        if spec.get('pageBreakBefore'):
+            entry['pageBreakBefore'] = True  # a page break inserted before the part; the part's own flag is lost on insert
+        if spec.get('fitTitleCell'):
+            # The title cell has a fixed width; native_assembly widens it by the new title's extra width.
+            cells = list(section.iter(HP + 'tc'))
+            index = next(i for i, c in enumerate(cells) if entry['placeholder'] in ''.join(''.join(t.itertext()) for t in c.iter(HP + 't')))
+            run = next(r for r in cells[index].iter(HP + 'run') if entry['placeholder'] in ''.join(''.join(t.itertext()) for t in r.iter(HP + 't')))
+            page = next(section.iter(HP + 'pagePr'))
+            entry['fit'] = {'cell': index, 'placeholder': entry['placeholder'],
+                            'sourceText': next(o for o, p in spec['replace'].items() if p == entry['placeholder']),
+                            'emHwp': int(header.find(f'.//{HH}charPr[@id="{run.get("charPrIDRef")}"]').get('height')),
+                            'maxWidthHwp': int(page.get('width')) - int(page.find(HP + 'margin').get('left')) - int(page.find(HP + 'margin').get('right'))}
+        for paragraph in section.iter(HP + 'p'):
+            for lines in paragraph.findall(HP + 'linesegarray'):
+                paragraph.remove(lines)
+    elif kind == 'cover':
         top = section.findall(HP + 'p')
         entry['placeholder'] = {}
         for field, place in spec['fields'].items():
@@ -314,7 +382,7 @@ def prepare(name, spec, raw, out_dir, deep_indent):
         previews.append(spec['placeholder'])
         for paragraph in section.findall(HP + 'p')[:-1]:  # the box stays on the page of its first heading
             shape_of(header, section, paragraph).find(HH + 'breakSetting').set('keepWithNext', '1')
-    elif kind == 'heading' or kind in ITEM_KINDS:
+    elif kind in ('heading', 'subhead') or kind in ITEM_KINDS:
         paragraphs = body_paragraphs(section)
         need(len(paragraphs) == 1, f'{name}: one text paragraph expected, found {len(paragraphs)}')
         set_placeholder(paragraphs[0], PREFIX[kind], spec['placeholder'])
@@ -327,6 +395,8 @@ def prepare(name, spec, raw, out_dir, deep_indent):
         shape = shape_of(header, section, paragraphs[0])
         if kind == 'heading':
             entry.update(level=spec['level'], numbering={1: 'decimal', 2: 'hangul', 3: 'paren'}[spec['level']])
+            shape.find(HH + 'breakSetting').set('keepWithNext', '1')
+        elif kind == 'subhead':
             shape.find(HH + 'breakSetting').set('keepWithNext', '1')
         else:
             shape.find(HH + 'align').set('horizontal', 'LEFT')  # justified lines widen the space after the symbol
@@ -366,7 +436,7 @@ def leftover_wording(path, allowed):
     text = ''.join(t.text or '' for t in section.iter(HP + 't')) + preview + ''.join(re.findall(r'<opf:title[^>]*>(.*?)</opf:title>', hpf, re.S))
     for value in sorted(allowed, key=len, reverse=True):
         text = text.replace(value, '')
-    return re.sub(r'[\s◦○\-‧※·]', '', text)
+    return re.sub(r'[\s◦○\-‧※·⇒□◈.]', '', text)
 
 
 def measure_advances(pdf, expected):
@@ -433,6 +503,7 @@ def calibrate_hanging(parts, out_dir, work):
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('map'); parser.add_argument('source'); parser.add_argument('work'); parser.add_argument('--out')
+    parser.add_argument('--alt-source', help='original of a prepared source, for parts marked fromAltSource')
     args = parser.parse_args()
     part_map = json.loads(Path(args.map).read_text(encoding='utf-8'))
     need(part_map.get('schema') == 'hwpx.assembly-part-map.v1', 'unsupported part map schema')
@@ -444,9 +515,16 @@ def main():
     need(not (out_dir / 'manifest.json').exists() or args.out, f'{out_dir} exists; pass --out to rebuild elsewhere')
     raw_dir = work / 'raw'
     raw_dir.mkdir()
-    blocks = [dict(name=name, start=spec['range'][0], end=spec['range'][1], path=str(raw_dir / f'{name}.hwpx'),
-                   **({'check': spec['check']} if 'check' in spec else {})) for name, spec in part_map['parts'].items()]
-    native(dict(source=str(source), blocks=blocks, renders=[]), work, 'save-blocks')
+    sources = {False: source}
+    if 'altSource' in part_map:  # the source's own original, for a part the prepared source dropped
+        need(args.alt_source, 'the map names altSource; pass --alt-source')
+        sources[True] = Path(args.alt_source).resolve(strict=True)
+        need(sha(sources[True]) == part_map['altSource']['sha256'], 'alt source differs from the part map hash')
+    for alt, path in sources.items():
+        blocks = [dict(name=name, start=spec['range'][0], end=spec['range'][1], path=str(raw_dir / f'{name}.hwpx'),
+                       **({'check': spec['check']} if 'check' in spec else {}))
+                  for name, spec in part_map['parts'].items() if bool(spec.get('fromAltSource')) == alt]
+        native(dict(source=str(path), blocks=blocks, renders=[]), work, 'save-blocks' + ('-alt' if alt else ''))
 
     parts = {}
     for name, spec in part_map['parts'].items():
@@ -454,6 +532,8 @@ def main():
     for name, entry in parts.items():
         placeholders = entry.get('placeholder', {})
         allowed = list(placeholders.values()) if isinstance(placeholders, dict) else [placeholders]
+        allowed += [entry['numberPlaceholder']] if 'numberPlaceholder' in entry else []
+        allowed += part_map['parts'].get(name, {}).get('keep', [])  # fixed labels of the design, such as [요약]
         left = leftover_wording(out_dir / entry['file'], allowed + entry.get('table', {}).get('header', []))
         need(not left, f'{name}: source wording left in the prepared part: {left[:60]!r}')
 
@@ -477,9 +557,7 @@ def main():
 
     manifest = {'schema': 'hwpx.assembly-template.v1', 'id': part_map['id'], 'label': part_map['label'],
                 'source': part_map['source'],
-                'rules': {'spacerBeforeLaterChapters': True, 'bodyStartsNewSection': True,
-                          'pageNumbers': {'position': 'BottomCenter', 'format': 'Digit', 'sideChar': '-'},
-                          'deepItemsUnderHeadingLevel': 3, 'deepIndentHwp': part_map['deepIndentHwp']},
+                'rules': {**DEFAULT_RULES, **part_map.get('rules', {}), 'deepIndentHwp': part_map['deepIndentHwp']},
                 'parts': parts}
     (out_dir / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
     print(json.dumps({'status': 'BUILT', 'manifest': str(out_dir / 'manifest.json'), 'parts': sorted(parts),
