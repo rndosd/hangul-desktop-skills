@@ -34,6 +34,8 @@ spacing variant used right after an outline node of that kind, table "role" (sch
 indicators) and "columns" (names of the unit cells) let an outline pick a table by role, table "fixedTexts" cells (step arrows) keep
 their text and take no value, and table "holderLineSpacing" sets the holding line's spacing. Table "footerRows" keeps the source's last rows (a total or remarks
 row) once after the repeated units; its "footerLabels" cells (계) keep their text, the rest take outline values.
+Table "labelColumn" (a fixed table whose rows are named, such as 운영 요일 · 운영 시간) keeps that column's names
+and records each row's value cell count, so an outline can fill the table by row name.
 "keepWithNext": false leaves a heading or subhead
 unbound to the next paragraph (a source that writes body lists as □ or "1. 기간: ..." lines). A cover field
 may name a list of placeholders that take the same value.
@@ -271,8 +273,22 @@ def normalize_table(section, header_xml, spec):
     header_cells = [cell for row in rows[:heads] for cell in row.findall(HP + 'tc')]
     unit_cells = [cell for row in rows[heads:heads + size] for cell in row.findall(HP + 'tc')]
     footer_cells = [cell for row in rows[heads + size:] for cell in row.findall(HP + 'tc')]
-    # Cells holding one of fixedTexts (the arrows of a step flow) keep their text and take no outline value.
-    fixed = [i for i, cell in enumerate(unit_cells) if text_of(cell).strip() in spec.get('fixedTexts', [])]
+    # Cells holding one of fixedTexts (the arrows of a step flow) keep their text and take no outline value, and so do
+    # the cells of labelColumn in a fixed table whose rows are named (운영 요일, 운영 시간): each such row is recorded
+    # with its value cell count, so an outline can fill the table by row name.
+    column = spec.get('labelColumn')
+    def is_label(cell):
+        return column is not None and cell.find(HP + 'cellAddr').get('colAddr') == str(column)
+    fixed = [i for i, cell in enumerate(unit_cells) if text_of(cell).strip() in spec.get('fixedTexts', []) or is_label(cell)]
+    row_labels = []
+    if column is not None:
+        need(not spec.get('repeat', True), 'labelColumn needs a fixed table ("repeat": false)')
+        for row in rows[heads:heads + size]:
+            cells = row.findall(HP + 'tc')
+            names = [text_of(c).strip() for c in cells if is_label(c)]
+            need(len(names) == 1 and names[0], f'every unit row needs one named label cell in column {column}')
+            row_labels.append(dict(label=names[0], cells=sum(not is_label(c) and text_of(c).strip() not in spec.get('fixedTexts', []) for c in cells)))
+        need(len({r['label'] for r in row_labels}) == len(row_labels), 'row labels must differ')
     unit_cells = [cell for i, cell in enumerate(unit_cells) if i not in fixed]
     labels = [i for i, cell in enumerate(footer_cells) if text_of(cell).strip() in spec.get('footerLabels', [])]
     footer_values = [cell for i, cell in enumerate(footer_cells) if i not in labels]
@@ -304,6 +320,7 @@ def normalize_table(section, header_xml, spec):
     return dict(headerRows=heads, unitRows=size, headerCells=len(header_cells), unitCells=len(unit_cells),
                 repeat=spec.get('repeat', True), header=header, **({'fixedCells': fixed} if fixed else {}),
                 **({'footerRows': feet, 'footerCells': len(footer_values), 'footerLabelCells': labels} if feet else {}),
+                **({'rowLabels': row_labels} if row_labels else {}),
                 role=spec.get('role', 'grid'), **({'columns': spec['columns']} if spec.get('columns') else {}),
                 **({'firstColumnPrefix': spec['firstColumnPrefix']} if spec.get('firstColumnPrefix') else {}))
 
@@ -473,7 +490,8 @@ def prepare(name, spec, raw, out_dir, deep_indent):
                 spacing.set('value', str(spec['table']['holderLineSpacing']))  # a table made inline from a floating one
             if spacing.get('type') == 'PERCENT' and int(spacing.get('value')) < 100:
                 spacing.set('value', '100')  # below 100% the next line overlaps a table that grew
-        previews.extend(entry['table']['header'] + spec['table'].get('fixedTexts', []) + spec['table'].get('footerLabels', []))
+        previews.extend(entry['table']['header'] + spec['table'].get('fixedTexts', []) + spec['table'].get('footerLabels', [])
+                        + [row['label'] for row in entry['table'].get('rowLabels', [])])
     else:
         raise ValueError(f'unknown kind {kind}')
     written = []
@@ -620,6 +638,7 @@ def main():
         allowed += part_map['parts'].get(name, {}).get('keep', [])  # fixed labels of the design, such as [요약]
         allowed += part_map['parts'].get(name, {}).get('table', {}).get('fixedTexts', [])
         allowed += part_map['parts'].get(name, {}).get('table', {}).get('footerLabels', [])
+        allowed += [row['label'] for row in entry.get('table', {}).get('rowLabels', [])]  # names of a fixed table's rows
         allowed += [entry['symbol']] if entry.get('symbol') else []  # the source's own leading symbol
         left = leftover_wording(out_dir / entry['file'], allowed + entry.get('table', {}).get('header', []))
         need(not left, f'{name}: source wording left in the prepared part: {left[:60]!r}')

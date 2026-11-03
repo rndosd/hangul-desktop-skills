@@ -166,6 +166,17 @@ class AssemblyTest(unittest.TestCase):
         self.assertEqual(table.get('rowCnt'), '4')
         self.rejects('합계 줄\\(footer\\)이 없습니다', CHAPTER, {'t': 'table', 'part': 'schedule', 'rows': [['안내', '3. 15.', '']], 'footer': ['1']})
 
+    def test_a_fixed_table_is_filled_by_row_name(self):
+        spec = {'rowLabels': [{'label': '운영 요일', 'cells': 3}, {'label': '운영 시간', 'cells': 2}, {'label': '비고', 'cells': 1}]}
+        self.assertEqual(a._by_label(spec, {'운영 시간': ['오전', '오후'], '운영 요일': ['월', '화', ['수', '목']]}, 't'),
+                         ['월', '화', ['수', '목'], '오전', '오후', ''])  # in the table's row order; 비고 left out stays empty
+        with self.assertRaisesRegex(ValueError, '칸 수가 2'):
+            a._by_label(spec, {'운영 시간': ['오전']}, 't')
+        with self.assertRaisesRegex(ValueError, '운영 요일, 운영 시간, 비고 중에서'):
+            a._by_label(spec, {'장소': ['강당']}, 't')
+        self.rejects('줄 이름이 없어 values', CHAPTER, {'t': 'table', 'part': 'schedule', 'values': {}})
+        self.rejects('rows\\(또는 values\\) 하나', CHAPTER, {'t': 'table', 'part': 'schedule', 'values': {}, 'rows': []})
+
     def test_table_header_override_is_validated(self):
         rows = [['1~2학년군', '그림책 읽기']]
         _, _, plain, _ = self.table_copy(self.plan(CHAPTER, {'t': 'table', 'part': 'two-column', 'rows': rows}))

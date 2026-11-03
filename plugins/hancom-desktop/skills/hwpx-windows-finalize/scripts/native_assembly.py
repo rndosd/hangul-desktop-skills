@@ -311,6 +311,20 @@ def fitted_instance(part, values, target, loose=False):
             out.writestr(info, data[info.filename])
 
 
+def _by_label(spec, values, where):
+    """The one unit of a fixed table with named rows, from {row name: [value cells]}; rows left out stay empty."""
+    labels = spec.get('rowLabels')
+    need(labels, f'{where}: 이 표는 줄 이름이 없어 values를 받지 않습니다. rows를 쓰세요.')
+    names = [row['label'] for row in labels]
+    need(isinstance(values, dict) and set(values) <= set(names), f'{where}: values의 줄 이름은 {", ".join(names)} 중에서 고릅니다.')
+    unit = []
+    for row in labels:
+        cells = values.get(row['label'], [''] * row['cells'])
+        need(isinstance(cells, list) and len(cells) == row['cells'], f"{where}.values[{row['label']}]: 칸 수가 {row['cells']}이 아닙니다.")
+        unit += cells
+    return unit
+
+
 def _role_key(kind, level=None):
     return f'heading{level}' if kind == 'heading' else kind
 
@@ -367,7 +381,8 @@ def describe(manifest):
         unavailable=[role for role, used in roles.items() if not used],
         tables=[dict(part=name, role=p['table'].get('role', 'grid'), roleLabel=TABLE_ROLES.get(p['table'].get('role', 'grid')),
                      cells=p['table']['unitCells'], columns=p['table'].get('columns') or p['table']['header'], header=p['table']['header'],
-                     repeat=p['table']['repeat'], **({'footerCells': p['table']['footerCells']} if p['table'].get('footerRows') else {}))
+                     repeat=p['table']['repeat'], **({'footerCells': p['table']['footerCells']} if p['table'].get('footerRows') else {}),
+                     **({'rowLabels': p['table']['rowLabels']} if p['table'].get('rowLabels') else {}))
                 for name, p in table_parts(parts).items()],
         cover=dict(fields=list(fields), required=[k for k in ('title', 'date') if k in fields],
                    carried={k: COVER_CARRY[k][0] for k in COVER_FIELDS if k not in fields and k in COVER_CARRY}),
@@ -537,8 +552,13 @@ def build_plan(manifest, outline, tables_dir=None, notes=None):
                 text = re.sub(rf'^\s*[{re.escape(KIND_SYMBOLS[kind])}]\s+', '', text) or text
                 out += [inserted(name, kind == 'subhead' and bodyless(position - 1)), dict(op='text', find=parts[name]['placeholder'], text=text)]
             elif kind == 'table':
-                need({'t', 'rows'} <= set(node) <= {'t', 'role', 'part', 'rows', 'header', 'footer'} and len({'role', 'part'} & set(node)) == 1,
-                     f'{where}: table은 t, rows, role(또는 part) 하나와 선택 header·footer만 받습니다.')
+                need(len({'rows', 'values'} & set(node)) == 1 and set(node) <= {'t', 'role', 'part', 'rows', 'values', 'header', 'footer'}
+                     and len({'role', 'part'} & set(node)) == 1,
+                     f'{where}: table은 t, rows(또는 values) 하나, role(또는 part) 하나와 선택 header·footer만 받습니다.')
+                if 'values' in node:
+                    need('part' in node, f'{where}: values(줄 이름으로 채우기)는 part로 표를 고릅니다.')
+                    need(node['part'] in parts and parts[node['part']]['kind'] == 'table', f"{where}: 표 부품 {node['part']!r}이 없습니다.")
+                    node = {**{k: v for k, v in node.items() if k != 'values'}, 'rows': [_by_label(parts[node['part']]['table'], node['values'], where)]}
                 table_name, used = resolve_table(parts, node, where)
                 if used:
                     notes.append(dict(at=where, role=f'table:{node["role"]}', used=f'table:{used}',
