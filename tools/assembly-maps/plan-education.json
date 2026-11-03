@@ -1,0 +1,34 @@
+{
+  "schema": "hwpx.assembly-part-map.v1",
+  "id": "plan-education",
+  "label": "교육사업 추진계획(표지형)",
+  "source": {
+    "sha256": "222922e59402161a2793cd74a62e7c268c0eadf43c0dec5c9104c868ebebe492",
+    "title": "완성형 plan-education (경남교육청 「사회적경제 교육 추진계획」에서 준비)",
+    "publisher": "경상남도교육청",
+    "license": "완성형 plan-education과 같음",
+    "attribution": "이 조립 양식의 서식은 경남교육청 「사회적경제 교육 추진계획」을 준비한 완성형 교육사업형(plan-education)에서 가져왔으며 원문 문구는 포함하지 않는다."
+  },
+  "rules": {"spacerBeforeLaterChapters": false, "bodyStartsNewSection": false, "pageNumbers": {"position": "BottomCenter", "format": "Digit", "sideChar": "-"}, "deepItemsUnderHeadingLevel": 9,
+            "textBeforeFirstChapter": true},
+  "deepIndentHwp": 1000,
+  "parts": {
+    "cover": {"range": [0, 29], "kind": "cover", "replace": {}, "keepFaces": true,
+      "fields": {"title": ["[사업 계획 제목]", "[본문 사업 제목]"], "subtitle": "[계획서 부제]", "date": "[작성 연월]",
+                 "organization": ["[작성 기관·부서]", "[본문 작성 기관]"]}},
+    "subhead": {"range": [29, 30], "kind": "subhead", "placeholder": "[소제목]"},
+    "subhead_after_table": {"range": [36, 37], "kind": "subhead", "context": "after-table", "placeholder": "[소제목]"},
+    "lead": {"range": [30, 31], "kind": "lead", "placeholder": "[항목]", "baseLeftHwp": 0},
+    "targets": {"range": [35, 36], "kind": "table", "tableAsChar": true, "table": {"headerRows": 1, "unitRows": 1, "holderLineSpacing": 100, "size": {"outMarginHwp": {"bottom": 1230}}}},
+    "chapter_first": {"range": [38, 39], "kind": "chapter_first", "replace": {"1": "[장 번호]", "교육활동 운영": "[장 제목]"},
+      "placeholder": "[장 제목]", "numberPlaceholder": "[장 번호]", "numbering": "digit", "fitTitleCell": true},
+    "chapter": {"range": [47, 48], "kind": "chapter", "replace": {"2": "[장 번호]", "교육활동 지원": "[장 제목]"},
+      "placeholder": "[장 제목]", "numberPlaceholder": "[장 번호]", "numbering": "digit", "fitTitleCell": true},
+    "task_after_chapter": {"range": [39, 40], "kind": "task", "context": "after-chapter", "replace": {"󰊱": "[과제 번호]", "[추진 과제 1 제목]": "[과제 제목]"},
+      "placeholder": "[과제 제목]", "numberPlaceholder": "[과제 번호]", "numbering": "boxed"},
+    "task": {"range": [64, 65], "kind": "task", "replace": {"󰊲": "[과제 번호]", "평가·환류": "[과제 제목]"},
+      "placeholder": "[과제 제목]", "numberPlaceholder": "[과제 번호]", "numbering": "boxed"},
+    "item": {"range": [42, 43], "kind": "item", "placeholder": "[항목]", "baseLeftHwp": 0},
+    "dash": {"range": [41, 42], "kind": "dash", "placeholder": "[항목]", "baseLeftHwp": 1165}
+  }
+}

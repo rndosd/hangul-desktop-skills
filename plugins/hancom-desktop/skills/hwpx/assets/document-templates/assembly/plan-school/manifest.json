@@ -1,0 +1,135 @@
+{
+ "schema": "hwpx.assembly-template.v1",
+ "id": "plan-school",
+ "label": "학교 교육활동 운영계획",
+ "source": {
+  "sha256": "c9cf3447d264e9902ab0d302190e927bce500ae9cfbf86b82ca48e5619251a46",
+  "title": "완성형 plan-school (경남교육청 「행복마을학교 운영계획」에서 준비)",
+  "publisher": "경상남도교육청",
+  "license": "완성형 plan-school와 같음",
+  "attribution": "이 조립 양식의 서식은 경남교육청 「행복마을학교 운영계획」을 준비한 완성형 학교형(plan-school)에서 가져왔으며 원문 문구는 포함하지 않는다."
+ },
+ "rules": {
+  "spacerBeforeLaterChapters": false,
+  "bodyStartsNewSection": false,
+  "pageNumbers": null,
+  "deepItemsUnderHeadingLevel": 9,
+  "textBeforeFirstChapter": true,
+  "deepIndentHwp": 1000
+ },
+ "parts": {
+  "cover": {
+   "kind": "cover",
+   "placeholder": {
+    "title": "[계획서 제목]",
+    "organization": "[학교·작성 부서]"
+   },
+   "file": "parts/cover.hwpx",
+   "sha256": "3f22299a4316693de0faa0f2ca690debcb63120aef8d8ff42c132bcac6039e6d"
+  },
+  "subhead": {
+   "kind": "subhead",
+   "placeholder": "[소제목]",
+   "file": "parts/subhead.hwpx",
+   "sha256": "b67b39d38fef0e09a925493e7f37e47773fd8d6486ee018175bf2c7b18361ae6"
+  },
+  "lead": {
+   "kind": "lead",
+   "placeholder": "[항목]",
+   "depth": 0,
+   "file": "parts/lead.hwpx",
+   "sha256": "3cd34587f9808326afb5c1706bce642d7433935dc07ea63e7c20459ab77eb063"
+  },
+  "lead-deep": {
+   "kind": "lead",
+   "placeholder": "[항목]",
+   "depth": 1,
+   "file": "parts/lead-deep.hwpx",
+   "sha256": "8060b431b63a66dfe6912ad72949c9cad7784ead8d4138e987638b2e405fe805"
+  },
+  "chapter_first": {
+   "kind": "chapter_first",
+   "placeholder": "[장 제목]",
+   "numberPlaceholder": "[장 번호]",
+   "numbering": "digit",
+   "fit": {
+    "cell": 1,
+    "placeholder": "[장 제목]",
+    "sourceText": "세부 운영 계획",
+    "emHwp": 1600,
+    "maxWidthHwp": 51026
+   },
+   "file": "parts/chapter_first.hwpx",
+   "sha256": "abf8129672db7f54c229d1d9badc7542edbfedcf265ab0fe85b8837a9fdbc52c"
+  },
+  "chapter": {
+   "kind": "chapter",
+   "placeholder": "[장 제목]",
+   "numberPlaceholder": "[장 번호]",
+   "numbering": "digit",
+   "fit": {
+    "cell": 1,
+    "placeholder": "[장 제목]",
+    "sourceText": "준비·지원 계획",
+    "emHwp": 1600,
+    "maxWidthHwp": 51026
+   },
+   "file": "parts/chapter.hwpx",
+   "sha256": "dad211854c941d537b42fc28fc6941e9bb31a542975d924f15b054be8ed721e4"
+  },
+  "task": {
+   "kind": "task",
+   "placeholder": "[과제 제목]",
+   "numberPlaceholder": "[과제 번호]",
+   "numbering": "boxed",
+   "file": "parts/task.hwpx",
+   "sha256": "5ed5be2ffb1846805bf04ad0ea4c31e485c1f13b930e93fd47f8800e142310e0"
+  },
+  "item": {
+   "kind": "item",
+   "placeholder": "[항목]",
+   "depth": 0,
+   "file": "parts/item.hwpx",
+   "sha256": "d3d12f10c221ba9f290976485123f22fc0f078516800e2e3f4f3e69cb6e51ed5"
+  },
+  "item-deep": {
+   "kind": "item",
+   "placeholder": "[항목]",
+   "depth": 1,
+   "file": "parts/item-deep.hwpx",
+   "sha256": "5ee788b6db9d02d95d958c9ae2684930bc748988efc73c2371fe0ffd1d6545c2"
+  },
+  "dash": {
+   "kind": "dash",
+   "placeholder": "[항목]",
+   "depth": 0,
+   "file": "parts/dash.hwpx",
+   "sha256": "5a0012cd93dd2ab7003776f558dd828f64fe5f6dec3f2fd7d97fa638afe2b127"
+  },
+  "dash-deep": {
+   "kind": "dash",
+   "placeholder": "[항목]",
+   "depth": 1,
+   "file": "parts/dash-deep.hwpx",
+   "sha256": "26436a00eae5a9b9f78eb6b250584958e81097f94052f912dc285e7b89f313b6"
+  },
+  "steps": {
+   "kind": "table",
+   "table": {
+    "headerRows": 0,
+    "unitRows": 2,
+    "headerCells": 0,
+    "unitCells": 8,
+    "repeat": false,
+    "header": [],
+    "fixedCells": [
+     1,
+     3,
+     5
+    ]
+   },
+   "file": "parts/steps.hwpx",
+   "sha256": "68ad8b33f01610197978382ee9d27985d3930c662ed90ed9adc24bcfc2c2f4b7"
+  }
+ }
+}

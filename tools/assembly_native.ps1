@@ -10,6 +10,7 @@ $mutex = [Threading.Mutex]::new($false, 'Local\CodexHancomAutomation')
 $locked = $false
 $hwp = $null
 function Get-ParagraphText([int]$Index) {
+    [void]$hwp.SetPos(0, 0, 0)  # SelectText counts paragraphs of the caret's list; a saved caret may sit in a cell
     [void]$hwp.SelectText($Index, 0, $Index + 1, 0)
     $text = [string]$hwp.GetTextFile('TEXT', 'saveblock')
     $hwp.Run('Cancel')
@@ -40,6 +41,7 @@ try {
                 $report.checks += [ordered]@{ name = $block.name; paragraph = $block.check.paragraph; ok = $ok; actual = $actual.Substring(0, [Math]::Min(40, $actual.Length)) }
                 if (!$ok) { throw "RANGE_CHECK_FAILED: $($block.name)" }
             }
+            [void]$hwp.SetPos(0, 0, 0)
             [void]$hwp.SelectText([int]$block.start, 0, [int]$block.end, 0)
             $set = $hwp.HParameterSet.HFileOpenSave
             [void]$hwp.HAction.GetDefault('FileSaveBlock_S', $set.HSet)

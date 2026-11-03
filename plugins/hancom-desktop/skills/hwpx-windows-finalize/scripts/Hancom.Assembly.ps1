@@ -20,9 +20,24 @@ function Set-HancomPlaceholderText($Hwp,[string]$Find,[string]$Text) {
     [void]$Hwp.HAction.Execute('RepeatFind',$search.HSet)
     if((Get-HancomSelectionText $Hwp) -ne $Find) { throw "ASSEMBLY_PLACEHOLDER_NOT_FOUND: $Find" }
     if($Text -eq '') { [void]$Hwp.HAction.Run('Delete'); return }
+    # Text typed over a selection takes the format of the character before it, which at a paragraph
+    # start is the previous paragraph's. Typing after the placeholder's first character keeps its own
+    # format; the placeholder characters around the new text are then deleted.
+    $start=$Hwp.CreateSet('ListParaPos');$end=$Hwp.CreateSet('ListParaPos')
+    if(!$Hwp.GetSelectedPosBySet($start,$end)) { throw "ASSEMBLY_PLACEHOLDER_NOT_FOUND: $Find" }
+    $list=[int]$start.Item('List');$para=[int]$start.Item('Para');$pos=[int]$start.Item('Pos')
+    [void]$Hwp.HAction.Run('Cancel')
+    if(!$Hwp.SetPos($list,$para,$pos+1)) { throw 'ASSEMBLY_TEXT_FAILED' }
     $insert=$Hwp.HParameterSet.HInsertText
     [void]$Hwp.HAction.GetDefault('InsertText',$insert.HSet);$insert.Text=$Text
     if($Hwp.HAction.Execute('InsertText',$insert.HSet) -eq $false) { throw 'ASSEMBLY_TEXT_FAILED' }
+    # Rest of the placeholder, then its first character. One character at a time: deleting a selection
+    # that ends before a control (a cover's page-number hiding) deletes the control too.
+    $after=[int]$Hwp.GetPosBySet().Item('Pos')
+    foreach($range in @(@($after,($Find.Length-1)),@($pos,1))) {
+        if(!$Hwp.SetPos($list,$para,$range[0])) { throw 'ASSEMBLY_TEXT_FAILED' }
+        for($i=0;$i -lt $range[1];$i++) { if($Hwp.HAction.Run('Delete') -eq $false) { throw 'ASSEMBLY_TEXT_FAILED' } }
+    }
 }
 
 function Get-HancomLastControl($Hwp,[string]$Id) {

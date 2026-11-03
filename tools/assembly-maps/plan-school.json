@@ -1,0 +1,29 @@
+{
+  "schema": "hwpx.assembly-part-map.v1",
+  "id": "plan-school",
+  "label": "학교 교육활동 운영계획",
+  "source": {
+    "sha256": "c9cf3447d264e9902ab0d302190e927bce500ae9cfbf86b82ca48e5619251a46",
+    "title": "완성형 plan-school (경남교육청 「행복마을학교 운영계획」에서 준비)",
+    "publisher": "경상남도교육청",
+    "license": "완성형 plan-school와 같음",
+    "attribution": "이 조립 양식의 서식은 경남교육청 「행복마을학교 운영계획」을 준비한 완성형 학교형(plan-school)에서 가져왔으며 원문 문구는 포함하지 않는다."
+  },
+  "rules": {"spacerBeforeLaterChapters": false, "bodyStartsNewSection": false, "pageNumbers": null, "deepItemsUnderHeadingLevel": 9,
+            "textBeforeFirstChapter": true},
+  "deepIndentHwp": 1000,
+  "parts": {
+    "cover": {"range": [0, 2], "kind": "cover", "replace": {}, "keepFaces": true, "fields": {"title": "[계획서 제목]", "organization": "[학교·작성 부서]"}},
+    "subhead": {"range": [2, 3], "kind": "subhead", "placeholder": "[소제목]"},
+    "lead": {"range": [3, 4], "kind": "lead", "placeholder": "[항목]", "baseLeftHwp": 0},
+    "chapter_first": {"range": [10, 11], "kind": "chapter_first", "replace": {"1": "[장 번호]", "세부 운영 계획": "[장 제목]"},
+      "placeholder": "[장 제목]", "numberPlaceholder": "[장 번호]", "numbering": "digit", "fitTitleCell": true},
+    "chapter": {"range": [17, 18], "kind": "chapter", "replace": {"2": "[장 번호]", "준비·지원 계획": "[장 제목]"},
+      "placeholder": "[장 제목]", "numberPlaceholder": "[장 번호]", "numbering": "digit", "fitTitleCell": true},
+    "task": {"range": [11, 12], "kind": "task", "replace": {"󰊱": "[과제 번호]", "운영 개요": "[과제 제목]"},
+      "placeholder": "[과제 제목]", "numberPlaceholder": "[과제 번호]", "numbering": "boxed"},
+    "item": {"range": [12, 13], "kind": "item", "placeholder": "[항목]", "baseLeftHwp": 0},
+    "dash": {"range": [16, 17], "kind": "dash", "placeholder": "[항목]", "baseLeftHwp": 992},
+    "steps": {"range": [31, 32], "kind": "table", "table": {"headerRows": 0, "unitRows": 2, "repeat": false, "fixedTexts": ["⇨"]}}
+  }
+}

@@ -259,5 +259,54 @@ class ProjectTemplateTest(unittest.TestCase):
             self.plan(self.outline([{'t': 'chapter', 'text': '계획'}, {'t': 'bullet', 'text': 'x'}]))
 
 
+class SchoolEducationTemplateTest(unittest.TestCase):
+    """plan-school and plan-education: bars before the first chapter, numbered tab chapters, fixed table cells."""
+
+    def plan(self, template_id, cover, nodes):
+        temp = tempfile.TemporaryDirectory(); self.addCleanup(temp.cleanup)
+        manifest = a.load_template(CATALOG, template_id)
+        value = {'schema': a.OUTLINE_SCHEMA, 'template': template_id, 'cover': cover, 'nodes': nodes}
+        return manifest, a.build_plan(manifest, value, Path(temp.name) / 'tables')
+
+    def test_school_starts_with_bars_and_numbers_tab_chapters(self):
+        _, plan = self.plan('plan-school', {'title': '가상 운영계획'}, [
+            {'t': 'subhead', 'text': '추진 근거'}, {'t': 'lead', 'text': '❍ 근거'},
+            {'t': 'chapter', 'text': '세부 운영 계획'}, {'t': 'task', 'text': '운영 개요'}, {'t': 'item', 'text': '대상: 전교생'},
+            {'t': 'chapter', 'text': '준비·지원 계획과 학교 안팎의 협력 체계'}, {'t': 'task', 'text': '준비'}, {'t': 'task', 'text': '기대 효과'}])
+        texts = [(s['find'], s['text']) for s in plan['steps'] if s['op'] == 'text']
+        self.assertIn(('[항목]', '근거'), texts)
+        self.assertEqual([t for f, t in texts if f == '[과제 번호]'], [chr(0xF02B1), chr(0xF02B1), chr(0xF02B2)])
+        tabs = [s['expect']['texts'] for s in plan['steps'] if 'expect' in s]
+        self.assertEqual(tabs, [['1', '세부 운영 계획'], ['2', '준비·지원 계획과 학교 안팎의 협력 체계']])
+        self.assertNotIn('pageNumbers', [s['op'] for s in plan['steps']])
+        self.assertEqual([f for f, _ in texts[:2]], ['[계획서 제목]', '[학교·작성 부서]'])  # no date on this cover
+
+    def test_school_step_table_keeps_its_arrows(self):
+        manifest, plan = self.plan('plan-school', {'title': '가상 운영계획'}, [
+            {'t': 'chapter', 'text': '일정'}, {'t': 'table', 'part': 'steps', 'rows': [['준비', '운영', '공유', '평가', '가', '나', '다', '라']]}])
+        self.assertEqual(manifest['parts']['steps']['table']['unitCells'], 8)
+        step = next(s for s in plan['steps'] if 'tableRows' in s.get('expect', {}))
+        cells = [''.join(t.text or '' for t in c.iter(a.HP + 't'))
+                 for c in ElementTree.fromstring(zipfile.ZipFile(plan['parts'][step['part']]['path']).read('Contents/section0.xml')).iter(a.HP + 'tc')]
+        self.assertEqual(cells, ['준비', '⇨', '운영', '⇨', '공유', '⇨', '평가', '가', '나', '다', '라'])
+        with self.assertRaisesRegex(ValueError, '묶음'):
+            self.plan('plan-school', {'title': '가상'}, [{'t': 'chapter', 'text': '일정'}, {'t': 'table', 'part': 'steps', 'rows': [['x'] * 8, ['y'] * 8]}])
+
+    def test_education_cover_fills_body_header_and_spaces_tasks_by_position(self):
+        _, plan = self.plan('plan-education', {'title': '가상 사업', 'date': '2027. 3.', 'organization': '가상 기관'}, [
+            {'t': 'subhead', 'text': '운영 여건'}, {'t': 'table', 'part': 'targets', 'rows': [['1', '전교생', '담임', '활동', '3월', '']]},
+            {'t': 'subhead', 'text': '추진 방침'},
+            {'t': 'chapter', 'text': '교육활동 운영'}, {'t': 'task', 'text': '첫 과제'}, {'t': 'item', 'text': '내용'}, {'t': 'task', 'text': '평가'}])
+        texts = [(s['find'], s['text']) for s in plan['steps'] if s['op'] == 'text']
+        self.assertEqual([f for f, t in texts if t == '가상 사업'], ['[사업 계획 제목]', '[본문 사업 제목]'])
+        self.assertEqual([f for f, t in texts if t == '가상 기관'], ['[작성 기관·부서]', '[본문 작성 기관]'])
+        inserted = [s['part'] for s in plan['steps'] if s['op'] == 'insert']
+        self.assertEqual([p for p in inserted if p.startswith('subhead')], ['subhead', 'subhead_after_table'])
+        self.assertEqual([p for p in inserted if p.startswith('task')], ['task_after_chapter', 'task'])
+        self.assertEqual(sum(s['op'] == 'pageNumbers' for s in plan['steps']), 1)
+        with self.assertRaisesRegex(ValueError, 'title·date 필수'):
+            self.plan('plan-education', {'title': '가상 사업'}, [{'t': 'chapter', 'text': '운영'}])
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

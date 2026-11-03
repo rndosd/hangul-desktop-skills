@@ -22,12 +22,12 @@ OUTLINE_SCHEMA = 'hwpx.assembly-outline.v1'
 PLAN_SCHEMA = 'hwpx.native-assemble.v1'
 ROMAN = 'ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩⅪⅫ'
 HANGUL = '가나다라마바사아자차카타파하'
-ITEM_KINDS = ('item', 'dash', 'dot', 'note', 'arrow')
+ITEM_KINDS = ('item', 'dash', 'dot', 'note', 'arrow', 'lead')
 # One placeholder, no numbering: the outline node {"t": kind, "text": ...} fills it.
 TEXT_KINDS = (*ITEM_KINDS, 'box', 'subhead')
 PART_KINDS = ('cover', 'chapter_first', 'chapter', 'heading', 'task', 'point', 'table', 'spacer', 'summary', 'summary_chapter', *TEXT_KINDS)
 # The symbol each text part already draws; the same symbol typed at the start of the text is dropped.
-KIND_SYMBOLS = {'item': '◦○∘•', 'dash': '-–', 'dot': '‧·ㆍ', 'note': '※', 'arrow': '⇒→', 'subhead': '□', 'box': '◈'}
+KIND_SYMBOLS = {'item': '◦○∘•', 'dash': '-–', 'dot': '‧·ㆍ', 'note': '※', 'arrow': '⇒→', 'subhead': '□', 'box': '◈', 'lead': '❍'}
 BOXED_DIGITS = 20  # Hancom private-use squared digits U+F02B1.., and circled ①..⑳
 STEP_OPS = ('text', 'section', 'insert', 'pageNumbers', 'boxWidth', 'pageBreak')
 MAX_NODES, MAX_ROWS, MAX_TEXT, MAX_CELL_PARAGRAPHS = 400, 100, 2000, 20
@@ -61,6 +61,11 @@ def load_template(catalog, template_id):
     for kind in required:
         need(sum(p['kind'] == kind for p in parts.values()) == 1, f'조립 양식에 {kind} 부품이 하나 있어야 합니다.')
     return manifest
+
+
+def places(value):
+    """A cover field names one placeholder or a list of them (the same value in several places)."""
+    return value if isinstance(value, list) else [value]
 
 
 def number(style, index, what):
@@ -151,13 +156,15 @@ def table_instance(part, header, units, target):
             _set_cell(cell, value)
     for tr in unit:
         table.remove(tr)
-    prefix = spec.get('firstColumnPrefix', '')
+    prefix, fixed = spec.get('firstColumnPrefix', ''), spec.get('fixedCells', [])
     for index, values in enumerate(units):
         clones = [copy.deepcopy(tr) for tr in unit]
-        for cell, value in zip([c for tr in clones for c in _cells(tr)], values):
+        cells = [c for tr in clones for c in _cells(tr)]
+        for cell in cells:
             address = cell.find(HP + 'cellAddr')
             address.set('rowAddr', str(int(address.get('rowAddr')) + index * len(unit)))
-            _set_cell(cell, value, prefix if address.get('colAddr') == '0' and value else '')
+        for cell, value in zip([c for i, c in enumerate(cells) if i not in fixed], values):  # fixed cells keep their text
+            _set_cell(cell, value, prefix if cell.find(HP + 'cellAddr').get('colAddr') == '0' and value else '')
         for tr in clones:
             table.append(tr)
     count = len(heads) + len(unit) * len(units)
@@ -224,32 +231,47 @@ def build_plan(manifest, outline, tables_dir=None):
     placeholders = set()
     for part in parts.values():
         value = part.get('placeholder')
-        placeholders.update(value.values() if isinstance(value, dict) else [value] if value else [])
+        placeholders.update([p for v in value.values() for p in places(v)] if isinstance(value, dict) else [value] if value else [])
         placeholders.update([part['numberPlaceholder']] if part.get('numberPlaceholder') else [])
     need(isinstance(outline, dict) and outline.get('schema', OUTLINE_SCHEMA) == OUTLINE_SCHEMA, f'outline schema는 {OUTLINE_SCHEMA}입니다.')
     need(set(outline) <= {'schema', 'template', 'cover', 'summary', 'nodes'}, '지원 키: schema, template, cover, summary, nodes')
     need(outline.get('template', manifest['id']) == manifest['id'], 'outline의 template이 선택한 양식과 다릅니다.')
     cover, cover_part = outline.get('cover'), next(n for n, p in parts.items() if p['kind'] == 'cover')
     fields = parts[cover_part]['placeholder']
-    need(isinstance(cover, dict) and set(cover) <= set(fields) and {'title', 'date'} <= set(cover), f'cover 지원 키: {", ".join(fields)} (title·date 필수)')
-    steps = [dict(op='text', find=fields[key], text=_text(cover.get(key, ''), f'cover.{key}', placeholders, key not in ('title', 'date'))) for key in fields]
+    required = [key for key in ('title', 'date') if key in fields]
+    need(isinstance(cover, dict) and set(cover) <= set(fields) and set(required) <= set(cover), f'cover 지원 키: {", ".join(fields)} ({"·".join(required)} 필수)')
+    steps = [dict(op='text', find=place, text=_text(cover.get(key, ''), f'cover.{key}', placeholders, key not in required))
+             for key in fields for place in places(fields[key])]
     if rules.get('pageNumbers') and not rules.get('bodyStartsNewSection'):
         steps.append(dict(op='pageNumbers', **rules['pageNumbers']))  # one section: the cover part hides its own number
     instances = {}
 
+    def titled(name, label, title):
+        """Insert steps of a numbered title; a title in a fixed-width cell gets its own fitted copy."""
+        part = parts[name]
+        if 'fit' not in part:
+            return [dict(op='insert', part=name, keepSection=0), *numbered(part, label, title)]
+        need(tables_dir is not None, 'fitted titles need a folder for part copies')
+        copy_name, target = f'{name}@{len(instances) + 1}', Path(tables_dir) / f'{name}-{len(instances) + 1}.hwpx'
+        fitted_instance(part, {part['numberPlaceholder']: label, part['placeholder']: title}, target)
+        instances[copy_name] = dict(path=str(target.resolve()), sha256=sha(target))
+        return [dict(op='insert', part=copy_name, keepSection=0, expect=dict(texts=[label, title]))]
+
     def body(nodes, prefix, summary):
         """Steps of one node list; the summary list uses the summary chapter part and its own numbering."""
         need(isinstance(nodes, list) and 1 <= len(nodes) <= MAX_NODES, f'{prefix}는 1~{MAX_NODES}개입니다.')
-        need(isinstance(nodes[0], dict) and nodes[0].get('t') == 'chapter', f'{prefix}는 장(chapter)으로 시작해야 합니다.')
-        def find(kind, level=None, depth=0):
-            """The part for a kind; on the summary page a part made for it comes first."""
-            return (summary and by_kind.get((kind, level, depth, 'summary'))) or by_kind.get((kind, level, depth, None))
+        need(isinstance(nodes[0], dict) and (nodes[0].get('t') == 'chapter' or rules.get('textBeforeFirstChapter')),
+             f'{prefix}는 장(chapter)으로 시작해야 합니다.')
+        def find(kind, level=None, depth=0, after=None):
+            """The part for a kind; on the summary page, or right after a node of kind after, a part made for it comes first."""
+            return ((summary and by_kind.get((kind, level, depth, 'summary'))) or (after and by_kind.get((kind, level, depth, f'after-{after}')))
+                    or by_kind.get((kind, level, depth, None)))
 
         out, counters, tasks, points, level = [], [0, 0, 0, 0], 0, 0, 0
         for position, node in enumerate(nodes, 1):
             where = f'{prefix}[{position}]'
             need(isinstance(node, dict) and 't' in node, f'{where}: t가 필요합니다.')
-            kind = node['t']
+            kind, after = node['t'], position > 1 and nodes[position - 2]['t']
             if kind == 'chapter':
                 need(set(node) == {'t', 'text'}, f'{where}: chapter는 t, text만 받습니다.')
                 counters, tasks, points, level = [counters[0] + 1, 0, 0, 0], 0, 0, 0
@@ -259,14 +281,14 @@ def build_plan(manifest, outline, tables_dir=None):
                 label = number(part['numbering'], counters[0], '장')
                 title = _text(node['text'], where, placeholders)
                 if first and not summary and rules.get('bodyStartsNewSection'):
-                    out += [dict(op='section'), dict(op='insert', part=name, keepSection=1), dict(op='pageNumbers', **rules['pageNumbers'])]
+                    out += [dict(op='section'), dict(op='insert', part=name, keepSection=1), dict(op='pageNumbers', **rules['pageNumbers']),
+                            *numbered(part, label, title)]
                 else:
                     if not first and not summary and rules.get('spacerBeforeLaterChapters'):
                         out.append(dict(op='insert', part=find('spacer'), keepSection=0))
                     if part.get('pageBreakBefore'):
                         out.append(dict(op='pageBreak'))
-                    out.append(dict(op='insert', part=name, keepSection=0))
-                out += numbered(part, label, title)
+                    out += titled(name, label, title)
                 if 'box' in part:
                     width = box_width(part['box'], f'{label} {title}')
                     need(width <= part['box']['maxWidthHwp'], f'{where}: 장 제목이 길어 상자가 본문 폭을 넘습니다 '
@@ -282,17 +304,10 @@ def build_plan(manifest, outline, tables_dir=None):
                 name = find('heading', depth)
                 need(name, f'양식에 {depth}단계 제목 부품이 없습니다.')
                 label, title = number(parts[name]['numbering'], counters[depth], f'{depth}단계 제목'), _text(node['text'], where, placeholders)
-                if 'fit' in parts[name]:
-                    need(tables_dir is not None, 'fitted titles need a folder for part copies')
-                    copy_name, target = f'{name}@{len(instances) + 1}', Path(tables_dir) / f'{name}-{len(instances) + 1}.hwpx'
-                    fitted_instance(parts[name], {parts[name]['numberPlaceholder']: label, parts[name]['placeholder']: title}, target)
-                    instances[copy_name] = dict(path=str(target.resolve()), sha256=sha(target))
-                    out.append(dict(op='insert', part=copy_name, keepSection=0, expect=dict(texts=[label, title])))
-                else:
-                    out += [dict(op='insert', part=name, keepSection=0), *numbered(parts[name], label, title)]
+                out += titled(name, label, title)
             elif kind in ('task', 'point'):
                 need(set(node) == {'t', 'text'}, f'{where}: {kind}는 t, text만 받습니다.')
-                name = find(kind)
+                name = find(kind, after=after)
                 need(name, f'양식에 {kind} 부품이 없습니다.')
                 if kind == 'task':
                     tasks, points = tasks + 1, 0
@@ -303,7 +318,7 @@ def build_plan(manifest, outline, tables_dir=None):
             elif kind in TEXT_KINDS:
                 need(set(node) == {'t', 'text'}, f'{where}: {kind}는 t, text만 받습니다.')
                 deep = int(level >= rules['deepItemsUnderHeadingLevel'])
-                name = find(kind, None, deep) or find(kind)
+                name = find(kind, None, deep, after) or find(kind, None, 0, after)
                 need(name, f'양식에 {kind} 부품이 없습니다.')
                 text = _text(node['text'], where, placeholders)
                 text = re.sub(rf'^\s*[{re.escape(KIND_SYMBOLS[kind])}]\s+', '', text) or text

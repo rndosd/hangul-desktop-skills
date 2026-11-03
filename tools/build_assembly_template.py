@@ -27,7 +27,12 @@ A part with "replace" swaps exact source texts for placeholders in their own run
 table cells, or number and title in separate runs; a prepared source may already hold placeholders),
 "fitTitleCell" lets native_assembly widen that title's cell, and "pageBreakBefore" starts it on a new
 page. "fromAltSource" parts come from the map's altSource (the original of a prepared source), and the
-map's "rules" override the default page numbering, section and spacer rules.
+map's "rules" override the default page numbering, section and spacer rules ("textBeforeFirstChapter"
+lets an outline open with bars and text). Other part options: "tableAsChar" saves a floating table from a
+copy where it sits in the line, "keepFaces" keeps a cover's display faces, "context": "after-<kind>" marks a
+spacing variant used right after an outline node of that kind, table "fixedTexts" cells (step arrows) keep
+their text and take no value, and table "holderLineSpacing" sets the holding line's spacing. A cover field
+may name a list of placeholders that take the same value.
 
 Usage: build_assembly_template.py MAP SOURCE.hwpx WORK_DIR [--out DIR] [--alt-source ORIGINAL.hwpx]
 """
@@ -53,14 +58,16 @@ HP = '{http://www.hancom.co.kr/hwpml/2011/paragraph}'
 HH = '{http://www.hancom.co.kr/hwpml/2011/head}'
 HC = '{http://www.hancom.co.kr/hwpml/2011/core}'
 PREFIX = {'cover': r'\s*', 'chapter_first': r'\s*', 'chapter': r'\s*', 'heading': r'\s*',
-          'item': r'\s*◦\s*', 'dash': r'\s*-\s*', 'dot': r'\s*‧\s*', 'note': r'\s*※\s*', 'arrow': r'\s*⇒\s*', 'subhead': r'\s*□\s*'}
-ITEM_KINDS = ('item', 'dash', 'dot', 'note', 'arrow')
+          'item': r'\s*◦\s*', 'dash': r'\s*-\s*', 'dot': r'\s*‧\s*', 'note': r'\s*※\s*', 'arrow': r'\s*⇒\s*', 'subhead': r'\s*□?\s*',
+          'lead': r'\s*\uf06d\s*'}
+ITEM_KINDS = ('item', 'dash', 'dot', 'note', 'arrow', 'lead')
 # Short strings stay on one line; every string ends in 가 so its last character has a successor.
 CALIBRATION = ['가가0123456789가', '.,·‧()-~/:%「」ㆍ가', 'ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ가', 'ABCDEFGHIJKLM가',
                'NOPQRSTUVWXYZ가', 'abcdefghijklm가', 'nopqrstuvwxyz가', "&+=[]'\"!?가 가"]
 CALIBRATION_BOX_HWP = 46000
 WRAP_TEXT = '가나다라마바사 아자차카타 ' * 10
-SYMBOL = {'item': '◦', 'dash': '-', 'dot': '‧', 'note': '※', 'arrow': '⇒'}
+SYMBOL = {'item': '◦', 'dash': '-', 'dot': '‧', 'note': '※', 'arrow': '⇒', 'lead': '\uf06d'}
+PDF_SYMBOL = {'lead': 'm'}  # the lead symbol is Wingdings, whose PDF text is the letter it is mapped on
 TITLE_KINDS = ('chapter_first', 'chapter', 'heading', 'task', 'subhead', 'summary', 'summary_chapter')
 DEFAULT_RULES = {'spacerBeforeLaterChapters': True, 'bodyStartsNewSection': True,
                  'pageNumbers': {'position': 'BottomCenter', 'format': 'Digit', 'sideChar': '-'}, 'deepItemsUnderHeadingLevel': 3}
@@ -69,6 +76,11 @@ TRUETYPE_FACE = '바탕'
 
 def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def flat(values):
+    """Cover fields name one placeholder or a list of them (the same value in several places)."""
+    return [p for value in values for p in (value if isinstance(value, list) else [value])]
 
 
 def need(ok, message):
@@ -238,6 +250,9 @@ def normalize_table(section, header_xml, spec):
         resize_table(table, header_xml, spec['size'])
     header_cells = [cell for row in rows[:heads] for cell in row.findall(HP + 'tc')]
     unit_cells = [cell for row in rows[heads:] for cell in row.findall(HP + 'tc')]
+    # Cells holding one of fixedTexts (the arrows of a step flow) keep their text and take no outline value.
+    fixed = [i for i, cell in enumerate(unit_cells) if text_of(cell).strip() in spec.get('fixedTexts', [])]
+    unit_cells = [cell for i, cell in enumerate(unit_cells) if i not in fixed]
     header = [text_of(cell) for cell in header_cells]
     for cell in header_cells:
         for paragraph in cell.iter(HP + 'p'):
@@ -264,7 +279,7 @@ def normalize_table(section, header_xml, spec):
                for row in rows]
     table.find(HP + 'sz').set('height', str(sum(heights)))  # rows dropped; Hangul lays out the real height
     return dict(headerRows=heads, unitRows=size, headerCells=len(header_cells), unitCells=len(unit_cells),
-                repeat=spec.get('repeat', True), header=header,
+                repeat=spec.get('repeat', True), header=header, **({'fixedCells': fixed} if fixed else {}),
                 **({'firstColumnPrefix': spec['firstColumnPrefix']} if spec.get('firstColumnPrefix') else {}))
 
 
@@ -325,10 +340,13 @@ def use_truetype_faces(header, section):
 
 def prepare(name, spec, raw, out_dir, deep_indent):
     section, header = load(raw)
-    use_truetype_faces(header, section)
+    if not spec.get('keepFaces'):  # a cover may keep its display faces: centred lines carry no indents to drift
+        use_truetype_faces(header, section)
     kind, entry, previews, variants = spec['kind'], {'kind': spec['kind']}, [], []
     if spec.get('context'):
-        entry['context'] = spec['context']  # "summary": used on the summary page, which spaces lines more tightly
+        # "summary": used on the summary page, which spaces lines more tightly; "after-<kind>": right after an outline
+        # node of that kind (a source that spaces a title differently there)
+        entry['context'] = spec['context']
     if 'replace' in spec:
         # Titles held in table cells or split over runs (number, period, title): exact source texts become
         # placeholders in their own runs, so each keeps its format. A prepared source may already hold them.
@@ -337,7 +355,7 @@ def prepare(name, spec, raw, out_dir, deep_indent):
         entry.update({key: spec[key] for key in ('placeholder', 'numberPlaceholder', 'numbering', 'level') if key in spec})
         if kind == 'cover':
             entry['placeholder'] = spec['fields']
-        names = list(entry['placeholder'].values()) if isinstance(entry.get('placeholder'), dict) else [entry['placeholder']]
+        names = flat(entry['placeholder'].values()) if isinstance(entry.get('placeholder'), dict) else [entry['placeholder']]
         names += [entry['numberPlaceholder']] if 'numberPlaceholder' in entry else []
         text = ''.join(''.join(t.itertext()) for t in section.iter(HP + 't'))  # with text after inline controls
         need(all(text.count(p) == 1 for p in names), f'{name}: each placeholder must appear once: {names}')
@@ -422,9 +440,11 @@ def prepare(name, spec, raw, out_dir, deep_indent):
         if spec['table'].get('size', {}).get('holderAlign'):
             shape_of(header, section, holder).find(HH + 'align').set('horizontal', spec['table']['size']['holderAlign'])
         for spacing in shape_of(header, section, holder).iter(HH + 'lineSpacing'):
+            if spacing.get('type') == 'PERCENT' and spec['table'].get('holderLineSpacing'):
+                spacing.set('value', str(spec['table']['holderLineSpacing']))  # a table made inline from a floating one
             if spacing.get('type') == 'PERCENT' and int(spacing.get('value')) < 100:
                 spacing.set('value', '100')  # below 100% the next line overlaps a table that grew
-        previews.extend(entry['table']['header'])
+        previews.extend(entry['table']['header'] + spec['table'].get('fixedTexts', []))
     else:
         raise ValueError(f'unknown kind {kind}')
     written = []
@@ -445,7 +465,7 @@ def leftover_wording(path, allowed):
     text = ''.join(t.text or '' for t in section.iter(HP + 't')) + preview + ''.join(re.findall(r'<opf:title[^>]*>(.*?)</opf:title>', hpf, re.S))
     for value in sorted(allowed, key=len, reverse=True):
         text = text.replace(value, '')
-    return re.sub(r'[\s◦○\-‧※·⇒□◈.]', '', text)
+    return re.sub(r'[\s◦○\-‧※·⇒⇨□◈.\uf06d]', '', text)
 
 
 def measure_advances(pdf, expected):
@@ -488,7 +508,9 @@ def calibrate_hanging(parts, out_dir, work):
             return dict(part=str(out_dir / entry['file']), cell=[entry['table']['headerRows'], 0], text=entry['table']['firstColumnPrefix'] + WRAP_TEXT, pdf=pdf)
         return dict(part=str(out_dir / entry['file']), find=entry['placeholder'], text=WRAP_TEXT, pdf=pdf)
     def symbol(name, entry):
-        return entry['table']['firstColumnPrefix'].strip() if name in tables else entry.get('symbol', SYMBOL[entry['kind']])
+        if name in tables:
+            return entry['table']['firstColumnPrefix'].strip()
+        return PDF_SYMBOL.get(entry['kind']) or entry.get('symbol', SYMBOL[entry['kind']])
     targets = {**items, **tables}
     for attempt in range(2):
         native(dict(renders=[render(name, entry, attempt) for name, entry in targets.items()]), work, f'hanging-{attempt}')
@@ -507,6 +529,27 @@ def calibrate_hanging(parts, out_dir, work):
                     margin(header, section, paragraph, 'intent', margin(header, section, paragraph, 'intent') - round(offset * 100))
                 write_part(path, path, section, header)
                 parts[variant]['sha256'] = sha(path)
+
+
+def tables_as_char(source, paragraphs, target):
+    """Copy of the source whose tables in the given top-level paragraphs sit in the line (treatAsChar)."""
+    with zipfile.ZipFile(source) as package:
+        infos = package.infolist()
+        data = {info.filename: package.read(info) for info in infos}
+    section = etree.fromstring(data['Contents/section0.xml'])
+    top = section.findall(HP + 'p')
+    for index in paragraphs:
+        tables = top[index].findall(f'.//{HP}tbl')
+        need(tables, f'paragraph {index} holds no table')
+        for table in tables:
+            table.find(HP + 'pos').attrib.update({'treatAsChar': '1', 'vertOffset': '0', 'horzOffset': '0'})
+        for lines in top[index].findall(HP + 'linesegarray'):
+            top[index].remove(lines)
+    data['Contents/section0.xml'] = etree.tostring(section, xml_declaration=True, encoding='UTF-8', standalone=True)
+    with zipfile.ZipFile(target, 'w') as out:
+        for info in infos:
+            out.writestr(info, data[info.filename])
+    return target
 
 
 def main():
@@ -529,6 +572,9 @@ def main():
         need(args.alt_source, 'the map names altSource; pass --alt-source')
         sources[True] = Path(args.alt_source).resolve(strict=True)
         need(sha(sources[True]) == part_map['altSource']['sha256'], 'alt source differs from the part map hash')
+    floating = [spec['range'][0] for spec in part_map['parts'].values() if spec.get('tableAsChar') and not spec.get('fromAltSource')]
+    if floating:  # block save drops a table that is not treated as a character, so save from a copy where it is
+        sources[False] = tables_as_char(source, floating, work / 'source-tables-as-char.hwpx')
     for alt, path in sources.items():
         blocks = [dict(name=name, start=spec['range'][0], end=spec['range'][1], path=str(raw_dir / f'{name}.hwpx'),
                        **({'check': spec['check']} if 'check' in spec else {}))
@@ -540,9 +586,10 @@ def main():
         parts.update(prepare(name, spec, raw_dir / f'{name}.hwpx', out_dir, part_map['deepIndentHwp']))
     for name, entry in parts.items():
         placeholders = entry.get('placeholder', {})
-        allowed = list(placeholders.values()) if isinstance(placeholders, dict) else [placeholders]
+        allowed = flat(placeholders.values()) if isinstance(placeholders, dict) else [placeholders]
         allowed += [entry['numberPlaceholder']] if 'numberPlaceholder' in entry else []
         allowed += part_map['parts'].get(name, {}).get('keep', [])  # fixed labels of the design, such as [요약]
+        allowed += part_map['parts'].get(name, {}).get('table', {}).get('fixedTexts', [])
         left = leftover_wording(out_dir / entry['file'], allowed + entry.get('table', {}).get('header', []))
         need(not left, f'{name}: source wording left in the prepared part: {left[:60]!r}')
 

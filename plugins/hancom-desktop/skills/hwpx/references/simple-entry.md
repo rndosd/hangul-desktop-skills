@@ -42,7 +42,7 @@ $taskLauncher = Join-Path $taskSkillDir 'scripts/Invoke-HangulTask.ps1'
 
 ## 준비된 완성형 계획서 채우기
 
-계획서 작성은 [완성형 3종](template-selection.md#준비된-완성형-계획서) 중 적합한 하나를 고른 뒤 기존 fill을 쓴다. `SKILL_DIR`는 실제 hwpx 스킬 폴더이며 실행기는 이미 선택한 환경을 재사용한다.
+계획서 작성은 [완성형 3종](template-selection.md#준비된-완성형-계획서) 중 적합한 하나를 고른 뒤 같은 ID의 [조립](#개요로-공문서형-계획서-조립)을 쓴다. fill은 조립이 실패했을 때의 예비다. `SKILL_DIR`는 실제 hwpx 스킬 폴더이며 실행기는 이미 선택한 환경을 재사용한다.
 
 **구역 늘리기·빼기.** 양식 설명(`fill --template`)의 `sections`는 통째로 반복하거나 뺄 수 있는 구역이다(예: 활동 영역 ① 제목·목적·기간·대상·방법·내용). 내용의 영역 수만큼 `{"sections": {"activities": [영역1, 영역2, 영역3]}}`처럼 구역 입력을 영역마다 하나씩 준다. 복사된 구역의 원 숫자는 ①→②→③으로 이어지고, `heading`을 받는 구역은 제목 문구도 바꿀 수 있다. 빈 목록은 구역을 지우며(최소 개수가 0일 때), 구역 입력을 구역 밖 값과 중복해 주면 거부한다. **내용이 양식 칸보다 많으면 버리지 않는다.** 구역으로 늘리거나, 맞는 양식을 고르거나, 구조 편집으로 보완하고, 그래도 넣지 못한 내용은 사용자에게 알린다. 종합사업형은 과제가 요약·성과표와 연결돼 있어 구역 반복을 제공하지 않는다.
 
@@ -96,6 +96,26 @@ $planCatalog = Join-Path $taskSkillDir 'assets/document-templates/full-plans.jso
 
 - `t`: `chapter`(Ⅰ 띠, 요약 안에서는 Ⅰ. 글자 제목), `heading` level 1(번호 탭 1·2·3, 긴 제목이면 탭이 넓어진다), `task`(네모 번호 과제 제목, 장·탭마다 다시 1부터), `subhead`(□ 소제목, 번호 없음), `point`(① 원 번호 줄, 장마다 1부터), `item`·`dash`·`arrow`·`note`, `box`(◈ 상자), `table`. 요약 안의 `item`·`task`는 요약 쪽 간격의 부품을 쓴다.
 - 표 부품: `three-column`(영역·내용·배점 3열, 제목 행은 `header`로 바꾼다), `indicators`(과제 칸이 두 줄에 걸친 2줄 묶음: 칸은 과제·지표 1·지표 2 세 개).
+
+### 학교형·교육사업형 조립: `plan-school`·`plan-education`
+
+완성형 학교형·교육사업형과 같은 디자인(□ 막대 소제목과 ❍ 문단, 번호 탭 1·2·3, 네모 번호 과제 제목, ◦ / -)을 길이에 관계없이 조립한다. 본문은 장 없이 □ 막대(추진 근거·배경·목적·방침 등)로 시작할 수 있고, 첫 `chapter`부터 번호 탭이 붙는다.
+
+```json
+{"schema":"hwpx.assembly-outline.v1","template":"plan-school",
+ "cover":{"title":"독서 주간 운영계획(안)","organization":"○○초등학교 · 독서교육 담당"},
+ "nodes":[{"t":"subhead","text":"추진 근거"},{"t":"lead","text":"근거 문장"},
+          {"t":"subhead","text":"추진 목적"},{"t":"lead","text":"목적 1"},{"t":"lead","text":"목적 2"},
+          {"t":"chapter","text":"세부 운영 계획"},{"t":"task","text":"운영 개요"},
+          {"t":"item","text":"대상: 전교생"},{"t":"item","text":"운영 내용"},{"t":"dash","text":"월요일 | 활동"},
+          {"t":"item","text":"추진 절차"},
+          {"t":"table","part":"steps","rows":[["준비","운영","공유","평가","담당 / 시기","담당 / 시기","담당 / 시기","담당 / 시기"]]},
+          {"t":"task","text":"기대 효과"},{"t":"lead","text":"효과 문장"}]}
+```
+
+- `t`: `subhead`(□ 막대 제목), `lead`(❍ 문단), `chapter`(번호 탭 1·2·3, 긴 제목이면 탭이 넓어진다), `task`(네모 번호 과제 제목, 장마다 다시 1부터), `item`(◦), `dash`(-), `table`. "목적: …"처럼 이름표가 붙는 줄은 `item` 문구에 그대로 쓴다.
+- `plan-school`: 표지 없이 첫 쪽 머리에 제목 띠와 작성 부서가 온다. `cover`는 `title`(필수)·`organization`. 표 부품 `steps`는 ⇨로 이은 4단계 절차표로 묶음 하나(칸 8개: 단계 4개 → 각 단계의 담당·시기 4개)만 받는다. 쪽 번호는 없다(완성형과 같다).
+- `plan-education`: 표지 쪽 다음에 본문이 온다. `cover`는 `title`·`date`(필수), `subtitle`(제목 위 줄), `organization`이며 `title`·`organization`은 본문 첫 쪽 머리에도 함께 들어간다. 표 부품 `targets`는 순·대상·담당·사업·활동·기간·비고 6칸 반복 표다. 쪽 번호는 본문 쪽부터 붙는다.
 
 입력 검사가 끝난 뒤 한글을 한 번 열어 표지 부품에 장·제목·항목·표 부품을 차례로 붙이고 저장·재열기·PDF를 만든다. 결과의 `assembly`는 저장본에 자리표시가 남지 않았는지와 요청한 문구·표 행 수를 확인한 값이며, `wrapAlignment`·`pageLayout`은 PDF 배치 경고다. `PASS_NATIVE` 뒤에도 쪽 이미지를 확인한다([preview](#준비된-블록-조합)). 내 양식을 부품으로 등록하는 방법은 저장소의 `tools/build_assembly_template.py`(부품 지도 → 블록 저장 → 자리표시·정규화 → manifest)이며, 등록한 폴더는 `--catalog`로 지정한다.
 
