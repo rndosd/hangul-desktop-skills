@@ -225,9 +225,14 @@ class ProjectTemplateTest(unittest.TestCase):
     def test_summary_tasks_and_chapters_number_in_their_own_styles(self):
         plan = self.plan(self.outline(
             [{'t': 'chapter', 'text': '추진 배경'}, {'t': 'task', 'text': '과제 가'}, {'t': 'task', 'text': '과제 나'}, {'t': 'chapter', 'text': '추진 계획'}],
-            {'title': '요약 제목', 'nodes': [{'t': 'chapter', 'text': '요약 장'}, {'t': 'arrow', 'text': '개선 방향'}]}))
+            {'title': '요약 제목', 'nodes': [{'t': 'chapter', 'text': '요약 장'}, {'t': 'item', 'text': '요약'}, {'t': 'point', 'text': '현재'},
+                                          {'t': 'point', 'text': '다음'}, {'t': 'arrow', 'text': '개선 방향'}]}))
         texts = [(s['find'], s['text']) for s in plan['steps'] if s['op'] == 'text']
         self.assertIn(('[요약 장 번호]', 'Ⅰ.'), texts)
+        self.assertEqual([t for f, t in texts if f == '[점 번호]'], ['①', '②'])
+        inserted = [s['part'] for s in plan['steps'] if s['op'] == 'insert']
+        self.assertLess(inserted.index('summary_item'), inserted.index('chapter_first'))  # summary spacing on the summary page
+        self.assertNotIn('summary_item', inserted[inserted.index('chapter_first'):])
         self.assertEqual([t for f, t in texts if f == '[장 번호]'], ['Ⅰ', 'Ⅱ'])
         self.assertEqual([t for f, t in texts if f == '[과제 번호]'], [chr(0xF02B1), chr(0xF02B2)])
         ops = [s['op'] for s in plan['steps']]

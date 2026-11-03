@@ -25,8 +25,8 @@ HANGUL = '가나다라마바사아자차카타파하'
 ITEM_KINDS = ('item', 'dash', 'dot', 'note', 'arrow')
 # One placeholder, no numbering: the outline node {"t": kind, "text": ...} fills it.
 TEXT_KINDS = (*ITEM_KINDS, 'box', 'subhead')
-PART_KINDS = ('cover', 'chapter_first', 'chapter', 'heading', 'task', 'table', 'spacer', 'summary', 'summary_chapter', *TEXT_KINDS)
-BOXED_DIGITS = 20  # Hancom private-use squared digits U+F02B1.. (①-style boxes)
+PART_KINDS = ('cover', 'chapter_first', 'chapter', 'heading', 'task', 'point', 'table', 'spacer', 'summary', 'summary_chapter', *TEXT_KINDS)
+BOXED_DIGITS = 20  # Hancom private-use squared digits U+F02B1.., and circled ①..⑳
 STEP_OPS = ('text', 'section', 'insert', 'pageNumbers', 'boxWidth', 'pageBreak')
 MAX_NODES, MAX_ROWS, MAX_TEXT, MAX_CELL_PARAGRAPHS = 400, 100, 2000, 20
 HP = '{http://www.hancom.co.kr/hwpml/2011/paragraph}'
@@ -69,9 +69,9 @@ def number(style, index, what):
     if style == 'hangul':
         need(index <= len(HANGUL), f'{what}은 한 묶음에 {len(HANGUL)}개까지입니다.')
         return f'{HANGUL[index - 1]}.'
-    if style == 'boxed':
+    if style in ('boxed', 'circled'):
         need(index <= BOXED_DIGITS, f'{what}은 한 묶음에 {BOXED_DIGITS}개까지입니다.')
-        return chr(0xF02B1 + index - 1)
+        return chr((0xF02B1 if style == 'boxed' else 0x2460) + index - 1)
     return {'decimal': f'{index}.', 'digit': str(index), 'paren': f'{index})'}[style]
 
 
@@ -218,7 +218,7 @@ def build_plan(manifest, outline, tables_dir=None):
     parts, rules = manifest['parts'], manifest['rules']
     by_kind = {}
     for name, part in parts.items():
-        by_kind.setdefault((part['kind'], part.get('level'), part.get('depth', 0)), name)
+        by_kind.setdefault((part['kind'], part.get('level'), part.get('depth', 0), part.get('context')), name)
     placeholders = set()
     for part in parts.values():
         value = part.get('placeholder')
@@ -239,16 +239,20 @@ def build_plan(manifest, outline, tables_dir=None):
         """Steps of one node list; the summary list uses the summary chapter part and its own numbering."""
         need(isinstance(nodes, list) and 1 <= len(nodes) <= MAX_NODES, f'{prefix}는 1~{MAX_NODES}개입니다.')
         need(isinstance(nodes[0], dict) and nodes[0].get('t') == 'chapter', f'{prefix}는 장(chapter)으로 시작해야 합니다.')
-        out, counters, tasks, level = [], [0, 0, 0, 0], 0, 0
+        def find(kind, level=None, depth=0):
+            """The part for a kind; on the summary page a part made for it comes first."""
+            return (summary and by_kind.get((kind, level, depth, 'summary'))) or by_kind.get((kind, level, depth, None))
+
+        out, counters, tasks, points, level = [], [0, 0, 0, 0], 0, 0, 0
         for position, node in enumerate(nodes, 1):
             where = f'{prefix}[{position}]'
             need(isinstance(node, dict) and 't' in node, f'{where}: t가 필요합니다.')
             kind = node['t']
             if kind == 'chapter':
                 need(set(node) == {'t', 'text'}, f'{where}: chapter는 t, text만 받습니다.')
-                counters, tasks, level = [counters[0] + 1, 0, 0, 0], 0, 0
+                counters, tasks, points, level = [counters[0] + 1, 0, 0, 0], 0, 0, 0
                 first = counters[0] == 1
-                name = by_kind[('summary_chapter', None, 0)] if summary else by_kind[('chapter_first' if first else 'chapter', None, 0)]
+                name = find('summary_chapter') if summary else find('chapter_first' if first else 'chapter')
                 part = parts[name]
                 label = number(part['numbering'], counters[0], '장')
                 title = _text(node['text'], where, placeholders)
@@ -256,7 +260,7 @@ def build_plan(manifest, outline, tables_dir=None):
                     out += [dict(op='section'), dict(op='insert', part=name, keepSection=1), dict(op='pageNumbers', **rules['pageNumbers'])]
                 else:
                     if not first and not summary and rules.get('spacerBeforeLaterChapters'):
-                        out.append(dict(op='insert', part=by_kind[('spacer', None, 0)], keepSection=0))
+                        out.append(dict(op='insert', part=find('spacer'), keepSection=0))
                     if part.get('pageBreakBefore'):
                         out.append(dict(op='pageBreak'))
                     out.append(dict(op='insert', part=name, keepSection=0))
@@ -272,8 +276,8 @@ def build_plan(manifest, outline, tables_dir=None):
                 need(depth == 1 or counters[depth - 1] > 0, f'{where}: {depth}단계 제목 앞에 {depth - 1}단계 제목이 필요합니다.')
                 counters[depth] += 1
                 counters[depth + 1:] = [0] * (3 - depth)
-                tasks, level = 0, depth
-                name = by_kind.get(('heading', depth, 0))
+                tasks, points, level = 0, 0, depth
+                name = find('heading', depth)
                 need(name, f'양식에 {depth}단계 제목 부품이 없습니다.')
                 label, title = number(parts[name]['numbering'], counters[depth], f'{depth}단계 제목'), _text(node['text'], where, placeholders)
                 if 'fit' in parts[name]:
@@ -284,17 +288,20 @@ def build_plan(manifest, outline, tables_dir=None):
                     out.append(dict(op='insert', part=copy_name, keepSection=0, expect=dict(texts=[label, title])))
                 else:
                     out += [dict(op='insert', part=name, keepSection=0), *numbered(parts[name], label, title)]
-            elif kind == 'task':
-                need(set(node) == {'t', 'text'}, f'{where}: task는 t, text만 받습니다.')
-                name = by_kind.get(('task', None, 0))
-                need(name, '양식에 과제 제목(task) 부품이 없습니다.')
-                tasks += 1
+            elif kind in ('task', 'point'):
+                need(set(node) == {'t', 'text'}, f'{where}: {kind}는 t, text만 받습니다.')
+                name = find(kind)
+                need(name, f'양식에 {kind} 부품이 없습니다.')
+                if kind == 'task':
+                    tasks, points = tasks + 1, 0
+                else:
+                    points += 1
                 out += [dict(op='insert', part=name, keepSection=0),
-                        *numbered(parts[name], number(parts[name]['numbering'], tasks, '과제 제목'), _text(node['text'], where, placeholders))]
+                        *numbered(parts[name], number(parts[name]['numbering'], tasks if kind == 'task' else points, '번호 항목'), _text(node['text'], where, placeholders))]
             elif kind in TEXT_KINDS:
                 need(set(node) == {'t', 'text'}, f'{where}: {kind}는 t, text만 받습니다.')
                 deep = int(level >= rules['deepItemsUnderHeadingLevel'])
-                name = by_kind.get((kind, None, deep)) or by_kind.get((kind, None, 0))
+                name = find(kind, None, deep) or find(kind)
                 need(name, f'양식에 {kind} 부품이 없습니다.')
                 out += [dict(op='insert', part=name, keepSection=0),
                         dict(op='text', find=parts[name]['placeholder'], text=_text(node['text'], where, placeholders))]
@@ -320,13 +327,13 @@ def build_plan(manifest, outline, tables_dir=None):
                 texts = [p for row in [header or [], *rows] for cell in row for p in (cell if isinstance(cell, list) else [cell]) if p]
                 out.append(dict(op='insert', part=name, keepSection=0, expect=dict(tableRows=count, texts=texts)))
             else:
-                known = sorted({p['kind'] for p in parts.values()} & {'heading', 'task', 'table', *TEXT_KINDS})
+                known = sorted({p['kind'] for p in parts.values()} & {'heading', 'task', 'point', 'table', *TEXT_KINDS})
                 raise ValueError(f'{where}: 알 수 없는 t {kind!r} (chapter, {", ".join(known)})')
         return out
 
     summary = outline.get('summary')
     if summary is not None:
-        name = by_kind.get(('summary', None, 0))
+        name = by_kind.get(('summary', None, 0, None))
         need(name, '이 양식에는 요약(summary) 부품이 없습니다.')
         need(isinstance(summary, dict) and set(summary) == {'title', 'nodes'}, 'summary는 title과 nodes를 받습니다.')
         steps += [dict(op='insert', part=name, keepSection=0), dict(op='text', find=parts[name]['placeholder'], text=_text(summary['title'], 'summary.title', placeholders)),

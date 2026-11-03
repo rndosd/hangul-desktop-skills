@@ -185,6 +185,11 @@ def resize_table(table, header_xml, size):
     scaled = [round(w * total / sum(widths)) for w in widths]
     scaled[-1] += total - sum(scaled)
     chars, clones = header_xml.find(f'.//{HH}charProperties'), {}
+    if 'columnWidthsHwp' in size:
+        need(sum(size['columnWidthsHwp']) == total and len(size['columnWidthsHwp']) == len(widths), 'columnWidthsHwp must fill the table width')
+        scaled = size['columnWidthsHwp']
+    if 'outMarginHwp' in size:
+        table.find(HP + 'outMargin').attrib.update({k: str(v) for k, v in size['outMarginHwp'].items()})
     for row in rows:
         for column, cell in enumerate(row.findall(HP + 'tc')):
             cell.find(HP + 'cellSz').set('width', str(scaled[column]))
@@ -322,6 +327,8 @@ def prepare(name, spec, raw, out_dir, deep_indent):
     section, header = load(raw)
     use_truetype_faces(header, section)
     kind, entry, previews, variants = spec['kind'], {'kind': spec['kind']}, [], []
+    if spec.get('context'):
+        entry['context'] = spec['context']  # "summary": used on the summary page, which spaces lines more tightly
     if 'replace' in spec:
         # Titles held in table cells or split over runs (number, period, title): exact source texts become
         # placeholders in their own runs, so each keeps its format. A prepared source may already hold them.
@@ -412,6 +419,8 @@ def prepare(name, spec, raw, out_dir, deep_indent):
         holder = next(p for p in section.findall(HP + 'p') if p.find(f'.//{HP}tbl') is not None)
         for margin_name, value in spec['table'].get('size', {}).get('holderMargins', {}).items():
             shape_margin(shape_of(header, section, holder), margin_name, value)  # where the table starts on the line
+        if spec['table'].get('size', {}).get('holderAlign'):
+            shape_of(header, section, holder).find(HH + 'align').set('horizontal', spec['table']['size']['holderAlign'])
         for spacing in shape_of(header, section, holder).iter(HH + 'lineSpacing'):
             if spacing.get('type') == 'PERCENT' and int(spacing.get('value')) < 100:
                 spacing.set('value', '100')  # below 100% the next line overlaps a table that grew
