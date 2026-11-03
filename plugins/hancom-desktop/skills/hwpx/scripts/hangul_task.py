@@ -176,7 +176,8 @@ def assemble(template, outline, output, pdf, run_dir, context, catalog=None, tim
     plan=build_plan(manifest,outline,tables,notes)
     result=run(plan['base']['path'],'SaveAs',output,pdf,run_dir,context,timeout,composition=plan)
     result['template']=dict(id=manifest['id'],label=manifest['label'],source=manifest['source'].get('attribution'))
-    result['substitutions']=notes  # roles, tables and cover fields this template drew with a substitute
+    result['substitutions']=[n for n in notes if n['role']!='block']  # roles, tables and cover fields drawn with a substitute
+    result['blocks']=[n for n in notes if n['role']=='block']  # parts that went in with their source wording, to review
     if result['status']=='PASS_NATIVE':
         receipt=json.loads(Path(result['receiptPath']).read_text(encoding='utf-8-sig'))
         result['pages']=receipt.get('pageCountAfter')

@@ -450,6 +450,22 @@ class RegisteredSourceTest(unittest.TestCase):
         self.assertEqual(added[0].find(a.HH + 'heading').get('type'), 'NONE')
         self.assertEqual(header.find(f'{a.HH}refList/{a.HH}paraProperties').get('itemCnt'), '3')
 
+    def test_a_block_goes_in_by_name_and_is_reported_for_review(self):
+        manifest = a.load_template(CATALOG, 'plan-official')
+        manifest['parts']['areas'] = dict(manifest['parts']['item'], kind='block', texts=['영역', '예술', '2026. 3.'],
+                                          numberedLines=['1) 지역자원 발굴'], reviewTexts=['2026. 3.'])
+        notes = []
+        temp = tempfile.TemporaryDirectory(); self.addCleanup(temp.cleanup)
+        value = {'schema': a.OUTLINE_SCHEMA, 'template': 'plan-official', 'cover': {'title': '가상', 'date': '2027.'},
+                 'nodes': [CHAPTER, {'t': 'block', 'part': 'areas'}, ITEM]}
+        plan = a.build_plan(manifest, value, Path(temp.name) / 'tables', notes)
+        self.assertIn('areas', [s.get('part') for s in plan['steps']])
+        self.assertEqual([(n['role'], n['used'], n['reviewTexts']) for n in notes], [('block', 'areas', ['2026. 3.'])])
+        self.assertIn('번호 줄', notes[0]['note'])
+        with self.assertRaisesRegex(ValueError, '블록 부품 .item.이 없습니다 \\(이 양식의 블록: areas\\)'):
+            a.build_plan(manifest, dict(value, nodes=[CHAPTER, {'t': 'block', 'part': 'item'}]), Path(temp.name) / 't2')
+        self.assertEqual(a.describe(manifest)['blocks'][0]['part'], 'areas')
+
     def test_any_node_may_start_a_new_page(self):
         plan = self.plan([CHAPTER, ITEM, dict(ITEM, pageBreakBefore=True), {'t': 'chapter', 'text': '계획', 'pageBreakBefore': True}, ITEM])
         ops = [s['op'] if s['op'] != 'insert' else s['part'].split('@')[0] for s in plan['steps']]

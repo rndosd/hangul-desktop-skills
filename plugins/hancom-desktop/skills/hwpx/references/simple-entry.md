@@ -146,7 +146,7 @@ $planCatalog = Join-Path $taskSkillDir 'assets/document-templates/full-plans.jso
 
 결과의 `roles`는 그대로 그리는 역할, `substitutes`는 대신 그리는 역할, `tables`는 표 역할·칸 수·칸 이름, `cover`는 표지 항목·필수·붙여 넣는 곳이다.
 
-입력 검사가 끝난 뒤 한글을 한 번 열어 표지 부품에 장·제목·항목·표 부품을 차례로 붙이고 저장·재열기·PDF를 만든다. 결과의 `assembly`는 저장본에 자리표시가 남지 않았는지와 요청한 문구·표 행 수를 확인한 값이며, `wrapAlignment`·`pageLayout`은 PDF 배치 경고다. `PASS_NATIVE` 뒤에도 쪽 이미지를 확인한다([preview](#준비된-블록-조합)). 내 양식을 부품으로 등록하는 방법은 저장소의 `tools/build_assembly_template.py`(부품 지도 → 블록 저장 → 자리표시·정규화 → manifest)이며, 등록한 폴더는 `--catalog`로 지정한다. 부품 지도는 위 공통 어휘의 역할·표 역할만 쓴다. 양식 폴더의 `reproduction/outline.json`(기준 개요)·`expected.json`(기대 쪽·줄 위치)은 저장소의 `tools/check_assembly_reproduction.py`가 모든 양식에 같은 방법으로 조립·비교하는 등록 합격 기준이다.
+입력 검사가 끝난 뒤 한글을 한 번 열어 표지 부품에 장·제목·항목·표 부품을 차례로 붙이고 저장·재열기·PDF를 만든다. 결과의 `assembly`는 저장본에 자리표시가 남지 않았는지와 요청한 문구·표 행 수를 확인한 값이며, `wrapAlignment`·`pageLayout`은 PDF 배치 경고다. `PASS_NATIVE` 뒤에도 쪽 이미지를 확인한다([preview](#준비된-블록-조합)). 내 양식을 부품으로 등록하는 방법은 저장소의 `tools/build_assembly_template.py`(부품 지도 → 블록 저장 → 자리표시·정규화 → manifest)이며, 등록한 폴더는 `--catalog`로 지정한다. 부품 지도는 위 공통 어휘의 역할·표 역할만 쓰고, 어휘로 읽히지 않는 부분은 원본 그대로 두는 블록 부품으로 남긴다(개요 `{"t":"block","part":"이름"}`, 결과 `blocks`에 원본 글자 목록). 조립·블록을 나누는 기준과 합격 기준은 저장소 `tools/assembly-maps/README.md`를 따른다. 양식 폴더의 `reproduction/outline.json`(기준 개요)·`expected.json`(기대 쪽·줄 위치)은 저장소의 `tools/check_assembly_reproduction.py`가 모든 양식에 같은 방법으로 조립·비교하는 등록 합격 기준이다.
 
 ## 준비된 양식 채우기
 

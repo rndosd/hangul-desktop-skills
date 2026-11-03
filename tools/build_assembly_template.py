@@ -34,7 +34,8 @@ spacing variant used right after an outline node of that kind, table "role" (sch
 indicators) and "columns" (names of the unit cells) let an outline pick a table by role, table "fixedTexts" cells (step arrows) keep
 their text and take no value, and table "holderLineSpacing" sets the holding line's spacing. Table "footerRows" keeps the source's last rows (a total or remarks
 row) once after the repeated units; its "footerLabels" cells (계) keep their text, the rest take outline values.
-Table "labelColumn" (a fixed table whose rows are named, such as 운영 요일 · 운영 시간) keeps that column's names
+A "block" part keeps a source range as it is (an irregular table, a paragraph with footnotes) and lists its texts,
+numbered-looking lines and date-like texts for review. Table "labelColumn" (a fixed table whose rows are named, such as 운영 요일 · 운영 시간) keeps that column's names
 and records each row's value cell count, so an outline can fill the table by row name.
 "keepWithNext": false leaves a heading or subhead
 unbound to the next paragraph (a source that writes body lists as □ or "1. 기간: ..." lines). A cover field
@@ -478,6 +479,20 @@ def prepare(name, spec, raw, out_dir, deep_indent):
             variants.append((f'{name}-deep', dict(entry, depth=1), deep_section, deep_header))
     elif kind == 'spacer':
         need(not body_paragraphs(section), 'spacer part must be empty')
+    elif kind == 'block':
+        # A part kept as the source has it (an irregular table, a paragraph with footnotes): no placeholder, no
+        # numbering. Its source wording ships, so every text is listed for the person to review, and lines that look
+        # like dates or numbered titles (the outline's numbering does not count them) are listed apart.
+        texts = [piece.strip() for t in section.iter(HP + 't') for piece in [t.text, *(c.tail for c in t)] if piece and piece.strip()]
+        need(texts, f'{name}: block part has no text')
+        lines = [''.join(t.text or '' for run in p.findall(HP + 'run') for t in run.findall(HP + 't')).strip() for p in section.findall(HP + 'p')]
+        entry.update(texts=texts,
+                     numberedLines=[line for line in lines if re.match(r'^([ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]|\d{1,2}\.|[가-하]\.|\d{1,2}\))\s', line)],
+                     reviewTexts=[text for text in texts if re.search(r'(19|20)\d\d|\d{1,2}\.\s?\d{1,2}\.', text)])
+        previews.extend(texts)
+        for paragraph in section.iter(HP + 'p'):
+            for lines_element in paragraph.findall(HP + 'linesegarray'):
+                paragraph.remove(lines_element)
     elif kind == 'table':
         entry['table'] = normalize_table(section, header, spec['table'])
         holder = next(p for p in section.findall(HP + 'p') if p.find(f'.//{HP}tbl') is not None)
@@ -639,6 +654,7 @@ def main():
         allowed += part_map['parts'].get(name, {}).get('table', {}).get('fixedTexts', [])
         allowed += part_map['parts'].get(name, {}).get('table', {}).get('footerLabels', [])
         allowed += [row['label'] for row in entry.get('table', {}).get('rowLabels', [])]  # names of a fixed table's rows
+        allowed += entry.get('texts', [])  # a block ships its source wording, listed in the manifest for review
         allowed += [entry['symbol']] if entry.get('symbol') else []  # the source's own leading symbol
         left = leftover_wording(out_dir / entry['file'], allowed + entry.get('table', {}).get('header', []))
         need(not left, f'{name}: source wording left in the prepared part: {left[:60]!r}')

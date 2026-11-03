@@ -25,7 +25,7 @@ HANGUL = '가나다라마바사아자차카타파하'
 ITEM_KINDS = ('item', 'dash', 'dot', 'note', 'arrow', 'lead')
 # One placeholder, no numbering: the outline node {"t": kind, "text": ...} fills it.
 TEXT_KINDS = (*ITEM_KINDS, 'box', 'subhead')
-PART_KINDS = ('cover', 'chapter_first', 'chapter', 'heading', 'task', 'point', 'table', 'spacer', 'summary', 'summary_chapter', *TEXT_KINDS)
+PART_KINDS = ('cover', 'chapter_first', 'chapter', 'heading', 'task', 'point', 'table', 'spacer', 'summary', 'summary_chapter', 'block', *TEXT_KINDS)
 # The symbol each text part already draws; the same symbol typed at the start of the text is dropped.
 KIND_SYMBOLS = {'item': '◦○∘•', 'dash': '-–', 'dot': '‧·ㆍ', 'note': '※', 'arrow': '⇒→', 'subhead': '□', 'box': '◈', 'lead': '❍'}
 BOXED_DIGITS = 20  # Hancom private-use squared digits U+F02B1.., and circled ①..⑳
@@ -384,6 +384,9 @@ def describe(manifest):
                      repeat=p['table']['repeat'], **({'footerCells': p['table']['footerCells']} if p['table'].get('footerRows') else {}),
                      **({'rowLabels': p['table']['rowLabels']} if p['table'].get('rowLabels') else {}))
                 for name, p in table_parts(parts).items()],
+        # parts kept as the source has it: called by name ({"t": "block", "part": name}), their wording goes in unchanged
+        blocks=[dict(part=name, texts=p['texts'][:8], numberedLines=p.get('numberedLines', []))
+                for name, p in parts.items() if p['kind'] == 'block'],
         cover=dict(fields=list(fields), required=[k for k in ('title', 'date') if k in fields],
                    carried={k: COVER_CARRY[k][0] for k in COVER_FIELDS if k not in fields and k in COVER_CARRY}),
         summary=any(p['kind'] == 'summary' for p in parts.values()),
@@ -586,6 +589,18 @@ def build_plan(manifest, outline, tables_dir=None, notes=None):
                 instances[name] = dict(path=str(target.resolve()), sha256=sha(target))
                 texts = [p for row in [header or [], *rows, footer or []] for cell in row for p in (cell if isinstance(cell, list) else [cell]) if p]
                 out.append(dict(op='insert', part=name, keepSection=0, expect=dict(tableRows=count, texts=texts)))
+            elif kind == 'block':
+                # A part kept as its source has it, called by name only; its source wording goes in unchanged
+                need(set(node) == {'t', 'part'}, f'{where}: block은 t와 part만 받습니다.')
+                need(isinstance(node['part'], str) and parts.get(node['part'], {}).get('kind') == 'block',
+                     f"{where}: 블록 부품 {node['part']!r}이 없습니다 (이 양식의 블록: {', '.join(n for n, p in parts.items() if p['kind'] == 'block') or '없음'}).")
+                part = parts[node['part']]
+                out.append(dict(op='insert', part=node['part'], keepSection=0))
+                notes.append(dict(at=where, role='block', used=node['part'], texts=part['texts'],
+                                  **({'numberedLines': part['numberedLines']} if part.get('numberedLines') else {}),
+                                  **({'reviewTexts': part['reviewTexts']} if part.get('reviewTexts') else {}),
+                                  note=f"원본 글자가 그대로 들어갔습니다. 새 문서에 맞는지 확인하세요."
+                                       + (' 블록 안 번호 줄은 개요 번호와 따로입니다.' if part.get('numberedLines') else '')))
             else:
                 raise ValueError(f'{where}: 알 수 없는 t {kind!r} (공통 역할: chapter, heading(level 1~3), {", ".join(r for r in ROLE_LABELS if r != "chapter" and not r.startswith("heading"))}, table)')
         return out
