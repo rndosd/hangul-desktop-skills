@@ -103,7 +103,11 @@ def table_shape(table):
     footer = 1 if len(body) > 1 and any(t.replace(' ', '') in [x.replace(' ', '') for x in TOTALS] for t in texts[-1]) else 0
     units = body[:len(body) - footer]
     layout = [tuple(span(c) for c in row) for row in units]
-    if all(l == layout[0] for l in layout) and all(s == (1, 1) for l in layout for s in l):
+    columns = sum(span(c)[1] for c in rows[0]) if rows else 0
+    if columns < 2 or len(rows[0]) < 2:
+        return dict(kind='block', why='한 칸짜리 상자·띠 표')  # a title band or a box, not a table of rows
+    if (all(l == layout[0] for l in layout) and all(s == (1, 1) for l in layout for s in l)
+            and heads == 1 and len(rows[0]) == len(units[0])):  # column headers over the unit's cells
         return dict(kind='repeat', headerRows=heads, unitRows=1, footerRows=footer,
                     footerLabels=sorted({t for t in texts[-1] if t.replace(' ', '') in [x.replace(' ', '') for x in TOTALS]}) if footer else [])
     first = [row[0] for row in body if row and row[0].find(HP + 'cellAddr').get('colAddr') == '0']
@@ -240,6 +244,9 @@ def propose(source, template_id, exclude=()):
     chapters = [i for i, r in enumerate(roles) if r['role'] == 'chapter']
     need(chapters, '장(Ⅰ 제목)이 없어 조립 양식으로 만들 수 없습니다. 빈칸 채우기로 등록하세요.')
     heights = {c.get('id'): int(c.get('height')) for c in header.iter(HH + 'charPr')}
+    # lines whose letters the author squeezed (negative spacing) to fit them: parts draw one look, so these may wrap
+    condensed = {c.get('id') for c in header.iter(HH + 'charPr') if int(c.find(HH + 'spacing').get('hangul')) < 0}
+    squeezed = sum(1 for i, r in enumerate(roles) if r['role'] not in ('empty', 'block', 'table', 'chapter') and look(top[i])[1] in condensed)
     cover_end = cover_end_of(top[:first], heights)
     cover, cover_value = cover_spec(top[:cover_end], heights)
     parts, notes = {}, []
@@ -373,7 +380,7 @@ def propose(source, template_id, exclude=()):
                     rules=rules, deepIndentHwp=1000, parts=parts)
     outline = dict(schema='hwpx.assembly-outline.v1', template=template_id, cover=cover_value, nodes=nodes)
     summary = dict(parts=sorted(parts), blocks=sum(n['t'] == 'block' for n in nodes), nodes=len(nodes),
-                   chapterNumbers=[chapter_number(i) for i in chapters],
+                   chapterNumbers=[chapter_number(i) for i in chapters], squeezedLines=squeezed,
                    roles=dict(Counter(r['role'] for r in roles[cover_end:] if r['role'] != 'empty')), notes=notes)
     return part_map, outline, summary
 

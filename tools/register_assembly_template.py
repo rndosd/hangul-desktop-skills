@@ -179,7 +179,9 @@ def main():
         numbers = summary.get('chapterNumbers', [])
         problems = []
         if abs(len(found) - len(expected)) > max(1, round(len(expected) * 0.1)):
-            problems.append(f'쪽 수가 크게 다름: 원본 {len(expected)}, 재현 {len(found)}')
+            squeezed = summary.get('squeezedLines', 0)
+            problems.append(f'쪽 수가 크게 다름: 원본 {len(expected)}, 재현 {len(found)}'
+                            + (f' (원본이 자간을 줄여 한 줄에 맞춘 줄 {squeezed}개가 부품 모양으로 들어가 줄바꿈이 늘었을 수 있음)' if squeezed else ''))
         if '' in found:
             problems.append(f'빈 쪽: {[i + 1 for i, f in enumerate(found) if not f]}')
         if numbers and numbers != [str(n) for n in range(1, len(numbers) + 1)]:
