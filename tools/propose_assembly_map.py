@@ -106,13 +106,19 @@ def table_shape(table):
     columns = sum(span(c)[1] for c in rows[0]) if rows else 0
     if columns < 2 or len(rows[0]) < 2:
         return dict(kind='block', why='한 칸짜리 상자·띠 표')  # a title band or a box, not a table of rows
+    def looks(cell):
+        return {(q.get('paraPrIDRef'), *(r.get('charPrIDRef') for r in q.findall(HP + 'run')[:1])) for q in cell.iter(HP + 'p')
+                if ''.join(t.text or '' for t in q.iter(HP + 't')).strip()}
+    # a table part fills every cell in one look per column: cells mixing looks (smaller notes, squeezed lines) would grow
+    uniform = all(len(set().union(*(looks(row[c]) for row in units if c < len(row)))) <= 1 for c in range(len(units[0]))) if units else False
     if (all(l == layout[0] for l in layout) and all(s == (1, 1) for l in layout for s in l)
-            and heads == 1 and len(rows[0]) == len(units[0])):  # column headers over the unit's cells
+            and heads == 1 and len(rows[0]) == len(units[0]) and uniform):  # column headers over the unit's cells
         return dict(kind='repeat', headerRows=heads, unitRows=1, footerRows=footer,
                     footerLabels=sorted({t for t in texts[-1] if t.replace(' ', '') in [x.replace(' ', '') for x in TOTALS]}) if footer else [])
     first = [row[0] for row in body if row and row[0].find(HP + 'cellAddr').get('colAddr') == '0']
     if (len(first) == len(body) and all(span(c)[0] == 1 for c in first)
-            and all(0 < len(flat_text(c)) <= 12 for c in first) and len({flat_text(c) for c in first}) == len(first)):
+            and all(0 < len(flat_text(c)) <= 12 for c in first) and len({flat_text(c) for c in first}) == len(first)
+            and all(len(looks(c)) <= 1 for row in body for c in row[1:])):  # each value cell in one look
         return dict(kind='labels', headerRows=heads, unitRows=len(body))
     return dict(kind='block', why='칸 합침이 불규칙한 표')
 
@@ -396,7 +402,7 @@ def table_node(i, p, info, parts, tables):
     if name is None:
         name = f'table{len(tables) + 1}'
         tables[key] = name
-        spec = dict(headerRows=shape['headerRows'], unitRows=shape['unitRows'], role='grid')
+        spec = dict(headerRows=shape['headerRows'], unitRows=shape['unitRows'], role='grid', keepWrap=True)  # the source's own wrap
         if shape['kind'] == 'repeat' and shape.get('footerRows'):
             spec.update(footerRows=1, footerLabels=shape['footerLabels'])
         if shape['kind'] == 'labels':

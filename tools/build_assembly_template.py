@@ -180,15 +180,18 @@ def margin(header, section, paragraph, name, value=None):
     return shape_margin(shape_of(header, section, paragraph), name, value)
 
 
-def own_shape(header, pid):
-    """A copy of paragraph format pid under a new id, so cells can change it without touching other paragraphs."""
+def own_shape(header, pid, word_wrap=True):
+    """A copy of paragraph format pid under a new id, so cells can change it without touching other paragraphs.
+    Cells wrap by word unless the table keeps its source's wrap (table "keepWrap": a registered source's cells
+    packed character by character would grow)."""
     shapes = header.find(f'.//{HH}paraProperties')
     clone = copy.deepcopy(shapes.find(f'{HH}paraPr[@id="{pid}"]'))
     clone.set('id', str(max(int(s.get('id')) for s in shapes) + 1))
     shapes.append(clone)
     shapes.set('itemCnt', str(len(shapes)))
     # In OWPML BREAK_WORD for non-Latin text is Hangul's word wrap (어절); KEEP_WORD breaks between characters.
-    clone.find(HH + 'breakSetting').attrib.update({'breakLatinWord': 'KEEP_WORD', 'breakNonLatinWord': 'BREAK_WORD'})
+    if word_wrap:
+        clone.find(HH + 'breakSetting').attrib.update({'breakLatinWord': 'KEEP_WORD', 'breakNonLatinWord': 'BREAK_WORD'})
     return clone
 
 
@@ -296,7 +299,7 @@ def normalize_table(section, header_xml, spec):
     header = [text_of(cell) for cell in header_cells]
     for cell in header_cells:
         for paragraph in cell.iter(HP + 'p'):
-            paragraph.set('paraPrIDRef', own_shape(header_xml, paragraph.get('paraPrIDRef')).get('id'))
+            paragraph.set('paraPrIDRef', own_shape(header_xml, paragraph.get('paraPrIDRef'), not spec.get('keepWrap')).get('id'))
     for cell in unit_cells + footer_values:
         sub = cell.find(HP + 'subList')
         paragraphs = sub.findall(HP + 'p')
@@ -309,7 +312,7 @@ def normalize_table(section, header_xml, spec):
                 keep.remove(child)
         for child in list(runs[0]):
             runs[0].remove(child)
-        shape = own_shape(header_xml, keep.get('paraPrIDRef'))
+        shape = own_shape(header_xml, keep.get('paraPrIDRef'), not spec.get('keepWrap'))
         if cell.find(HP + 'cellAddr').get('colAddr') == '0' and spec.get('firstColumnPrefix') and int(cell.find(HP + 'cellAddr').get('rowAddr')) < heads + size:
             shape.find(HH + 'align').set('horizontal', 'LEFT')  # justified lines widen the space after the prefix
             shape_margin(shape, 'intent', 0)  # calibrate_hanging measures and sets the hanging indent

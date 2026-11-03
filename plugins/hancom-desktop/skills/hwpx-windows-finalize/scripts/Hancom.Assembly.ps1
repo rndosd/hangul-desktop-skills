@@ -47,6 +47,46 @@ function Get-HancomLastControl($Hwp,[string]$Id) {
     return $last
 }
 
+function Get-HancomLastLine($Hwp,[int]$Para) {
+    # (start of the paragraph's last line, end of the paragraph) as character positions; start 0 is one line
+    if(!$Hwp.SetPos(0,$Para,0) -or [int]$Hwp.GetPosBySet().Item('Para') -ne $Para) { return $null }
+    [void]$Hwp.HAction.Run('MoveParaEnd');$end=[int]$Hwp.GetPosBySet().Item('Pos')
+    [void]$Hwp.HAction.Run('MoveLineBegin');$start=[int]$Hwp.GetPosBySet().Item('Pos')
+    return @($start,$end)
+}
+
+function Set-HancomParagraphSpacing($Hwp,[int]$Para,[string]$Action,[int]$Times) {
+    for($i=0;$i -lt $Times;$i++) {
+        [void]$Hwp.SetPos(0,$Para,0);[void]$Hwp.HAction.Run('MoveSelParaEnd')
+        $done=$Hwp.HAction.Run($Action);[void]$Hwp.HAction.Run('Cancel')
+        if($done -eq $false) { throw "ASSEMBLY_SPACING_FAILED: $Action" }
+    }
+}
+
+function Invoke-HancomFitShortLines($Hwp,[int]$MaxSteps,[int]$TailChars) {
+    # What authors do by hand: a body paragraph whose last line is short (TailChars, or the share of the earlier
+    # characters MaxSteps 1% steps can take back) gets its letters squeezed one step at a time until that line is
+    # gone; past MaxSteps it goes back as it was.
+    $fitted=0;$kept=0
+    Move-HancomBodyEnd $Hwp;$last=[int]$Hwp.GetPosBySet().Item('Para')  # SetPos past the end lands on the last paragraph
+    for($para=0;$para -le $last;$para++) {
+        $line=Get-HancomLastLine $Hwp $para
+        if($null -eq $line) { continue }
+        $tail=$line[1]-$line[0]
+        # MaxSteps 1% steps take back about that share of the characters before the last line
+        if($line[0] -gt 0 -and $tail -gt 0 -and $tail -le [Math]::Max($TailChars,[int]($line[0]*$MaxSteps/100))) {
+            $steps=0
+            while($steps -lt $MaxSteps) {
+                Set-HancomParagraphSpacing $Hwp $para 'CharShapeSpacingDecrease' 1;$steps++
+                $now=Get-HancomLastLine $Hwp $para
+                if($now[0] -lt $line[0]) { break }  # the last line moved up: one line fewer
+            }
+            if($now[0] -lt $line[0]) { $fitted++ } else { Set-HancomParagraphSpacing $Hwp $para 'CharShapeSpacingIncrease' $steps;$kept++ }
+        }
+    }
+    return @{fitted=$fitted;unchanged=$kept;paragraphs=$last+1}
+}
+
 function Invoke-HancomAssembly($Hwp,$Plan,$Report) {
     $parts=@{};foreach($property in $Plan.parts.PSObject.Properties){$parts[$property.Name]=$property.Value}
     $Report.assembly=@{steps=0;texts=0;boxes=@();pageNumbers=$null}
@@ -83,6 +123,7 @@ function Invoke-HancomAssembly($Hwp,$Plan,$Report) {
                 if([Math]::Abs($actual-[int]$step.width) -gt 2) { throw "ASSEMBLY_BOX_WIDTH_FAILED: $actual" }
                 $Report.assembly.boxes+=@{requested=[int]$step.width;actual=$actual}
             }
+            'fitShortLines' { $Report.assembly.fitShortLines=Invoke-HancomFitShortLines $Hwp ([int]$step.maxSteps) ([int]$step.tailChars) }
             'trimEnd' {
                 # The last part's empty trailer paragraph ends the body; on a full last page it starts an empty page.
                 Move-HancomBodyEnd $Hwp

@@ -42,7 +42,9 @@ TABLE_ROLES = {'schedule': '업무·일정 목록', 'grid': '구분·내용 표'
 COVER_FIELDS = ('title', 'subtitle', 'date', 'organization', 'department')
 # A cover value without a place on this template's cover is added to another field, never dropped.
 COVER_CARRY = {'subtitle': ('title', ' - '), 'date': ('organization', ' · '), 'department': ('organization', ' · ')}
-STEP_OPS = ('text', 'section', 'insert', 'pageNumbers', 'boxWidth', 'pageBreak', 'trimEnd')
+STEP_OPS = ('text', 'section', 'insert', 'pageNumbers', 'boxWidth', 'pageBreak', 'fitShortLines', 'trimEnd')
+# A body paragraph whose last line holds at most FIT_TAIL characters is squeezed up to FIT_STEPS letter-spacing steps
+FIT_STEPS, FIT_TAIL = 10, 6
 MAX_NODES, MAX_ROWS, MAX_TEXT, MAX_CELL_PARAGRAPHS = 400, 100, 2000, 20
 # Numbered title lines a block keeps as written (1., 가., 1)): the next outline title of that level counts on from them
 BLOCK_TITLES = ((1, r'^\d{1,2}\.\s'), (2, r'^[가-하]\.\s'), (3, r'^\d{1,2}\)\s'))
@@ -621,6 +623,8 @@ def build_plan(manifest, outline, tables_dir=None, notes=None):
         steps += [dict(op='insert', part=name, keepSection=0), dict(op='text', find=parts[name]['placeholder'], text=_text(summary['title'], 'summary.title', placeholders)),
                   *body(summary['nodes'], 'summary.nodes', True)]
     steps += body(outline.get('nodes'), 'nodes', False)
+    if rules.get('fitShortLines', True):  # what authors do by hand: squeeze a paragraph to take back a few-character line
+        steps.append(dict(op='fitShortLines', maxSteps=FIT_STEPS, tailChars=FIT_TAIL))
     steps.append(dict(op='trimEnd'))  # the last part's empty trailer would start an empty page after a full one
     used = {step['part'] for step in steps if step['op'] == 'insert'}
     files = {**parts, **instances}
