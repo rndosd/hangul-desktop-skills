@@ -123,6 +123,8 @@ $planCatalog = Join-Path $taskSkillDir 'assets/document-templates/full-plans.jso
 
 ### 공통 개요 어휘와 양식 조회
 
+어떤 요소를 어디에 쓸지(틀 세우기)는 [조립 개요 설계](outline-design.md)를 따른다. 아래는 요소의 뜻과 대신 그리는 순서다.
+
 네 양식(그리고 앞으로 등록하는 양식)은 같은 개요 어휘를 쓴다. 양식에 없는 역할은 아래 순서로 가까운 부품이 대신 그리고, 결과의 `substitutions`에 위치·원래 역할·대신 쓴 역할을 남긴다. 대신 그린 곳이 있으면 사용자에게 알린다(번호가 새로 생기거나 기호가 바뀔 수 있다).
 
 | `t` | 뜻 | 없을 때 |
