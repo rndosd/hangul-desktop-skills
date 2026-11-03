@@ -184,8 +184,10 @@ def _set_cell(cell, value, prefix='', plain=None):
         sub.append(paragraph)
 
 
-def table_instance(part, header, units, target):
-    """Write a copy of a table part with the outline's header cells and units; returns the row count."""
+def table_instance(part, header, units, target, footer=None):
+    """Write a copy of a table part with the outline's header cells, units and footer values; returns the row count.
+
+    Footer rows (a total row) follow the last unit once; their label cells keep their text."""
     spec = part['table']
     with zipfile.ZipFile(part['path']) as package:
         infos = package.infolist()
@@ -195,11 +197,12 @@ def table_instance(part, header, units, target):
     plain = _unnumbered(shapes) if shapes is not None else None
     table = next(section.iter(HP + 'tbl'))
     rows = table.findall(HP + 'tr')
-    heads, unit = rows[:spec['headerRows']], rows[spec['headerRows']:]
+    feet = spec.get('footerRows', 0)
+    heads, unit, foot = rows[:spec['headerRows']], rows[spec['headerRows']:len(rows) - feet], rows[len(rows) - feet:]
     if header is not None:
         for cell, value in zip([c for tr in heads for c in _cells(tr)], header):
             _set_cell(cell, value, plain=plain)
-    for tr in unit:
+    for tr in unit + foot:
         table.remove(tr)
     prefix, fixed = spec.get('firstColumnPrefix', ''), spec.get('fixedCells', [])
     for index, values in enumerate(units):
@@ -212,7 +215,16 @@ def table_instance(part, header, units, target):
             _set_cell(cell, value, prefix if cell.find(HP + 'cellAddr').get('colAddr') == '0' and value else '', plain)
         for tr in clones:
             table.append(tr)
-    count = len(heads) + len(unit) * len(units)
+    labels = spec.get('footerLabelCells', [])
+    cells = [c for tr in foot for c in _cells(tr)]
+    for cell in cells:
+        address = cell.find(HP + 'cellAddr')
+        address.set('rowAddr', str(int(address.get('rowAddr')) + (len(units) - 1) * len(unit)))
+    for cell, value in zip([c for i, c in enumerate(cells) if i not in labels], footer or []):
+        _set_cell(cell, value, plain=plain)
+    for tr in foot:
+        table.append(tr)
+    count = len(heads) + len(unit) * len(units) + len(foot)
     size = table.find(HP + 'sz')
     size.set('height', str(int(size.get('height')) * count // len(rows)))  # Hangul sets the real height on layout
     table.set('rowCnt', str(count))
@@ -355,7 +367,8 @@ def describe(manifest):
         unavailable=[role for role, used in roles.items() if not used],
         tables=[dict(part=name, role=p['table'].get('role', 'grid'), roleLabel=TABLE_ROLES.get(p['table'].get('role', 'grid')),
                      cells=p['table']['unitCells'], columns=p['table'].get('columns') or p['table']['header'], header=p['table']['header'],
-                     repeat=p['table']['repeat']) for name, p in table_parts(parts).items()],
+                     repeat=p['table']['repeat'], **({'footerCells': p['table']['footerCells']} if p['table'].get('footerRows') else {}))
+                for name, p in table_parts(parts).items()],
         cover=dict(fields=list(fields), required=[k for k in ('title', 'date') if k in fields],
                    carried={k: COVER_CARRY[k][0] for k in COVER_FIELDS if k not in fields and k in COVER_CARRY}),
         summary=any(p['kind'] == 'summary' for p in parts.values()),
@@ -524,8 +537,8 @@ def build_plan(manifest, outline, tables_dir=None, notes=None):
                 text = re.sub(rf'^\s*[{re.escape(KIND_SYMBOLS[kind])}]\s+', '', text) or text
                 out += [inserted(name, kind == 'subhead' and bodyless(position - 1)), dict(op='text', find=parts[name]['placeholder'], text=text)]
             elif kind == 'table':
-                need({'t', 'rows'} <= set(node) <= {'t', 'role', 'part', 'rows', 'header'} and len({'role', 'part'} & set(node)) == 1,
-                     f'{where}: table은 t, rows, role(또는 part) 하나와 선택 header만 받습니다.')
+                need({'t', 'rows'} <= set(node) <= {'t', 'role', 'part', 'rows', 'header', 'footer'} and len({'role', 'part'} & set(node)) == 1,
+                     f'{where}: table은 t, rows, role(또는 part) 하나와 선택 header·footer만 받습니다.')
                 table_name, used = resolve_table(parts, node, where)
                 if used:
                     notes.append(dict(at=where, role=f'table:{node["role"]}', used=f'table:{used}',
@@ -536,6 +549,11 @@ def build_plan(manifest, outline, tables_dir=None, notes=None):
                     need(isinstance(header, list) and len(header) == spec['headerCells'], f'{where}: header 칸 수가 {spec["headerCells"]}이 아닙니다.')
                     for c, cell in enumerate(header, 1):
                         _text(cell, f'{where}.header[{c}]', placeholders)
+                footer = node.get('footer')
+                if footer is not None:
+                    need(spec.get('footerCells'), f'{where}: 이 표에는 합계 줄(footer)이 없습니다.')
+                    need(isinstance(footer, list) and len(footer) == spec['footerCells'], f'{where}: footer 칸 수가 {spec.get("footerCells")}이 아닙니다.')
+                    footer = [_cell(cell, f'{where}.footer[{c}]', placeholders) for c, cell in enumerate(footer, 1)]
                 most = MAX_ROWS if spec['repeat'] else 1
                 need(isinstance(rows, list) and 1 <= len(rows) <= most, f'{where}: rows는 1~{most}묶음입니다.')
                 for r, row in enumerate(rows, 1):
@@ -544,9 +562,9 @@ def build_plan(manifest, outline, tables_dir=None, notes=None):
                 need(tables_dir is not None, 'table nodes need a folder for table copies')
                 name = f'{table_name}@{len(instances) + 1}'
                 target = Path(tables_dir) / f'{table_name}-{len(instances) + 1}.hwpx'
-                count = table_instance(part, header, rows, target)
+                count = table_instance(part, header, rows, target, footer)
                 instances[name] = dict(path=str(target.resolve()), sha256=sha(target))
-                texts = [p for row in [header or [], *rows] for cell in row for p in (cell if isinstance(cell, list) else [cell]) if p]
+                texts = [p for row in [header or [], *rows, footer or []] for cell in row for p in (cell if isinstance(cell, list) else [cell]) if p]
                 out.append(dict(op='insert', part=name, keepSection=0, expect=dict(tableRows=count, texts=texts)))
             else:
                 raise ValueError(f'{where}: 알 수 없는 t {kind!r} (공통 역할: chapter, heading(level 1~3), {", ".join(r for r in ROLE_LABELS if r != "chapter" and not r.startswith("heading"))}, table)')

@@ -32,7 +32,9 @@ lets an outline open with bars and text). Other part options: "tableAsChar" save
 copy where it sits in the line, "keepFaces" keeps a cover's display faces, "context": "after-<kind>" marks a
 spacing variant used right after an outline node of that kind, table "role" (schedule, grid, steps, targets,
 indicators) and "columns" (names of the unit cells) let an outline pick a table by role, table "fixedTexts" cells (step arrows) keep
-their text and take no value, and table "holderLineSpacing" sets the holding line's spacing. "keepWithNext": false leaves a heading or subhead
+their text and take no value, and table "holderLineSpacing" sets the holding line's spacing. Table "footerRows" keeps the source's last rows (a total or remarks
+row) once after the repeated units; its "footerLabels" cells (계) keep their text, the rest take outline values.
+"keepWithNext": false leaves a heading or subhead
 unbound to the next paragraph (a source that writes body lists as □ or "1. 기간: ..." lines). A cover field
 may name a list of placeholders that take the same value.
 
@@ -236,18 +238,25 @@ def row_span(cell):
 
 
 def normalize_table(section, header_xml, spec):
-    """Keep the header rows and one unit (unitRows rows that repeat, merges allowed inside it), empty the unit."""
+    """Keep the header rows, one unit (unitRows rows that repeat, merges allowed inside it) and the last footerRows
+    rows (a total or remarks row drawn once after the units), empty the unit and the footer's value cells.
+    Footer cells holding one of footerLabels (계, 합계) keep their text and take no outline value."""
     table = next(section.iter(HP + 'tbl'))
-    heads, size = spec.get('headerRows', 1), spec.get('unitRows', 1)
+    heads, size, feet = spec.get('headerRows', 1), spec.get('unitRows', 1), spec.get('footerRows', 0)
     rows = table.findall(HP + 'tr')
-    need(len(rows) >= heads + size, 'table has fewer rows than headerRows + unitRows')
-    for row in rows[heads + size:]:
+    need(len(rows) >= heads + size + feet, 'table has fewer rows than headerRows + unitRows + footerRows')
+    for row in rows[heads + size:len(rows) - feet]:
         table.remove(row)
-    rows = rows[:heads + size]
+    for row in rows[len(rows) - feet:]:  # footer rows follow the unit directly
+        for cell in row.findall(HP + 'tc'):
+            address = cell.find(HP + 'cellAddr')
+            address.set('rowAddr', str(int(address.get('rowAddr')) - (len(rows) - feet) + heads + size))
+    rows = rows[:heads + size] + rows[len(rows) - feet:]
     for row in rows:
         for cell in row.findall(HP + 'tc'):
             top, bottom = row_span(cell)
-            need(bottom <= heads or heads <= top and bottom <= heads + size, 'a merged cell crosses the header or the unit boundary')
+            need(bottom <= heads or heads <= top and bottom <= heads + size or heads + size <= top,
+                 'a merged cell crosses the header, unit or footer boundary')
     if spec.get('size'):
         resize_table(table, header_xml, spec['size'])
     if heads and 'rowHeightHwp' not in spec.get('size', {}):
@@ -260,15 +269,18 @@ def normalize_table(section, header_xml, spec):
                 measure = cell.find(HP + 'cellSz')
                 measure.set('height', str(min(int(measure.get('height')), line * (bottom - top))))
     header_cells = [cell for row in rows[:heads] for cell in row.findall(HP + 'tc')]
-    unit_cells = [cell for row in rows[heads:] for cell in row.findall(HP + 'tc')]
+    unit_cells = [cell for row in rows[heads:heads + size] for cell in row.findall(HP + 'tc')]
+    footer_cells = [cell for row in rows[heads + size:] for cell in row.findall(HP + 'tc')]
     # Cells holding one of fixedTexts (the arrows of a step flow) keep their text and take no outline value.
     fixed = [i for i, cell in enumerate(unit_cells) if text_of(cell).strip() in spec.get('fixedTexts', [])]
     unit_cells = [cell for i, cell in enumerate(unit_cells) if i not in fixed]
+    labels = [i for i, cell in enumerate(footer_cells) if text_of(cell).strip() in spec.get('footerLabels', [])]
+    footer_values = [cell for i, cell in enumerate(footer_cells) if i not in labels]
     header = [text_of(cell) for cell in header_cells]
     for cell in header_cells:
         for paragraph in cell.iter(HP + 'p'):
             paragraph.set('paraPrIDRef', own_shape(header_xml, paragraph.get('paraPrIDRef')).get('id'))
-    for cell in unit_cells:
+    for cell in unit_cells + footer_values:
         sub = cell.find(HP + 'subList')
         paragraphs = sub.findall(HP + 'p')
         for extra in paragraphs[1:]:
@@ -281,7 +293,7 @@ def normalize_table(section, header_xml, spec):
         for child in list(runs[0]):
             runs[0].remove(child)
         shape = own_shape(header_xml, keep.get('paraPrIDRef'))
-        if cell.find(HP + 'cellAddr').get('colAddr') == '0' and spec.get('firstColumnPrefix'):
+        if cell.find(HP + 'cellAddr').get('colAddr') == '0' and spec.get('firstColumnPrefix') and int(cell.find(HP + 'cellAddr').get('rowAddr')) < heads + size:
             shape.find(HH + 'align').set('horizontal', 'LEFT')  # justified lines widen the space after the prefix
             shape_margin(shape, 'intent', 0)  # calibrate_hanging measures and sets the hanging indent
         keep.set('paraPrIDRef', shape.get('id'))
@@ -291,6 +303,7 @@ def normalize_table(section, header_xml, spec):
     table.find(HP + 'sz').set('height', str(sum(heights)))  # rows dropped; Hangul lays out the real height
     return dict(headerRows=heads, unitRows=size, headerCells=len(header_cells), unitCells=len(unit_cells),
                 repeat=spec.get('repeat', True), header=header, **({'fixedCells': fixed} if fixed else {}),
+                **({'footerRows': feet, 'footerCells': len(footer_values), 'footerLabelCells': labels} if feet else {}),
                 role=spec.get('role', 'grid'), **({'columns': spec['columns']} if spec.get('columns') else {}),
                 **({'firstColumnPrefix': spec['firstColumnPrefix']} if spec.get('firstColumnPrefix') else {}))
 
@@ -460,7 +473,7 @@ def prepare(name, spec, raw, out_dir, deep_indent):
                 spacing.set('value', str(spec['table']['holderLineSpacing']))  # a table made inline from a floating one
             if spacing.get('type') == 'PERCENT' and int(spacing.get('value')) < 100:
                 spacing.set('value', '100')  # below 100% the next line overlaps a table that grew
-        previews.extend(entry['table']['header'] + spec['table'].get('fixedTexts', []))
+        previews.extend(entry['table']['header'] + spec['table'].get('fixedTexts', []) + spec['table'].get('footerLabels', []))
     else:
         raise ValueError(f'unknown kind {kind}')
     written = []
@@ -606,6 +619,7 @@ def main():
         allowed += [entry['numberPlaceholder']] if 'numberPlaceholder' in entry else []
         allowed += part_map['parts'].get(name, {}).get('keep', [])  # fixed labels of the design, such as [요약]
         allowed += part_map['parts'].get(name, {}).get('table', {}).get('fixedTexts', [])
+        allowed += part_map['parts'].get(name, {}).get('table', {}).get('footerLabels', [])
         allowed += [entry['symbol']] if entry.get('symbol') else []  # the source's own leading symbol
         left = leftover_wording(out_dir / entry['file'], allowed + entry.get('table', {}).get('header', []))
         need(not left, f'{name}: source wording left in the prepared part: {left[:60]!r}')

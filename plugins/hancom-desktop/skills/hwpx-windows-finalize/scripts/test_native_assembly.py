@@ -146,6 +146,26 @@ class AssemblyTest(unittest.TestCase):
         self.assertEqual(found, [('0', '1', '과제'), ('0', '1', '지표'), ('1', '2', '과제 1'), ('1', '1', '지표 가'), ('2', '1', '지표 나'),
                                  ('3', '2', '과제 2'), ('3', '1', '지표 다'), ('4', '1', '')])
 
+    def test_a_footer_row_follows_the_units_once(self):
+        """A total row kept from the source: after every unit, its label cell fixed and its value cells filled."""
+        cell = ('<hp:tc><hp:subList><hp:p paraPrIDRef="1"><hp:run charPrIDRef="1">{t}</hp:run></hp:p></hp:subList>'
+                '<hp:cellAddr colAddr="{c}" rowAddr="{r}"/><hp:cellSpan colSpan="1" rowSpan="1"/><hp:cellSz width="100" height="10"/></hp:tc>')
+        rows = [cell.format(c=0, r=0, t='') + cell.format(c=1, r=0, t=''), cell.format(c=0, r=1, t='') + cell.format(c=1, r=1, t=''),
+                cell.format(c=0, r=2, t='<hp:t>계</hp:t>') + cell.format(c=1, r=2, t='')]
+        section = (f'<hs:sec xmlns:hs="http://www.hancom.co.kr/hwpml/2011/section" xmlns:hp="{a.HP[1:-1]}"><hp:p><hp:run><hp:tbl rowCnt="3">'
+                   '<hp:sz width="200" height="30"/>' + ''.join(f'<hp:tr>{r}</hp:tr>' for r in rows) + '</hp:tbl></hp:run></hp:p></hs:sec>')
+        temp = Path(tempfile.mkdtemp()); self.addCleanup(shutil.rmtree, temp)
+        with zipfile.ZipFile(temp / 'part.hwpx', 'w') as package:
+            package.writestr('Contents/section0.xml', section)
+        part = {'path': str(temp / 'part.hwpx'), 'table': {'headerRows': 1, 'unitRows': 1, 'footerRows': 1, 'footerCells': 1, 'footerLabelCells': [0]}}
+        self.assertEqual(a.table_instance(part, ['기준', '배점'], [['필요성', '20'], ['적절성', '80']], temp / 'out.hwpx', ['100']), 4)
+        with zipfile.ZipFile(temp / 'out.hwpx') as package:
+            table = next(ElementTree.fromstring(package.read('Contents/section0.xml')).iter(a.HP + 'tbl'))
+        found = [(tc.find(a.HP + 'cellAddr').get('rowAddr'), ''.join(t.text or '' for t in tc.iter(a.HP + 't'))) for tc in table.iter(a.HP + 'tc')]
+        self.assertEqual(found, [('0', '기준'), ('0', '배점'), ('1', '필요성'), ('1', '20'), ('2', '적절성'), ('2', '80'), ('3', '계'), ('3', '100')])
+        self.assertEqual(table.get('rowCnt'), '4')
+        self.rejects('합계 줄\\(footer\\)이 없습니다', CHAPTER, {'t': 'table', 'part': 'schedule', 'rows': [['안내', '3. 15.', '']], 'footer': ['1']})
+
     def test_table_header_override_is_validated(self):
         rows = [['1~2학년군', '그림책 읽기']]
         _, _, plain, _ = self.table_copy(self.plan(CHAPTER, {'t': 'table', 'part': 'two-column', 'rows': rows}))
@@ -157,7 +177,7 @@ class AssemblyTest(unittest.TestCase):
         self.rejects('header 칸 수가 2', CHAPTER, dict(table, header='학년군'))
         self.rejects('header\\[2\\]: 빈 문구', CHAPTER, dict(table, header=['학년군', ' ']))
         self.rejects('header\\[1\\]: 양식 자리표시', CHAPTER, dict(table, header=['[항목]', '내용']))
-        self.rejects('선택 header만', CHAPTER, dict(table, caption='표'))
+        self.rejects('선택 header·footer만', CHAPTER, dict(table, caption='표'))
 
     def test_table_cells_wrap_by_word_and_prefixed_column_hangs(self):
         head = '{http://www.hancom.co.kr/hwpml/2011/head}'
