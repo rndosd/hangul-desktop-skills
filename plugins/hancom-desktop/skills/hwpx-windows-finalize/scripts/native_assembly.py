@@ -29,6 +29,19 @@ PART_KINDS = ('cover', 'chapter_first', 'chapter', 'heading', 'task', 'point', '
 # The symbol each text part already draws; the same symbol typed at the start of the text is dropped.
 KIND_SYMBOLS = {'item': '◦○∘•', 'dash': '-–', 'dot': '‧·ㆍ', 'note': '※', 'arrow': '⇒→', 'subhead': '□', 'box': '◈', 'lead': '❍'}
 BOXED_DIGITS = 20  # Hancom private-use squared digits U+F02B1.., and circled ①..⑳
+# The common outline vocabulary. A template draws the roles it has parts for; a role it lacks is drawn by
+# the first available role down this chain (a template may override it in rules.fallbacks), and the
+# result lists every such substitution.
+ROLE_LABELS = {'chapter': '장', 'heading1': '1. 제목', 'heading2': '가. 제목', 'heading3': '1) 제목', 'task': '네모 번호 과제',
+               'subhead': '□ 소제목', 'lead': '❍ 머리 문단', 'item': '○ 항목', 'dash': '- 항목', 'dot': '‧ 항목', 'note': '※ 참고',
+               'arrow': '⇒ 결과', 'point': '① 원 번호 줄', 'box': '◈ 강조 상자'}
+FALLBACKS = {'heading1': ['task', 'subhead'], 'heading2': ['heading1'], 'heading3': ['heading2'], 'task': ['heading1', 'subhead'],
+             'subhead': ['task', 'heading1'], 'lead': ['item'], 'dash': ['item'], 'dot': ['dash'], 'note': ['dash'], 'arrow': ['dash'],
+             'point': ['item'], 'box': ['lead']}
+TABLE_ROLES = {'schedule': '업무·일정 목록', 'grid': '구분·내용 표', 'steps': '가로 단계 흐름', 'targets': '대상별 현황', 'indicators': '과제별 성과지표'}
+COVER_FIELDS = ('title', 'subtitle', 'date', 'organization', 'department')
+# A cover value without a place on this template's cover is added to another field, never dropped.
+COVER_CARRY = {'subtitle': ('title', ' - '), 'date': ('organization', ' · '), 'department': ('organization', ' · ')}
 STEP_OPS = ('text', 'section', 'insert', 'pageNumbers', 'boxWidth', 'pageBreak')
 MAX_NODES, MAX_ROWS, MAX_TEXT, MAX_CELL_PARAGRAPHS = 400, 100, 2000, 20
 HP = '{http://www.hancom.co.kr/hwpml/2011/paragraph}'
@@ -220,11 +233,76 @@ def fitted_instance(part, values, target):
             out.writestr(info, data[info.filename])
 
 
-def build_plan(manifest, outline, tables_dir=None):
+def _role_key(kind, level=None):
+    return f'heading{level}' if kind == 'heading' else kind
+
+
+def _has_role(parts, role):
+    kinds = {_role_key(p['kind'], p.get('level')) for p in parts.values()}
+    return role in kinds or role == 'chapter' and 'chapter_first' in kinds
+
+
+def resolve_role(parts, rules, role, seen=()):
+    """The role that draws role on this template: itself, else the first available one down its fallback chain."""
+    if _has_role(parts, role):
+        return role
+    for candidate in {**FALLBACKS, **rules.get('fallbacks', {})}.get(role, []):
+        if candidate not in seen:
+            found = resolve_role(parts, rules, candidate, (*seen, role))
+            if found:
+                return found
+    return None
+
+
+def table_parts(parts):
+    return {name: part for name, part in parts.items() if part['kind'] == 'table'}
+
+
+def resolve_table(parts, node, where):
+    """The table part for an outline table: by part name, or by role and cell count with a same-size fallback."""
+    tables = table_parts(parts)
+    listing = ', '.join(f'{p["table"].get("role", "grid")}({n}, 칸 {p["table"]["unitCells"]})' for n, p in tables.items())
+    if 'part' in node:
+        need(node['part'] in tables, f'{where}: 표 부품 {node["part"]!r}이 양식에 없습니다. 이 양식의 표: {listing}')
+        return node['part'], None
+    rows = node.get('rows')
+    width = len(rows[0]) if isinstance(rows, list) and rows and isinstance(rows[0], list) else None
+    same_role = [n for n, p in tables.items() if p['table'].get('role', 'grid') == node['role']]
+    pick = [n for n in same_role if tables[n]['table']['unitCells'] == width] or (same_role if len(same_role) == 1 else [])
+    if pick:
+        return pick[0], None
+    sized = sorted((n for n, p in tables.items() if p['table']['unitCells'] == width and p['table']['repeat']),
+                   key=lambda n: tables[n]['table'].get('role', 'grid') != 'grid')
+    need(sized, f'{where}: 이 양식에 {node["role"]!r} 표나 칸 {width}개 반복 표가 없습니다. 이 양식의 표: {listing}')
+    return sized[0], tables[sized[0]]['table'].get('role', 'grid')
+
+
+def describe(manifest):
+    """What an outline can use on this template: roles drawn as themselves or by a substitute, tables and cover fields."""
+    parts, rules = manifest['parts'], manifest['rules']
+    roles = {role: resolve_role(parts, rules, role) for role in ROLE_LABELS}
+    fields = next(p for p in parts.values() if p['kind'] == 'cover')['placeholder']
+    return dict(
+        id=manifest['id'], label=manifest['label'],
+        roles={role: ROLE_LABELS[role] for role, used in roles.items() if used == role},
+        substitutes={role: used for role, used in roles.items() if used and used != role},
+        unavailable=[role for role, used in roles.items() if not used],
+        tables=[dict(part=name, role=p['table'].get('role', 'grid'), roleLabel=TABLE_ROLES.get(p['table'].get('role', 'grid')),
+                     cells=p['table']['unitCells'], columns=p['table'].get('columns') or p['table']['header'], header=p['table']['header'],
+                     repeat=p['table']['repeat']) for name, p in table_parts(parts).items()],
+        cover=dict(fields=list(fields), required=[k for k in ('title', 'date') if k in fields],
+                   carried={k: COVER_CARRY[k][0] for k in COVER_FIELDS if k not in fields and k in COVER_CARRY}),
+        summary=any(p['kind'] == 'summary' for p in parts.values()),
+        textBeforeFirstChapter=bool(rules.get('textBeforeFirstChapter')))
+
+
+def build_plan(manifest, outline, tables_dir=None, notes=None):
     """Validate the outline against the template and resolve it into native steps.
 
-    Table nodes are written as part copies into tables_dir (a new folder)."""
+    Table nodes are written as part copies into tables_dir (a new folder). Roles, table roles and cover
+    fields the template lacks are drawn by substitutes; each substitution is appended to notes."""
     parts, rules = manifest['parts'], manifest['rules']
+    notes = [] if notes is None else notes
     by_kind = {}
     for name, part in parts.items():
         by_kind.setdefault((part['kind'], part.get('level'), part.get('depth', 0), part.get('context')), name)
@@ -239,7 +317,17 @@ def build_plan(manifest, outline, tables_dir=None):
     cover, cover_part = outline.get('cover'), next(n for n, p in parts.items() if p['kind'] == 'cover')
     fields = parts[cover_part]['placeholder']
     required = [key for key in ('title', 'date') if key in fields]
-    need(isinstance(cover, dict) and set(cover) <= set(fields) and set(required) <= set(cover), f'cover 지원 키: {", ".join(fields)} ({"·".join(required)} 필수)')
+    need(isinstance(cover, dict) and set(cover) <= set(fields) | set(COVER_FIELDS) and set(required) <= set(cover),
+         f'cover 지원 키: {", ".join(COVER_FIELDS)} (이 양식은 {"·".join(required)} 필수)')
+    cover = dict(cover)
+    for key in COVER_FIELDS:
+        if key in cover and key not in fields:
+            target, joint = COVER_CARRY[key]
+            need(target in fields, f'cover.{key}: 이 양식 표지에 {key}·{target} 자리가 없습니다. 본문에 넣으세요.')
+            value =_text(cover.pop(key), f'cover.{key}', placeholders, True)
+            if value:
+                cover[target] = joint.join(v for v in (cover.get(target, ''), value) if v)
+                notes.append(dict(at=f'cover.{key}', role=key, used=target, note=f'이 양식 표지에 {key} 자리가 없어 {target}에 붙였습니다.'))
     steps = [dict(op='text', find=place, text=_text(cover.get(key, ''), f'cover.{key}', placeholders, key not in required))
              for key in fields for place in places(fields[key])]
     if rules.get('pageNumbers') and not rules.get('bodyStartsNewSection'):
@@ -267,11 +355,27 @@ def build_plan(manifest, outline, tables_dir=None):
             return ((summary and by_kind.get((kind, level, depth, 'summary'))) or (after and by_kind.get((kind, level, depth, f'after-{after}')))
                     or by_kind.get((kind, level, depth, None)))
 
-        out, counters, tasks, points, level = [], [0, 0, 0, 0], 0, 0, 0
+        def substitute(node, where):
+            """The node redrawn with the role this template has for it (the same node when the role exists)."""
+            kind = node['t']
+            if kind not in ROLE_LABELS and kind != 'heading' or kind == 'heading' and node.get('level') not in (1, 2, 3):
+                return node  # unknown kinds and malformed headings are rejected below
+            role = _role_key(kind, node.get('level'))
+            used = resolve_role(parts, rules, role)
+            if used in (None, role):
+                return node
+            notes.append(dict(at=where, role=role, used=used, note=f'{ROLE_LABELS[role]} 부품이 없어 {ROLE_LABELS[used]}로 넣었습니다.'))
+            moved = {k: v for k, v in node.items() if k not in ('t', 'level')}
+            if role in KIND_SYMBOLS and isinstance(moved.get('text'), str):  # the symbol typed for the original role
+                moved['text'] = re.sub(rf'^\s*[{re.escape(KIND_SYMBOLS[role])}]\s+', '', moved['text']) or moved['text']
+            return dict(moved, t='heading', level=int(used[-1])) if used.startswith('heading') else dict(moved, t=used)
+
+        out, counters, tasks, points, level, previous = [], [0, 0, 0, 0], 0, 0, 0, None
         for position, node in enumerate(nodes, 1):
             where = f'{prefix}[{position}]'
-            need(isinstance(node, dict) and 't' in node, f'{where}: t가 필요합니다.')
-            kind, after = node['t'], position > 1 and nodes[position - 2]['t']
+            need(isinstance(node, dict) and isinstance(node.get('t'), str), f'{where}: t가 필요합니다.')
+            node = substitute(node, where)
+            kind, after, previous = node['t'], previous, node['t']  # after: the kind drawn just before this node
             if kind == 'chapter':
                 need(set(node) == {'t', 'text'}, f'{where}: chapter는 t, text만 받습니다.')
                 counters, tasks, points, level = [counters[0] + 1, 0, 0, 0], 0, 0, 0
@@ -324,9 +428,13 @@ def build_plan(manifest, outline, tables_dir=None):
                 text = re.sub(rf'^\s*[{re.escape(KIND_SYMBOLS[kind])}]\s+', '', text) or text
                 out += [dict(op='insert', part=name, keepSection=0), dict(op='text', find=parts[name]['placeholder'], text=text)]
             elif kind == 'table':
-                need({'t', 'part', 'rows'} <= set(node) <= {'t', 'part', 'rows', 'header'}, f'{where}: table은 t, part, rows와 선택 header만 받습니다.')
-                part = parts.get(node['part'])
-                need(part is not None and part['kind'] == 'table', f'{where}: 표 부품 {node["part"]!r}이 양식에 없습니다.')
+                need({'t', 'rows'} <= set(node) <= {'t', 'role', 'part', 'rows', 'header'} and len({'role', 'part'} & set(node)) == 1,
+                     f'{where}: table은 t, rows, role(또는 part) 하나와 선택 header만 받습니다.')
+                table_name, used = resolve_table(parts, node, where)
+                if used:
+                    notes.append(dict(at=where, role=f'table:{node["role"]}', used=f'table:{used}',
+                                      note=f'{node["role"]} 표가 없어 칸 수가 같은 {table_name} 표({used})로 넣었습니다.'))
+                part = parts[table_name]
                 spec, rows, header = part['table'], node['rows'], node.get('header')
                 if header is not None:
                     need(isinstance(header, list) and len(header) == spec['headerCells'], f'{where}: header 칸 수가 {spec["headerCells"]}이 아닙니다.')
@@ -338,15 +446,14 @@ def build_plan(manifest, outline, tables_dir=None):
                     need(isinstance(row, list) and len(row) == spec['unitCells'], f'{where}: {r}행의 칸 수가 {spec["unitCells"]}이 아닙니다.')
                     rows[r - 1] = [_cell(cell, f'{where}.rows[{r}][{c}]', placeholders) for c, cell in enumerate(row, 1)]
                 need(tables_dir is not None, 'table nodes need a folder for table copies')
-                name = f'{node["part"]}@{len(instances) + 1}'
-                target = Path(tables_dir) / f'{node["part"]}-{len(instances) + 1}.hwpx'
+                name = f'{table_name}@{len(instances) + 1}'
+                target = Path(tables_dir) / f'{table_name}-{len(instances) + 1}.hwpx'
                 count = table_instance(part, header, rows, target)
                 instances[name] = dict(path=str(target.resolve()), sha256=sha(target))
                 texts = [p for row in [header or [], *rows] for cell in row for p in (cell if isinstance(cell, list) else [cell]) if p]
                 out.append(dict(op='insert', part=name, keepSection=0, expect=dict(tableRows=count, texts=texts)))
             else:
-                known = sorted({p['kind'] for p in parts.values()} & {'heading', 'task', 'point', 'table', *TEXT_KINDS})
-                raise ValueError(f'{where}: 알 수 없는 t {kind!r} (chapter, {", ".join(known)})')
+                raise ValueError(f'{where}: 알 수 없는 t {kind!r} (공통 역할: chapter, heading(level 1~3), {", ".join(r for r in ROLE_LABELS if r != "chapter" and not r.startswith("heading"))}, table)')
         return out
 
     summary = outline.get('summary')

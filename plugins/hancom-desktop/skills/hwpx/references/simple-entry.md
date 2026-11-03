@@ -70,13 +70,14 @@ $planCatalog = Join-Path $taskSkillDir 'assets/document-templates/full-plans.jso
  "nodes":[{"t":"chapter","text":"평가 개요"},
           {"t":"heading","level":1,"text":"평가의 목적"},
           {"t":"item","text":"성취 수준을 진단함."},{"t":"dash","text":"세부 내용"},{"t":"dot","text":"하위 내용"},{"t":"note","text":"참고 사항"},
-          {"t":"table","part":"schedule","rows":[["시행계획 안내","3. 15.(월)",""]]}]}
+          {"t":"table","role":"schedule","rows":[["시행계획 안내","3. 15.(월)",""]]}]}
 ```
 
 - 번호(Ⅰ. 1. 가. 1))는 개요에서 만든다. 문구에 번호를 넣지 않는다. 절을 빼면 뒤 번호가 당겨진다.
 - `cover`의 `title`·`date`는 필수다. `subtitle`(제목 위 작은 줄)·`organization`은 빼면 빈 줄로 남는다.
+- 개요의 `t`·표 역할·표지 항목은 네 양식이 같은 [공통 어휘](#공통-개요-어휘와-양식-조회)를 쓴다.
 - `level` 2는 1 아래, 3은 2 아래에만 둔다. 3단계 제목 아래 항목은 원본처럼 한 단계 깊게 들여 쓴다.
-- 표 부품: `schedule`(주요 업무·추진 일정·비고 3열, 첫 열 앞에 ` ○ `), `two-column`(구분·내용 2열). `rows`의 한 항목이 표의 반복 묶음 하나이며 1~100개를 넣는다. 묶음의 칸은 왼쪽 위부터 읽는 순서로 manifest `unitCells`개를 적는다(두 부품은 한 줄 묶음이라 열 수와 같다). 칸 하나에 여러 문단이 필요하면 문자열 목록(`["가", "나"]`)을 쓰고 빈 칸은 `""`이다. 제목 행은 선택 `"header":["학년군","주요 활동"]`(`headerCells`개)로 바꾸며, 빼면 부품의 제목을 쓴다. 묶음이 여러 줄(`unitRows`)이고 칸이 합쳐진 표도 같은 방식이며, `repeat`가 false인 표는 묶음 하나만 받는다.
+- 표(역할): `schedule`(주요 업무·추진 일정·비고 3열, 첫 열 앞에 ` ○ `), `grid`(부품 `two-column`, 구분·내용 2열). `rows`의 한 항목이 표의 반복 묶음 하나이며 1~100개를 넣는다. 묶음의 칸은 왼쪽 위부터 읽는 순서로 manifest `unitCells`개를 적는다(두 부품은 한 줄 묶음이라 열 수와 같다). 칸 하나에 여러 문단이 필요하면 문자열 목록(`["가", "나"]`)을 쓰고 빈 칸은 `""`이다. 제목 행은 선택 `"header":["학년군","주요 활동"]`(`headerCells`개)로 바꾸며, 빼면 부품의 제목을 쓴다. 묶음이 여러 줄(`unitRows`)이고 칸이 합쳐진 표도 같은 방식이며, `repeat`가 false인 표는 묶음 하나만 받는다.
 - 장 제목 상자는 제목 길이에 맞춰 넓어진다. 본문 폭을 넘는 제목은 실행 전에 거부한다.
 - 문구는 줄바꿈·탭 없이 한 문단씩 넣는다. 빈 문구와 `[항목]` 같은 자리표시 문구는 거부한다.
 
@@ -91,11 +92,11 @@ $planCatalog = Join-Path $taskSkillDir 'assets/document-templates/full-plans.jso
  "nodes":[{"t":"chapter","text":"추진 배경"},{"t":"subhead","text":"추진 필요성"},{"t":"item","text":"배경"},
           {"t":"chapter","text":"중점 추진 과제"},{"t":"task","text":"첫째 과제"},{"t":"item","text":"(목표) ..."},{"t":"dash","text":"세부"},
           {"t":"chapter","text":"사업 추진 계획"},{"t":"heading","level":1,"text":"성과 관리"},{"t":"box","text":"핵심 문장"},
-          {"t":"table","part":"indicators","rows":[["과제",["지표 1"],["지표 2"]]]}]}
+          {"t":"table","role":"indicators","rows":[["과제",["지표 1"],["지표 2"]]]}]}
 ```
 
 - `t`: `chapter`(Ⅰ 띠, 요약 안에서는 Ⅰ. 글자 제목), `heading` level 1(번호 탭 1·2·3, 긴 제목이면 탭이 넓어진다), `task`(네모 번호 과제 제목, 장·탭마다 다시 1부터), `subhead`(□ 소제목, 번호 없음), `point`(① 원 번호 줄, 장마다 1부터), `item`·`dash`·`arrow`·`note`, `box`(◈ 상자), `table`. 요약 안의 `item`·`task`는 요약 쪽 간격의 부품을 쓴다.
-- 표 부품: `three-column`(영역·내용·배점 3열, 제목 행은 `header`로 바꾼다), `indicators`(과제 칸이 두 줄에 걸친 2줄 묶음: 칸은 과제·지표 1·지표 2 세 개).
+- 표(역할): `grid`(부품 `three-column`, 영역·내용·배점 3열, 제목 행은 `header`로 바꾼다), `indicators`(과제 칸이 두 줄에 걸친 2줄 묶음: 칸은 과제·지표 1·지표 2 세 개).
 
 ### 학교형·교육사업형 조립: `plan-school`·`plan-education`
 
@@ -109,15 +110,41 @@ $planCatalog = Join-Path $taskSkillDir 'assets/document-templates/full-plans.jso
           {"t":"chapter","text":"세부 운영 계획"},{"t":"task","text":"운영 개요"},
           {"t":"item","text":"대상: 전교생"},{"t":"item","text":"운영 내용"},{"t":"dash","text":"월요일 | 활동"},
           {"t":"item","text":"추진 절차"},
-          {"t":"table","part":"steps","rows":[["준비","운영","공유","평가","담당 / 시기","담당 / 시기","담당 / 시기","담당 / 시기"]]},
+          {"t":"table","role":"steps","rows":[["준비","운영","공유","평가","담당 / 시기","담당 / 시기","담당 / 시기","담당 / 시기"]]},
           {"t":"task","text":"기대 효과"},{"t":"lead","text":"효과 문장"}]}
 ```
 
 - `t`: `subhead`(□ 막대 제목), `lead`(❍ 문단), `chapter`(번호 탭 1·2·3, 긴 제목이면 탭이 넓어진다), `task`(네모 번호 과제 제목, 장마다 다시 1부터), `item`(◦), `dash`(-), `table`. "목적: …"처럼 이름표가 붙는 줄은 `item` 문구에 그대로 쓴다.
-- `plan-school`: 표지 없이 첫 쪽 머리에 제목 띠와 작성 부서가 온다. `cover`는 `title`(필수)·`organization`. 표 부품 `steps`는 ⇨로 이은 4단계 절차표로 묶음 하나(칸 8개: 단계 4개 → 각 단계의 담당·시기 4개)만 받는다. 쪽 번호는 없다(완성형과 같다).
-- `plan-education`: 표지 쪽 다음에 본문이 온다. `cover`는 `title`·`date`(필수), `subtitle`(제목 위 줄), `organization`이며 `title`·`organization`은 본문 첫 쪽 머리에도 함께 들어간다. 표 부품 `targets`는 순·대상·담당·사업·활동·기간·비고 6칸 반복 표다. 쪽 번호는 본문 쪽부터 붙는다.
+- `plan-school`: 표지 없이 첫 쪽 머리에 제목 띠와 작성 부서가 온다. `cover`는 `title`(필수)·`organization`. 표 `steps`는 ⇨로 이은 4단계 절차표로 묶음 하나(칸 8개: 단계 4개 → 각 단계의 담당·시기 4개)만 받는다. 쪽 번호는 없다(완성형과 같다).
+- `plan-education`: 표지 쪽 다음에 본문이 온다. `cover`는 `title`·`date`(필수), `subtitle`(제목 위 줄), `organization`이며 `title`·`organization`은 본문 첫 쪽 머리에도 함께 들어간다. 표 `targets`는 순·대상·담당·사업·활동·기간·비고 6칸 반복 표다. 쪽 번호는 본문 쪽부터 붙는다.
 
-입력 검사가 끝난 뒤 한글을 한 번 열어 표지 부품에 장·제목·항목·표 부품을 차례로 붙이고 저장·재열기·PDF를 만든다. 결과의 `assembly`는 저장본에 자리표시가 남지 않았는지와 요청한 문구·표 행 수를 확인한 값이며, `wrapAlignment`·`pageLayout`은 PDF 배치 경고다. `PASS_NATIVE` 뒤에도 쪽 이미지를 확인한다([preview](#준비된-블록-조합)). 내 양식을 부품으로 등록하는 방법은 저장소의 `tools/build_assembly_template.py`(부품 지도 → 블록 저장 → 자리표시·정규화 → manifest)이며, 등록한 폴더는 `--catalog`로 지정한다.
+### 공통 개요 어휘와 양식 조회
+
+네 양식(그리고 앞으로 등록하는 양식)은 같은 개요 어휘를 쓴다. 양식에 없는 역할은 아래 순서로 가까운 부품이 대신 그리고, 결과의 `substitutions`에 위치·원래 역할·대신 쓴 역할을 남긴다. 대신 그린 곳이 있으면 사용자에게 알린다(번호가 새로 생기거나 기호가 바뀔 수 있다).
+
+| `t` | 뜻 | 없을 때 |
+|---|---|---|
+| `chapter` | 장(양식에 따라 Ⅰ 상자·Ⅰ 띠·번호 탭) | 모든 양식에 있음 |
+| `heading` level 1·2·3 | 1. / 가. / 1) 제목 | 2→1, 3→2, 1→`task`→`subhead` |
+| `task` | 네모 번호 과제 ①② | `heading` 1 → `subhead` |
+| `subhead` | □ 번호 없는 소제목 | `task` → `heading` 1 |
+| `lead` | ❍ 머리 문단 | `item` |
+| `item` / `dash` / `dot` | ○ / - / ‧ 항목 | `dot`→`dash`→`item` |
+| `note` / `arrow` | ※ 참고 / ⇒ 결과 | `dash` |
+| `point` | ① 원 번호 줄 | `item` |
+| `box` | ◈ 강조 상자 | `lead` → `item` |
+
+- 표는 `"role"`로 고른다: `schedule`(업무·일정 목록), `grid`(구분·내용), `steps`(가로 단계 흐름), `targets`(대상별 현황), `indicators`(과제별 성과지표). 같은 역할이 없으면 칸 수가 같은 반복 표가 대신하고, 그것도 없으면 이 양식의 표 목록과 칸 수를 알려 주며 거부한다. 부품 이름(`"part"`)으로 고르는 옛 개요도 받는다.
+- 표지 항목은 `title`·`subtitle`·`date`·`organization`·`department`. 이 양식 표지에 자리가 없으면 버리지 않고 `subtitle`은 제목 뒤에 " - ", `date`·`department`는 `organization` 뒤에 " · "로 붙인다. 필수는 양식에 자리가 있는 `title`·`date`다.
+- 개요를 쓰기 전에 고른 양식이 무엇을 갖췄는지 조회한다(한글을 열지 않는다):
+
+```powershell
+& $taskLauncher assemble --template plan-school --describe
+```
+
+결과의 `roles`는 그대로 그리는 역할, `substitutes`는 대신 그리는 역할, `tables`는 표 역할·칸 수·칸 이름, `cover`는 표지 항목·필수·붙여 넣는 곳이다.
+
+입력 검사가 끝난 뒤 한글을 한 번 열어 표지 부품에 장·제목·항목·표 부품을 차례로 붙이고 저장·재열기·PDF를 만든다. 결과의 `assembly`는 저장본에 자리표시가 남지 않았는지와 요청한 문구·표 행 수를 확인한 값이며, `wrapAlignment`·`pageLayout`은 PDF 배치 경고다. `PASS_NATIVE` 뒤에도 쪽 이미지를 확인한다([preview](#준비된-블록-조합)). 내 양식을 부품으로 등록하는 방법은 저장소의 `tools/build_assembly_template.py`(부품 지도 → 블록 저장 → 자리표시·정규화 → manifest)이며, 등록한 폴더는 `--catalog`로 지정한다. 부품 지도는 위 공통 어휘의 역할·표 역할만 쓴다. 양식 폴더의 `reproduction/outline.json`(기준 개요)·`expected.json`(기대 쪽·줄 위치)은 저장소의 `tools/check_assembly_reproduction.py`가 모든 양식에 같은 방법으로 조립·비교하는 등록 합격 기준이다.
 
 ## 준비된 양식 채우기
 

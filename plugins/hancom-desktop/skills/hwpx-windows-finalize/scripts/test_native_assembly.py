@@ -255,7 +255,7 @@ class ProjectTemplateTest(unittest.TestCase):
         self.assertEqual(texts, ['참고 사항', '항목', '-1℃ 기준', '핵심 문장'])
 
     def test_unknown_kind_lists_the_kinds_of_this_template(self):
-        with self.assertRaisesRegex(ValueError, 'box.*subhead.*task'):
+        with self.assertRaisesRegex(ValueError, "'bullet'.*공통 역할.*subhead.*box"):
             self.plan(self.outline([{'t': 'chapter', 'text': '계획'}, {'t': 'bullet', 'text': 'x'}]))
 
 
@@ -306,6 +306,71 @@ class SchoolEducationTemplateTest(unittest.TestCase):
         self.assertEqual(sum(s['op'] == 'pageNumbers' for s in plan['steps']), 1)
         with self.assertRaisesRegex(ValueError, 'title·date 필수'):
             self.plan('plan-education', {'title': '가상 사업'}, [{'t': 'chapter', 'text': '운영'}])
+
+
+
+class CommonVocabularyTest(unittest.TestCase):
+    """One outline vocabulary for every template: missing roles, tables and cover fields are drawn by substitutes."""
+
+    def plan(self, template_id, cover, nodes):
+        temp = tempfile.TemporaryDirectory(); self.addCleanup(temp.cleanup)
+        notes = []
+        value = {'schema': a.OUTLINE_SCHEMA, 'template': template_id, 'cover': cover, 'nodes': nodes}
+        return a.build_plan(a.load_template(CATALOG, template_id), value, Path(temp.name) / 'tables', notes), notes
+
+    def test_missing_roles_take_the_next_role_down_the_chain(self):
+        plan, notes = self.plan('plan-school', {'title': '가상'}, [
+            {'t': 'chapter', 'text': '운영'}, {'t': 'heading', 'level': 1, 'text': '개요'}, {'t': 'heading', 'level': 2, 'text': '세부'},
+            {'t': 'item', 'text': '항목'}, {'t': 'dot', 'text': '‧ 하위'}, {'t': 'note', 'text': '※ 참고'}, {'t': 'box', 'text': '강조'}])
+        self.assertEqual([(n['at'], n['role'], n['used']) for n in notes],
+                         [('nodes[2]', 'heading1', 'task'), ('nodes[3]', 'heading2', 'task'), ('nodes[5]', 'dot', 'dash'),
+                          ('nodes[6]', 'note', 'dash'), ('nodes[7]', 'box', 'lead')])
+        texts = [(s['find'], s['text']) for s in plan['steps'] if s['op'] == 'text']
+        self.assertEqual([t for f, t in texts if f == '[과제 번호]'], [chr(0xF02B1), chr(0xF02B2)])
+        self.assertIn(('[항목]', '하위'), texts)  # the typed symbol of the original role is dropped too
+
+    def test_subhead_on_the_official_template_becomes_a_numbered_heading(self):
+        _, notes = self.plan('plan-official', {'title': '가상', 'date': '2027.'},
+                             [{'t': 'chapter', 'text': '개요'}, {'t': 'subhead', 'text': '소제목'}, {'t': 'lead', 'text': '문단'}])
+        self.assertEqual([(n['role'], n['used']) for n in notes], [('subhead', 'heading1'), ('lead', 'item')])
+
+    def test_tables_are_picked_by_role_then_by_cell_count(self):
+        plan, notes = self.plan('plan-school', {'title': '가상'}, [
+            {'t': 'chapter', 'text': '일정'}, {'t': 'table', 'role': 'steps', 'rows': [['가', '나', '다', '라', '1', '2', '3', '4']]}])
+        self.assertEqual(notes, [])
+        self.assertTrue(any(step.get('part', '').startswith('steps@') for step in plan['steps']))
+        plan, notes = self.plan('plan-education', {'title': '가상', 'date': '2027.'}, [
+            {'t': 'chapter', 'text': '일정'}, {'t': 'table', 'role': 'schedule', 'rows': [['1', '가', '나', '다', '라', '']]}])
+        self.assertEqual([(n['role'], n['used']) for n in notes], [('table:schedule', 'table:targets')])
+        with self.assertRaisesRegex(ValueError, r"칸 3개 반복 표가 없습니다.*targets\(targets, 칸 6\)"):
+            self.plan('plan-education', {'title': '가상', 'date': '2027.'},
+                      [{'t': 'chapter', 'text': '일정'}, {'t': 'table', 'role': 'schedule', 'rows': [['업무', '일정', '']]}])
+
+    def test_cover_values_without_a_place_are_carried_not_dropped(self):
+        plan, notes = self.plan('plan-school', {'title': '가상', 'subtitle': '부제', 'date': '2027. 3.', 'organization': '가상학교', 'department': '교무부'},
+                                [{'t': 'chapter', 'text': '운영'}])
+        texts = dict((s['find'], s['text']) for s in plan['steps'] if s['op'] == 'text')
+        self.assertEqual(texts['[계획서 제목]'], '가상 - 부제')
+        self.assertEqual(texts['[학교·작성 부서]'], '가상학교 · 2027. 3. · 교무부')
+        self.assertEqual([n['role'] for n in notes], ['subtitle', 'date', 'department'])
+
+    def test_describe_lists_roles_substitutes_tables_and_cover(self):
+        info = a.describe(a.load_template(CATALOG, 'plan-education'))
+        self.assertIn('lead', info['roles'])
+        self.assertEqual(info['substitutes']['heading1'], 'task')
+        self.assertEqual([(t['part'], t['role'], t['cells']) for t in info['tables']], [('targets', 'targets', 6)])
+        self.assertEqual(info['cover']['required'], ['title', 'date'])
+        self.assertEqual(info['cover']['carried'], {'department': 'organization'})
+
+    def test_reference_outlines_need_no_substitutes(self):
+        for folder in sorted(p for p in CATALOG.iterdir() if (p / 'reproduction/outline.json').is_file()):
+            temp = tempfile.TemporaryDirectory(); self.addCleanup(temp.cleanup)
+            notes = []
+            a.build_plan(a.load_template(CATALOG, folder.name), json.loads((folder / 'reproduction/outline.json').read_text(encoding='utf-8')),
+                         Path(temp.name) / 'tables', notes)
+            self.assertEqual(notes, [], folder.name)
+            expected = json.loads((folder / 'reproduction/expected.json').read_text(encoding='utf-8'))
+            self.assertGreater(expected['pages'], 0, folder.name)
 
 
 if __name__ == '__main__':

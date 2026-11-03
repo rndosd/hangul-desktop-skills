@@ -36,10 +36,10 @@
     "dash": {"range": [27, 28], "kind": "dash", "placeholder": "[항목]", "baseLeftHwp": 0},
     "heading1": {"range": [43, 44], "kind": "heading", "level": 1, "replace": {"2": "[번호]", "운영 방향": "[제목]"},
       "placeholder": "[제목]", "numberPlaceholder": "[번호]", "numbering": "digit", "fitTitleCell": true},
-    "three-column": {"range": [148, 149], "kind": "table", "table": {"size": {"rowHeightHwp": 1800, "columnWidthsHwp": [8516, 29191, 8500],
+    "three-column": {"range": [148, 149], "kind": "table", "table": {"role": "grid", "size": {"rowHeightHwp": 1800, "columnWidthsHwp": [8516, 29191, 8500],
       "outMarginHwp": {"top": 600, "bottom": 2100}, "holderMargins": {"left": 0, "intent": 0}, "holderAlign": "LEFT"}}, "fromAltSource": true},
     "box": {"range": [51, 52], "kind": "box", "replace": {}, "placeholder": "[평가·환류 개요]"},
-    "indicators": {"range": [56, 57], "kind": "table", "table": {"unitRows": 2}},
+    "indicators": {"range": [56, 57], "kind": "table", "table": {"role": "indicators", "columns": ["과제", "지표 1", "지표 2"], "unitRows": 2}},
     "note": {"range": [31, 32], "kind": "note", "placeholder": "[항목]", "baseLeftHwp": 0, "fromAltSource": true}
   }
 }

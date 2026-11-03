@@ -24,6 +24,6 @@
       "placeholder": "[과제 제목]", "numberPlaceholder": "[과제 번호]", "numbering": "boxed"},
     "item": {"range": [12, 13], "kind": "item", "placeholder": "[항목]", "baseLeftHwp": 0},
     "dash": {"range": [16, 17], "kind": "dash", "placeholder": "[항목]", "baseLeftHwp": 992},
-    "steps": {"range": [31, 32], "kind": "table", "table": {"headerRows": 0, "unitRows": 2, "repeat": false, "fixedTexts": ["⇨"]}}
+    "steps": {"range": [31, 32], "kind": "table", "table": {"role": "steps", "columns": ["단계 1", "단계 2", "단계 3", "단계 4", "단계 1 담당·시기", "단계 2 담당·시기", "단계 3 담당·시기", "단계 4 담당·시기"], "headerRows": 0, "unitRows": 2, "repeat": false, "fixedTexts": ["⇨"]}}
   }
 }

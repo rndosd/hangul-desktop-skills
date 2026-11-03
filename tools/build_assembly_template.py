@@ -30,7 +30,8 @@ page. "fromAltSource" parts come from the map's altSource (the original of a pre
 map's "rules" override the default page numbering, section and spacer rules ("textBeforeFirstChapter"
 lets an outline open with bars and text). Other part options: "tableAsChar" saves a floating table from a
 copy where it sits in the line, "keepFaces" keeps a cover's display faces, "context": "after-<kind>" marks a
-spacing variant used right after an outline node of that kind, table "fixedTexts" cells (step arrows) keep
+spacing variant used right after an outline node of that kind, table "role" (schedule, grid, steps, targets,
+indicators) and "columns" (names of the unit cells) let an outline pick a table by role, table "fixedTexts" cells (step arrows) keep
 their text and take no value, and table "holderLineSpacing" sets the holding line's spacing. A cover field
 may name a list of placeholders that take the same value.
 
@@ -280,6 +281,7 @@ def normalize_table(section, header_xml, spec):
     table.find(HP + 'sz').set('height', str(sum(heights)))  # rows dropped; Hangul lays out the real height
     return dict(headerRows=heads, unitRows=size, headerCells=len(header_cells), unitCells=len(unit_cells),
                 repeat=spec.get('repeat', True), header=header, **({'fixedCells': fixed} if fixed else {}),
+                role=spec.get('role', 'grid'), **({'columns': spec['columns']} if spec.get('columns') else {}),
                 **({'firstColumnPrefix': spec['firstColumnPrefix']} if spec.get('firstColumnPrefix') else {}))
 
 

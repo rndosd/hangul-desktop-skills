@@ -19,7 +19,7 @@
     "subhead": {"range": [29, 30], "kind": "subhead", "placeholder": "[소제목]"},
     "subhead_after_table": {"range": [36, 37], "kind": "subhead", "context": "after-table", "placeholder": "[소제목]"},
     "lead": {"range": [30, 31], "kind": "lead", "placeholder": "[항목]", "baseLeftHwp": 0},
-    "targets": {"range": [35, 36], "kind": "table", "tableAsChar": true, "table": {"headerRows": 1, "unitRows": 1, "holderLineSpacing": 100, "size": {"outMarginHwp": {"bottom": 1230}}}},
+    "targets": {"range": [35, 36], "kind": "table", "tableAsChar": true, "table": {"role": "targets", "headerRows": 1, "unitRows": 1, "holderLineSpacing": 100, "size": {"outMarginHwp": {"bottom": 1230}}}},
     "chapter_first": {"range": [38, 39], "kind": "chapter_first", "replace": {"1": "[장 번호]", "교육활동 운영": "[장 제목]"},
       "placeholder": "[장 제목]", "numberPlaceholder": "[장 번호]", "numbering": "digit", "fitTitleCell": true},
     "chapter": {"range": [47, 48], "kind": "chapter", "replace": {"2": "[장 번호]", "교육활동 지원": "[장 제목]"},

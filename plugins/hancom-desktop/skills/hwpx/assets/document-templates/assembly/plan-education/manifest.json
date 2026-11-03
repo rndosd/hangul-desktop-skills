@@ -81,7 +81,8 @@
      "사업·활동",
      "기간",
      "비고"
-    ]
+    ],
+    "role": "targets"
    },
    "file": "parts/targets.hwpx",
    "sha256": "7dcb149c54b38a3a662a1b5103d433a6a3a5b2f9bb283faaba4cf593f9f888e2"

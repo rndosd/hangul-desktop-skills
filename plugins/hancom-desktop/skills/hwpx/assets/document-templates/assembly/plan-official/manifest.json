@@ -358,7 +358,8 @@
      "추 진 일 정",
      "비    고"
     ],
-    "firstColumnPrefix": " ○ "
+    "firstColumnPrefix": " ○ ",
+    "role": "schedule"
    },
    "file": "parts/schedule.hwpx",
    "sha256": "bece2ef0b48dd24b009278fa2af718fd578c9c578f88fe07d1fe5883a55f4c79"
@@ -374,7 +375,8 @@
     "header": [
      "구분",
      "내용"
-    ]
+    ],
+    "role": "grid"
    },
    "file": "parts/two-column.hwpx",
    "sha256": "3756bb98cfb363e5be576bea28ab71fe8d93a0217ac0a8ac2bae28591c8a689a"
