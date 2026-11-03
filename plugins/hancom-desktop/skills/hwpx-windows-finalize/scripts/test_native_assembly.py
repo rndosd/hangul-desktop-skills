@@ -248,6 +248,12 @@ class ProjectTemplateTest(unittest.TestCase):
         width = lambda path: int(next(ElementTree.fromstring(zipfile.ZipFile(path).read('Contents/section0.xml')).iter(a.HP + 'tbl')).find(a.HP + 'sz').get('width'))
         self.assertGreater(width(plan['parts'][step['part']]['path']), width(self.manifest['parts']['heading1']['path']))
 
+    def test_symbol_typed_in_the_text_is_not_drawn_twice(self):
+        nodes = [{'t': 'chapter', 'text': '계획'}, {'t': 'note', 'text': '※ 참고 사항'}, {'t': 'item', 'text': '◦ 항목'},
+                 {'t': 'dash', 'text': '-1℃ 기준'}, {'t': 'box', 'text': '◈ 핵심 문장'}]
+        texts = [s['text'] for s in self.plan(self.outline(nodes))['steps'] if s['op'] == 'text' and s['find'] in ('[항목]', '[평가·환류 개요]')]
+        self.assertEqual(texts, ['참고 사항', '항목', '-1℃ 기준', '핵심 문장'])
+
     def test_unknown_kind_lists_the_kinds_of_this_template(self):
         with self.assertRaisesRegex(ValueError, 'box.*subhead.*task'):
             self.plan(self.outline([{'t': 'chapter', 'text': '계획'}, {'t': 'bullet', 'text': 'x'}]))

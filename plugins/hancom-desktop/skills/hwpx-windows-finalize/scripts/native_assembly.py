@@ -26,6 +26,8 @@ ITEM_KINDS = ('item', 'dash', 'dot', 'note', 'arrow')
 # One placeholder, no numbering: the outline node {"t": kind, "text": ...} fills it.
 TEXT_KINDS = (*ITEM_KINDS, 'box', 'subhead')
 PART_KINDS = ('cover', 'chapter_first', 'chapter', 'heading', 'task', 'point', 'table', 'spacer', 'summary', 'summary_chapter', *TEXT_KINDS)
+# The symbol each text part already draws; the same symbol typed at the start of the text is dropped.
+KIND_SYMBOLS = {'item': '◦○∘•', 'dash': '-–', 'dot': '‧·ㆍ', 'note': '※', 'arrow': '⇒→', 'subhead': '□', 'box': '◈'}
 BOXED_DIGITS = 20  # Hancom private-use squared digits U+F02B1.., and circled ①..⑳
 STEP_OPS = ('text', 'section', 'insert', 'pageNumbers', 'boxWidth', 'pageBreak')
 MAX_NODES, MAX_ROWS, MAX_TEXT, MAX_CELL_PARAGRAPHS = 400, 100, 2000, 20
@@ -303,8 +305,9 @@ def build_plan(manifest, outline, tables_dir=None):
                 deep = int(level >= rules['deepItemsUnderHeadingLevel'])
                 name = find(kind, None, deep) or find(kind)
                 need(name, f'양식에 {kind} 부품이 없습니다.')
-                out += [dict(op='insert', part=name, keepSection=0),
-                        dict(op='text', find=parts[name]['placeholder'], text=_text(node['text'], where, placeholders))]
+                text = _text(node['text'], where, placeholders)
+                text = re.sub(rf'^\s*[{re.escape(KIND_SYMBOLS[kind])}]\s+', '', text) or text
+                out += [dict(op='insert', part=name, keepSection=0), dict(op='text', find=parts[name]['placeholder'], text=text)]
             elif kind == 'table':
                 need({'t', 'part', 'rows'} <= set(node) <= {'t', 'part', 'rows', 'header'}, f'{where}: table은 t, part, rows와 선택 header만 받습니다.')
                 part = parts.get(node['part'])
