@@ -15,7 +15,7 @@ this tool then rewrites each saved part so that no source wording ships:
                "repeat": false keeps a fixed table filled once. Optionally resized first (map
                "size": width, row and character height, holder margins) so tables from different
                source pages match. Every cell wraps by word, and a prefixed first column is left
-               aligned with a hanging indent
+               aligned with a hanging indent ("prefixColumn" names another column for the prefix)
                calibrated like the items; the holding paragraph gets at least 100% line spacing so
                the next line clears a grown table
   chapter box  kept with the next paragraph, like headings. Hangul renders calibration strings
@@ -29,7 +29,7 @@ table cells, or number and title in separate runs; a prepared source may already
 page. "fromAltSource" parts come from the map's altSource (the original of a prepared source), and the
 map's "rules" override the default page numbering, section and spacer rules ("textBeforeFirstChapter"
 lets an outline open with bars and text). Other part options: "tableAsChar" saves a floating table from a
-copy where it sits in the line, "keepFaces" keeps a cover's display faces, "context": "after-<kind>" marks a
+copy where it sits in the line, "keepFaces" keeps a cover's display faces, "dropPictures" removes its pictures (a logo), "context": "after-<kind>" marks a
 spacing variant used right after an outline node of that kind, table "role" (schedule, grid, steps, targets,
 indicators) and "columns" (names of the unit cells) let an outline pick a table by role, table "fixedTexts" cells (step arrows) keep
 their text and take no value, and table "holderLineSpacing" sets the holding line's spacing. Table "footerRows" keeps the source's last rows (a total or remarks
@@ -232,15 +232,31 @@ def resize_table(table, header_xml, size):
     table.find(HP + 'sz').set('width', str(total))
 
 
-def first_column_shape(header, section, header_rows):
-    """Paragraph format of the first unit cell in the first column; normalize_table gives that cell its own."""
-    cell = next(section.iter(HP + 'tbl')).findall(HP + 'tr')[header_rows].find(HP + 'tc')
+def first_column_shape(header, section, header_rows, column=0):
+    """Paragraph format of the first unit cell in the prefixed column; normalize_table gives that cell its own."""
+    cell = next(section.iter(HP + 'tbl')).findall(HP + 'tr')[header_rows].findall(HP + 'tc')[column]
     return header.find(f'.//{HH}paraPr[@id="{cell.find(f"{HP}subList/{HP}p").get("paraPrIDRef")}"]')
 
 
 def row_span(cell):
     address, span = cell.find(HP + 'cellAddr'), cell.find(HP + 'cellSpan')
     return int(address.get('rowAddr')), int(address.get('rowAddr')) + int(span.get('rowSpan'))
+
+
+def unsqueezed(header_xml, char_id):
+    """A character format like char_id with no negative letter spacing: a source author tightens the spacing of a
+    cell to fit its own text on one line, which would cramp every outline value."""
+    chars = header_xml.find(f'.//{HH}charProperties')
+    original = chars.find(f'{HH}charPr[@id="{char_id}"]')
+    spacing = original.find(HH + 'spacing')
+    if spacing is None or all(int(v) >= 0 for v in spacing.attrib.values()):
+        return char_id
+    clone = copy.deepcopy(original)
+    clone.set('id', str(max(int(c.get('id')) for c in chars) + 1))
+    clone.find(HH + 'spacing').attrib.update({k: '0' for k, v in spacing.attrib.items() if int(v) < 0})
+    chars.append(clone)
+    chars.set('itemCnt', str(len(chars)))
+    return clone.get('id')
 
 
 def normalize_table(section, header_xml, spec):
@@ -302,6 +318,8 @@ def normalize_table(section, header_xml, spec):
             paragraph.set('paraPrIDRef', own_shape(header_xml, paragraph.get('paraPrIDRef'), not spec.get('keepWrap')).get('id'))
     for cell in unit_cells + footer_values:
         sub = cell.find(HP + 'subList')
+        if sub.get('lineWrap') == 'SQUEEZE':  # "한 줄로 입력" shrinks a long outline value to fit one line
+            sub.set('lineWrap', 'BREAK')
         paragraphs = sub.findall(HP + 'p')
         for extra in paragraphs[1:]:
             sub.remove(extra)
@@ -312,8 +330,9 @@ def normalize_table(section, header_xml, spec):
                 keep.remove(child)
         for child in list(runs[0]):
             runs[0].remove(child)
+        runs[0].set('charPrIDRef', unsqueezed(header_xml, runs[0].get('charPrIDRef')))
         shape = own_shape(header_xml, keep.get('paraPrIDRef'), not spec.get('keepWrap'))
-        if cell.find(HP + 'cellAddr').get('colAddr') == '0' and spec.get('firstColumnPrefix') and int(cell.find(HP + 'cellAddr').get('rowAddr')) < heads + size:
+        if cell.find(HP + 'cellAddr').get('colAddr') == str(spec.get('prefixColumn', 0)) and spec.get('firstColumnPrefix') and int(cell.find(HP + 'cellAddr').get('rowAddr')) < heads + size:
             shape.find(HH + 'align').set('horizontal', 'LEFT')  # justified lines widen the space after the prefix
             shape_margin(shape, 'intent', 0)  # calibrate_hanging measures and sets the hanging indent
         keep.set('paraPrIDRef', shape.get('id'))
@@ -326,7 +345,8 @@ def normalize_table(section, header_xml, spec):
                 **({'footerRows': feet, 'footerCells': len(footer_values), 'footerLabelCells': labels} if feet else {}),
                 **({'rowLabels': row_labels} if row_labels else {}),
                 role=spec.get('role', 'grid'), **({'columns': spec['columns']} if spec.get('columns') else {}),
-                **({'firstColumnPrefix': spec['firstColumnPrefix']} if spec.get('firstColumnPrefix') else {}))
+                **({'firstColumnPrefix': spec['firstColumnPrefix']} if spec.get('firstColumnPrefix') else {}),
+                **({'prefixColumn': spec['prefixColumn']} if spec.get('prefixColumn') else {}))
 
 
 def blank_png():
@@ -345,6 +365,13 @@ def write_part(raw, target, section, header, preview=None):
     hpf = data['Contents/content.hpf'].decode('utf-8')
     hpf = re.sub(r'<opf:title[^>]*?(?:/>|>.*?</opf:title>)', '<opf:title/>', hpf, flags=re.S)
     hpf = re.sub(r'(<opf:meta name="(?:creator|lastsaveby)" content="text">)[^<]*', r'\1', hpf)
+    used = {image.get('binaryItemIDRef') for image in section.iter() if image.get('binaryItemIDRef')}
+    for item in re.findall(r'<opf:item [^>]*?href="BinData/[^"]*"[^>]*/>', hpf):  # images no paragraph shows
+        name = re.search(r'id="([^"]*)"', item).group(1)
+        if name not in used:
+            hpf = hpf.replace(item, '')
+            href = re.search(r'href="([^"]*)"', item).group(1)
+            infos = [info for info in infos if info.filename != href]
     data['Contents/content.hpf'] = hpf.encode('utf-8')
     if preview is not None:
         data['Preview/PrvText.txt'] = preview.encode('utf-8')
@@ -391,6 +418,9 @@ def prepare(name, spec, raw, out_dir, deep_indent):
     section.findall(HP + 'p')[-1].set('pageBreak', '0')
     if not spec.get('keepFaces'):  # a cover may keep its display faces: centred lines carry no indents to drift
         use_truetype_faces(header, section)
+    if spec.get('dropPictures'):  # an agency logo on a cover is the source's mark, not its layout
+        for picture in list(section.iter(HP + 'pic')):
+            picture.getparent().remove(picture)
     kind, entry, previews, variants = spec['kind'], {'kind': spec['kind']}, [], []
     if spec.get('context'):
         # "summary": used on the summary page, which spaces lines more tightly; "after-<kind>": right after an outline
@@ -572,7 +602,7 @@ def calibrate_hanging(parts, out_dir, work):
     def render(name, entry, attempt):
         pdf = str(work / f'hanging-{attempt}-{name}.pdf')
         if name in tables:
-            return dict(part=str(out_dir / entry['file']), cell=[entry['table']['headerRows'], 0], text=entry['table']['firstColumnPrefix'] + WRAP_TEXT, pdf=pdf)
+            return dict(part=str(out_dir / entry['file']), cell=[entry['table']['headerRows'], entry['table'].get('prefixColumn', 0)], text=entry['table']['firstColumnPrefix'] + WRAP_TEXT, pdf=pdf)
         return dict(part=str(out_dir / entry['file']), find=entry['placeholder'], text=WRAP_TEXT, pdf=pdf)
     def symbol(name, entry):
         if name in tables:
@@ -589,7 +619,7 @@ def calibrate_hanging(parts, out_dir, work):
                 path = out_dir / parts[variant]['file']
                 section, header = load(path)
                 if name in tables:
-                    shape = first_column_shape(header, section, parts[variant]['table']['headerRows'])
+                    shape = first_column_shape(header, section, parts[variant]['table']['headerRows'], parts[variant]['table'].get('prefixColumn', 0))
                     shape_margin(shape, 'intent', shape_margin(shape, 'intent') - round(offset * 100))
                 else:
                     paragraph = body_paragraphs(section)[0]

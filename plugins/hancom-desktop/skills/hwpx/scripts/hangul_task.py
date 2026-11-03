@@ -1,6 +1,6 @@
 """Stable common task interface. Existing guarded engines remain authoritative."""
 from pathlib import Path
-import argparse, hashlib, json, os, sys, runpy
+import argparse, copy, hashlib, json, os, re, sys, runpy
 from contextlib import contextmanager
 from candidate_runtime import activate, identity
 
@@ -158,6 +158,31 @@ def compose(request, output, pdf, run_dir, context, timeout=120):
     from compose_native import compose as native_compose
     return native_compose(request,output,pdf,run_dir,context,timeout)
 
+TITLE_KINDS=('chapter','heading','task','subhead')
+def _titles_left_above_tables(outline, pdf):
+    """Outline indexes of titles followed by a table whose text is the last line of a page that is not the last.
+
+    A table that splits across pages floats with the text, so the title's keep-with-next holds only the table's
+    anchor line; when no table row fits below the title, the title stays alone at the page end."""
+    import pymupdf
+    nodes=outline.get('nodes',[])
+    titles=[i for i,n in enumerate(nodes[:-1]) if n.get('t') in TITLE_KINDS and nodes[i+1].get('t')=='table' and not nodes[i].get('pageBreakBefore')]
+    if not titles:return []
+    flat=lambda s:re.sub(r'\s+','',s)
+    ends=[]
+    with pymupdf.open(pdf) as document:
+        for page in list(document)[:-1]:
+            limit=page.rect.height*0.92  # above the page number
+            lines=[(l['bbox'][1],''.join(s['text'] for s in l['spans'])) for b in page.get_text('dict')['blocks'] for l in b.get('lines',[]) if l['bbox'][3]<limit]
+            lines=[t for y,t in sorted(lines) if t.strip()]
+            if lines:ends.append(flat(''.join(lines[-2:])))
+    stranded=[]
+    for i in titles:
+        if any(flat(nodes[i]['text'])[:12] in end for end in ends):
+            while i and nodes[i-1].get('t') in TITLE_KINDS:i-=1  # a chapter right above the title goes with it
+            stranded.append(i)
+    return stranded
+
 def assemble(template, outline, output, pdf, run_dir, context, catalog=None, timeout=240):
     """Outline -> parts of one assembly template, assembled in one owned Hangul job."""
     native_scripts=ROOT.parent/'hwpx-windows-finalize/scripts'
@@ -175,6 +200,20 @@ def assemble(template, outline, output, pdf, run_dir, context, catalog=None, tim
     notes=[]
     plan=build_plan(manifest,outline,tables,notes)
     result=run(plan['base']['path'],'SaveAs',output,pdf,run_dir,context,timeout,composition=plan)
+    stranded=_titles_left_above_tables(outline,pdf) if result['status']=='PASS_NATIVE' else []
+    if stranded:  # a title ended a page and its table began the next: start those titles on the next page, once
+        retry=Path(run_dir).with_name(Path(run_dir).name+'-retry')
+        need(not retry.exists() and not retry.with_name(retry.name+'-tables').exists(),f'already exists: {retry}')
+        retry.mkdir()
+        moved=copy.deepcopy(outline)
+        for index in stranded:moved['nodes'][index]['pageBreakBefore']=True
+        notes=[]
+        plan=build_plan(manifest,moved,retry.with_name(retry.name+'-tables'),notes)
+        again=Path(retry)/'out'
+        result=run(plan['base']['path'],'SaveAs',retry/Path(output).name,retry/Path(pdf).name,again,context,timeout,composition=plan)
+        if result['status']=='PASS_NATIVE':
+            os.replace(retry/Path(output).name,output);os.replace(retry/Path(pdf).name,pdf)
+        result['titlesMovedToNextPage']=[outline['nodes'][i]['text'] for i in stranded]
     result['template']=dict(id=manifest['id'],label=manifest['label'],source=manifest['source'].get('attribution'))
     result['substitutions']=[n for n in notes if n['role']!='block']  # roles, tables and cover fields drawn with a substitute
     result['blocks']=[n for n in notes if n['role']=='block']  # parts that went in with their source wording, to review

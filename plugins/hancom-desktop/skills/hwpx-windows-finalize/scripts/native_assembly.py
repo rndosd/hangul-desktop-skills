@@ -217,7 +217,7 @@ def table_instance(part, header, units, target, footer=None):
             address = cell.find(HP + 'cellAddr')
             address.set('rowAddr', str(int(address.get('rowAddr')) + index * len(unit)))
         for cell, value in zip([c for i, c in enumerate(cells) if i not in fixed], values):  # fixed cells keep their text
-            _set_cell(cell, value, prefix if cell.find(HP + 'cellAddr').get('colAddr') == '0' and value else '', plain)
+            _set_cell(cell, value, prefix if cell.find(HP + 'cellAddr').get('colAddr') == str(spec.get('prefixColumn', 0)) and value else '', plain)
         for tr in clones:
             table.append(tr)
     labels = spec.get('footerLabelCells', [])
