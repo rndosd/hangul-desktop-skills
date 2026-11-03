@@ -32,7 +32,8 @@ lets an outline open with bars and text). Other part options: "tableAsChar" save
 copy where it sits in the line, "keepFaces" keeps a cover's display faces, "context": "after-<kind>" marks a
 spacing variant used right after an outline node of that kind, table "role" (schedule, grid, steps, targets,
 indicators) and "columns" (names of the unit cells) let an outline pick a table by role, table "fixedTexts" cells (step arrows) keep
-their text and take no value, and table "holderLineSpacing" sets the holding line's spacing. A cover field
+their text and take no value, and table "holderLineSpacing" sets the holding line's spacing. "keepWithNext": false leaves a heading or subhead
+unbound to the next paragraph (a source that writes body lists as □ or "1. 기간: ..." lines). A cover field
 may name a list of placeholders that take the same value.
 
 Usage: build_assembly_template.py MAP SOURCE.hwpx WORK_DIR [--out DIR] [--alt-source ORIGINAL.hwpx]
@@ -249,6 +250,15 @@ def normalize_table(section, header_xml, spec):
             need(bottom <= heads or heads <= top and bottom <= heads + size, 'a merged cell crosses the header or the unit boundary')
     if spec.get('size'):
         resize_table(table, header_xml, spec['size'])
+    if heads and 'rowHeightHwp' not in spec.get('size', {}):
+        # The kept unit row is one sample row of the source, often a tall one; as a minimum height it would make
+        # every outline row that tall. Unit rows start at the header row's height and grow with their text.
+        line = min(int(c.find(HP + 'cellSz').get('height')) for r in rows[:heads] for c in r.findall(HP + 'tc') if row_span(c)[1] - row_span(c)[0] == 1)
+        for row in rows[heads:]:
+            for cell in row.findall(HP + 'tc'):
+                top, bottom = row_span(cell)
+                measure = cell.find(HP + 'cellSz')
+                measure.set('height', str(min(int(measure.get('height')), line * (bottom - top))))
     header_cells = [cell for row in rows[:heads] for cell in row.findall(HP + 'tc')]
     unit_cells = [cell for row in rows[heads:] for cell in row.findall(HP + 'tc')]
     # Cells holding one of fixedTexts (the arrows of a step flow) keep their text and take no outline value.
@@ -412,19 +422,23 @@ def prepare(name, spec, raw, out_dir, deep_indent):
     elif kind in ('heading', 'subhead') or kind in ITEM_KINDS:
         paragraphs = body_paragraphs(section)
         need(len(paragraphs) == 1, f'{name}: one text paragraph expected, found {len(paragraphs)}')
-        set_placeholder(paragraphs[0], PREFIX[kind], spec['placeholder'])
+        # "prefix": the source's own leading symbol (a regex), when it is not the kind's usual one (○ for ◦, • for ‧)
+        set_placeholder(paragraphs[0], spec.get('prefix', PREFIX[kind]), spec['placeholder'])
         if spec.get('symbol'):
-            prefix = next(t for t in paragraphs[0].iter(HP + 't') if t.text and SYMBOL[kind] in t.text)
-            prefix.text = prefix.text.replace(SYMBOL[kind], spec['symbol'], 1)
+            prefix = next((t for t in paragraphs[0].iter(HP + 't') if t.text and SYMBOL.get(kind, '') in t.text), None)
+            if prefix is not None and SYMBOL.get(kind) and spec['symbol'] not in prefix.text:
+                prefix.text = prefix.text.replace(SYMBOL[kind], spec['symbol'], 1)
             entry['symbol'] = spec['symbol']
         entry['placeholder'] = spec['placeholder']
         previews.append(spec['placeholder'])
         shape = shape_of(header, section, paragraphs[0])
-        if kind == 'heading':
-            entry.update(level=spec['level'], numbering={1: 'decimal', 2: 'hangul', 3: 'paren'}[spec['level']])
-            shape.find(HH + 'breakSetting').set('keepWithNext', '1')
-        elif kind == 'subhead':
-            shape.find(HH + 'breakSetting').set('keepWithNext', '1')
+        if kind in ('heading', 'subhead'):
+            if kind == 'heading':
+                entry.update(level=spec['level'], numbering={1: 'decimal', 2: 'hangul', 3: 'paren'}[spec['level']])
+            # "keepWithNext": false for a source that writes body lines in this form (□ or "1. 기간: ..." lists),
+            # where a run of them chained to the next paragraph pushes the whole run to the next page
+            if spec.get('keepWithNext', True):
+                shape.find(HH + 'breakSetting').set('keepWithNext', '1')
         else:
             shape.find(HH + 'align').set('horizontal', 'LEFT')  # justified lines widen the space after the symbol
             margin(header, section, paragraphs[0], 'left', spec['baseLeftHwp'])
@@ -592,6 +606,7 @@ def main():
         allowed += [entry['numberPlaceholder']] if 'numberPlaceholder' in entry else []
         allowed += part_map['parts'].get(name, {}).get('keep', [])  # fixed labels of the design, such as [요약]
         allowed += part_map['parts'].get(name, {}).get('table', {}).get('fixedTexts', [])
+        allowed += [entry['symbol']] if entry.get('symbol') else []  # the source's own leading symbol
         left = leftover_wording(out_dir / entry['file'], allowed + entry.get('table', {}).get('header', []))
         need(not left, f'{name}: source wording left in the prepared part: {left[:60]!r}')
 

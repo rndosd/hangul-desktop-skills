@@ -401,7 +401,8 @@ def build_plan(manifest, outline, tables_dir=None, notes=None):
             elif kind == 'heading':
                 need(set(node) == {'t', 'level', 'text'} and node['level'] in (1, 2, 3), f'{where}: heading은 level 1~3과 text가 필요합니다.')
                 depth = node['level']
-                need(depth == 1 or counters[depth - 1] > 0, f'{where}: {depth}단계 제목 앞에 {depth - 1}단계 제목이 필요합니다.')
+                need(depth == 1 or counters[depth - 1] > 0 or rules.get('headingLevelsMaySkip'),  # some sources put 가. right under a task
+                     f'{where}: {depth}단계 제목 앞에 {depth - 1}단계 제목이 필요합니다.')
                 counters[depth] += 1
                 counters[depth + 1:] = [0] * (3 - depth)
                 tasks, points, level = 0, 0, depth
@@ -415,6 +416,7 @@ def build_plan(manifest, outline, tables_dir=None, notes=None):
                 need(name, f'양식에 {kind} 부품이 없습니다.')
                 if kind == 'task':
                     tasks, points = tasks + 1, 0
+                    counters[2:] = [0, 0]  # 가. and 1) titles under a task count from the task
                 else:
                     points += 1
                 out += [dict(op='insert', part=name, keepSection=0),

@@ -372,6 +372,16 @@ class CommonVocabularyTest(unittest.TestCase):
             expected = json.loads((folder / 'reproduction/expected.json').read_text(encoding='utf-8'))
             self.assertGreater(expected['pages'], 0, folder.name)
 
+    def test_a_template_may_let_titles_skip_a_level(self):
+        manifest = a.load_template(CATALOG, 'plan-official')
+        value = {'schema': a.OUTLINE_SCHEMA, 'template': 'plan-official', 'cover': {'title': '가상', 'date': '2027.'},
+                 'nodes': [{'t': 'chapter', 'text': '개요'}, {'t': 'heading', 'level': 2, 'text': '바로 가.'}]}
+        with self.assertRaisesRegex(ValueError, '2단계 제목 앞에 1단계'):
+            a.build_plan(copy.deepcopy(manifest), copy.deepcopy(value))
+        manifest['rules']['headingLevelsMaySkip'] = True  # sources that put 가. right under a task
+        plan = a.build_plan(manifest, value)
+        self.assertIn('가.', [s['text'].split(' ')[0] for s in plan['steps'] if s['op'] == 'text'])
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
