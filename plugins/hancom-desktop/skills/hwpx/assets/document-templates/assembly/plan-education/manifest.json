@@ -1,0 +1,166 @@
+{
+ "schema": "hwpx.assembly-template.v1",
+ "id": "plan-education",
+ "label": "교육사업 추진계획(표지형)",
+ "source": {
+  "sha256": "222922e59402161a2793cd74a62e7c268c0eadf43c0dec5c9104c868ebebe492",
+  "title": "완성형 plan-education (경남교육청 「사회적경제 교육 추진계획」에서 준비)",
+  "publisher": "경상남도교육청",
+  "license": "완성형 plan-education과 같음",
+  "attribution": "이 조립 양식의 서식은 경남교육청 「사회적경제 교육 추진계획」을 준비한 완성형 교육사업형(plan-education)에서 가져왔으며 원문 문구는 포함하지 않는다."
+ },
+ "rules": {
+  "spacerBeforeLaterChapters": false,
+  "bodyStartsNewSection": false,
+  "pageNumbers": {
+   "position": "BottomCenter",
+   "format": "Digit",
+   "sideChar": "-"
+  },
+  "deepItemsUnderHeadingLevel": 9,
+  "textBeforeFirstChapter": true,
+  "deepIndentHwp": 1000
+ },
+ "parts": {
+  "cover": {
+   "kind": "cover",
+   "placeholder": {
+    "title": [
+     "[사업 계획 제목]",
+     "[본문 사업 제목]"
+    ],
+    "subtitle": "[계획서 부제]",
+    "date": "[작성 연월]",
+    "organization": [
+     "[작성 기관·부서]",
+     "[본문 작성 기관]"
+    ]
+   },
+   "file": "parts/cover.hwpx",
+   "sha256": "9b64af3ade9d19d41bfc8c890b33e65e2f62caa0287b828fefc0860068701661"
+  },
+  "subhead": {
+   "kind": "subhead",
+   "placeholder": "[소제목]",
+   "file": "parts/subhead.hwpx",
+   "sha256": "15cfb57569ec3a000f2267ce44634a0a26af1ac2edeba25b1aea3effdbf7f2ab"
+  },
+  "subhead_after_table": {
+   "kind": "subhead",
+   "context": "after-table",
+   "placeholder": "[소제목]",
+   "file": "parts/subhead_after_table.hwpx",
+   "sha256": "69ce34bceb1f69c205b639d118d3631d9606eff18e68474fedd9835e8dbbda92"
+  },
+  "lead": {
+   "kind": "lead",
+   "placeholder": "[항목]",
+   "depth": 0,
+   "file": "parts/lead.hwpx",
+   "sha256": "a88f10557075779bb8ad8a09772751ddc5b66e89b4da2262bfca4653449ffd00"
+  },
+  "lead-deep": {
+   "kind": "lead",
+   "placeholder": "[항목]",
+   "depth": 1,
+   "file": "parts/lead-deep.hwpx",
+   "sha256": "398d629ecf68b34da033ea244d8e3c82e813f0a53d1697cfb668d92709624558"
+  },
+  "targets": {
+   "kind": "table",
+   "table": {
+    "headerRows": 1,
+    "unitRows": 1,
+    "headerCells": 6,
+    "unitCells": 6,
+    "repeat": true,
+    "header": [
+     "순",
+     "대상",
+     "담당",
+     "사업·활동",
+     "기간",
+     "비고"
+    ],
+    "role": "targets"
+   },
+   "file": "parts/targets.hwpx",
+   "sha256": "7dcb149c54b38a3a662a1b5103d433a6a3a5b2f9bb283faaba4cf593f9f888e2"
+  },
+  "chapter_first": {
+   "kind": "chapter_first",
+   "placeholder": "[장 제목]",
+   "numberPlaceholder": "[장 번호]",
+   "numbering": "digit",
+   "fit": {
+    "cell": 1,
+    "placeholder": "[장 제목]",
+    "sourceText": "교육활동 운영",
+    "emHwp": 1600,
+    "maxWidthHwp": 51026
+   },
+   "file": "parts/chapter_first.hwpx",
+   "sha256": "844721756f9428b85fb6b8655d43ebb8042913b7abf241b089f987adee3fad10"
+  },
+  "chapter": {
+   "kind": "chapter",
+   "placeholder": "[장 제목]",
+   "numberPlaceholder": "[장 번호]",
+   "numbering": "digit",
+   "fit": {
+    "cell": 1,
+    "placeholder": "[장 제목]",
+    "sourceText": "교육활동 지원",
+    "emHwp": 1600,
+    "maxWidthHwp": 51026
+   },
+   "file": "parts/chapter.hwpx",
+   "sha256": "115cd8dbc417545ef37e64803dba230a71ae224d7249c7e3fb7ce117fc11cdf1"
+  },
+  "task_after_chapter": {
+   "kind": "task",
+   "context": "after-chapter",
+   "placeholder": "[과제 제목]",
+   "numberPlaceholder": "[과제 번호]",
+   "numbering": "boxed",
+   "file": "parts/task_after_chapter.hwpx",
+   "sha256": "c56c757e1c6fdd3e4e02188b0ecedb111d952c827844b2f19abc067ad759e243"
+  },
+  "task": {
+   "kind": "task",
+   "placeholder": "[과제 제목]",
+   "numberPlaceholder": "[과제 번호]",
+   "numbering": "boxed",
+   "file": "parts/task.hwpx",
+   "sha256": "6d851f60baee7923a66a55ae7ac362319c3c0afefb33e2c62d0eab194e30d519"
+  },
+  "item": {
+   "kind": "item",
+   "placeholder": "[항목]",
+   "depth": 0,
+   "file": "parts/item.hwpx",
+   "sha256": "6b2e79fbeed734bbeead06b913482d86be8a59ca60c69683534f969c53b5e3e3"
+  },
+  "item-deep": {
+   "kind": "item",
+   "placeholder": "[항목]",
+   "depth": 1,
+   "file": "parts/item-deep.hwpx",
+   "sha256": "a1d083cb4d17cf84de073f3c8a5d7cba47c7c892792a71385c3b9e731499abcb"
+  },
+  "dash": {
+   "kind": "dash",
+   "placeholder": "[항목]",
+   "depth": 0,
+   "file": "parts/dash.hwpx",
+   "sha256": "6343818cae8664d646e18095308d08fdc22b4b664731fdaa5a5f0176016045ac"
+  },
+  "dash-deep": {
+   "kind": "dash",
+   "placeholder": "[항목]",
+   "depth": 1,
+   "file": "parts/dash-deep.hwpx",
+   "sha256": "4dcaa08fac8569959e144fc8d751db0c15e4edf81a24cbe23d04e03cee67e25c"
+  }
+ }
+}

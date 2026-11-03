@@ -163,14 +163,21 @@ def assemble(template, outline, output, pdf, run_dir, context, catalog=None, tim
     native_scripts=ROOT.parent/'hwpx-windows-finalize/scripts'
     need((native_scripts/'native_assembly.py').is_file(), 'paired native assembly helper required')
     sys.path.insert(0,str(native_scripts))
-    from native_assembly import load_template, build_plan, check_output
+    from native_assembly import load_template, build_plan, check_output, describe
+    if outline is None:  # --describe: what an outline can use on this template, no Hangul
+        return dict(status='DESCRIBED',template=describe(load_template(catalog or ROOT/'assets/document-templates/assembly',template)))
     from run_native_job import run
     from wrap_alignment import measure
     from page_layout import measure as page_layout
     manifest=load_template(catalog or ROOT/'assets/document-templates/assembly',template)
-    plan=build_plan(manifest,outline)
+    tables=Path(run_dir).with_name(Path(run_dir).name+'-tables')  # table copies; the run folder itself must be new
+    need(not tables.exists(),f'already exists: {tables}')
+    notes=[]
+    plan=build_plan(manifest,outline,tables,notes)
     result=run(plan['base']['path'],'SaveAs',output,pdf,run_dir,context,timeout,composition=plan)
     result['template']=dict(id=manifest['id'],label=manifest['label'],source=manifest['source'].get('attribution'))
+    result['substitutions']=[n for n in notes if n['role']!='block']  # roles, tables and cover fields drawn with a substitute
+    result['blocks']=[n for n in notes if n['role']=='block']  # parts that went in with their source wording, to review
     if result['status']=='PASS_NATIVE':
         receipt=json.loads(Path(result['receiptPath']).read_text(encoding='utf-8-sig'))
         result['pages']=receipt.get('pageCountAfter')
@@ -223,7 +230,7 @@ def main():
     sub.add_parser('doctor');s=sub.add_parser('schema');s.add_argument('operation',choices=['table'])
     s=sub.add_parser('tool');s.add_argument('script');s.add_argument('arguments',nargs=argparse.REMAINDER)
     s=sub.add_parser('compose');s.add_argument('--request',required=True);s.add_argument('--output',required=True);s.add_argument('--pdf',required=True);s.add_argument('--run',required=True);s.add_argument('--context',choices=['ordinary-shell','host-approved'],required=True);s.add_argument('--timeout',type=int,default=120)
-    s=sub.add_parser('assemble');s.add_argument('--template',required=True);s.add_argument('--outline',required=True);s.add_argument('--output',required=True);s.add_argument('--pdf',required=True);s.add_argument('--run',required=True);s.add_argument('--context',choices=['ordinary-shell','host-approved'],required=True);s.add_argument('--catalog');s.add_argument('--timeout',type=int,default=240)
+    s=sub.add_parser('assemble');s.add_argument('--template',required=True);s.add_argument('--describe',action='store_true');s.add_argument('--outline');s.add_argument('--output');s.add_argument('--pdf');s.add_argument('--run');s.add_argument('--context',choices=['ordinary-shell','host-approved']);s.add_argument('--catalog');s.add_argument('--timeout',type=int,default=240)
     s=sub.add_parser('fill');s.add_argument('--template');s.add_argument('--values');s.add_argument('--content');s.add_argument('--output');s.add_argument('--styles');s.add_argument('--catalog',default=str(ROOT/'assets/document-templates/full-plans.json'));s.add_argument('--dry-run',action='store_true')
     s=sub.add_parser('preview');s.add_argument('pdf');s.add_argument('--output',required=True)
     s=sub.add_parser('layout-check');s.add_argument('source');s.add_argument('--pdf')
@@ -247,7 +254,11 @@ def main():
         if a.command=='tool':return run_tool(a.script,a.arguments)
         if a.command=='doctor':result=doctor()
         elif a.command=='compose':result=compose(read(a.request),a.output,a.pdf,a.run,a.context,a.timeout)
-        elif a.command=='assemble':result=assemble(a.template,read(a.outline),a.output,a.pdf,a.run,a.context,a.catalog,a.timeout)
+        elif a.command=='assemble':
+            if a.describe:result=assemble(a.template,None,None,None,None,None,a.catalog)
+            else:
+                need(all([a.outline,a.output,a.pdf,a.run,a.context]),'assemble needs --outline --output --pdf --run --context (or --describe)')
+                result=assemble(a.template,read(a.outline),a.output,a.pdf,a.run,a.context,a.catalog,a.timeout)
         elif a.command=='schema':result=schema(a.operation)
         elif a.command=='preview':result=preview(a.pdf,a.output)
         elif a.command=='layout-check':result=layout_check(a.source,a.pdf)
@@ -295,14 +306,14 @@ def main():
             from prepare_source import check_source
             result=check_source(a.source,a.analysis)
         if a.command!='schema':
-            result.setdefault('native',result.get('status') if a.command in ('compose','assemble') else 'NOT_CHECKED');result.setdefault('entryScript',str(Path(__file__).resolve()));result.setdefault('entrySha256',sha(__file__))
+            result.setdefault('native',result.get('status') if a.command in ('compose','assemble') and result.get('status')!='DESCRIBED' else 'NOT_CHECKED');result.setdefault('entryScript',str(Path(__file__).resolve()));result.setdefault('entrySha256',sha(__file__))
         displayed=result
         if a.command in ('text','batch','layout','table','replace','fill') and not a.full_output and (a.command!='fill' or a.values or (a.content and result.get('ok') is not None)):
             from inspection_summary import saved_edit_summary
             output=getattr(a,'output',None) or result.get('output',{}).get('filename')
             displayed=saved_edit_summary(result,output)
             if 'contentSelection' in result:displayed['contentSelection']=result['contentSelection']
-        print(json.dumps(displayed,ensure_ascii=False,indent=2));return (0 if result.get('status')=='PASS_NATIVE' else 3) if a.command in ('compose','assemble') else (2 if result.get('status') in ('STALE','BLOCKED') else 0)
+        print(json.dumps(displayed,ensure_ascii=False,indent=2));return (0 if result.get('status') in ('PASS_NATIVE','DESCRIBED') else 3) if a.command in ('compose','assemble') else (2 if result.get('status') in ('STALE','BLOCKED') else 0)
     except Exception as ex:
         print(json.dumps(dict(status='BLOCKED',reason=str(ex),errorType=type(ex).__name__,native='NOT_CHECKED',nextStep='reason에 해당하는 입력·지원 범위를 references/simple-entry.md에서 확인하세요. 보존·revision 실패는 중단하고 같은 요청을 자동 재시도하지 마세요.'),ensure_ascii=False));return 2
 if __name__=='__main__':raise SystemExit(main())

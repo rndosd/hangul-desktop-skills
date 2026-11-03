@@ -30,7 +30,7 @@
     "organization": "[기관명]"
    },
    "file": "parts/cover.hwpx",
-   "sha256": "6552d168a255b6f4b3a4b815fa8b3936fc511f141e0efd04aa1d1de5bcb04c49"
+   "sha256": "a05e40470d5c7e5b3161b6059973412115467de885830e87d958f345bb25e2f5"
   },
   "chapter_first": {
    "kind": "chapter_first",
@@ -143,7 +143,7 @@
     "fallbackAdvancePt": 15.0
    },
    "file": "parts/chapter_first.hwpx",
-   "sha256": "b24529a77133c621083969fd031246230586198d42e4916ad995480200adc874"
+   "sha256": "f7309014cb8f52538ca489093592e5dec1e29936c058dcc35679c3651d6baf09"
   },
   "chapter": {
    "kind": "chapter",
@@ -256,7 +256,7 @@
     "fallbackAdvancePt": 15.0
    },
    "file": "parts/chapter.hwpx",
-   "sha256": "c20dbb059b912c4c68c6c4eb05114466a6414935814eaa6e1ce7644005a78ca3"
+   "sha256": "3fd45de1a185d008262ee3e0266398376bd69dedcbf80e7110fd61cc17d8de67"
   },
   "heading1": {
    "kind": "heading",
@@ -264,7 +264,7 @@
    "level": 1,
    "numbering": "decimal",
    "file": "parts/heading1.hwpx",
-   "sha256": "432a44839b9da5c3a28401fab4fa37236dcf1403f54a8d504e864fc0991c83f3"
+   "sha256": "52690a0603236b8b89fca1aa6b3cc3b2a144887335ba07af730e0d75cdaf7482"
   },
   "heading2": {
    "kind": "heading",
@@ -272,7 +272,7 @@
    "level": 2,
    "numbering": "hangul",
    "file": "parts/heading2.hwpx",
-   "sha256": "e120ac73733187e0756838a159fc99a9e2789578d2eb88f5b2e2b6a9ab7cbeb2"
+   "sha256": "1544eaa5872b149ab932a2f4dfcb45e3a5a733f335762f957240c285582a9dd0"
   },
   "heading3": {
    "kind": "heading",
@@ -280,7 +280,7 @@
    "level": 3,
    "numbering": "paren",
    "file": "parts/heading3.hwpx",
-   "sha256": "8eaa8aecb7ea54e88efeeabad33062ccff6cbfebeb5d79a5a9a070288b387660"
+   "sha256": "2e705ffe350cb0f3d1ff60fffd6e1bf7f468fa2c87289b21445f514f96818e6f"
   },
   "item": {
    "kind": "item",
@@ -288,7 +288,7 @@
    "placeholder": "[항목]",
    "depth": 0,
    "file": "parts/item.hwpx",
-   "sha256": "316411118111eca9f86b24832071fb1e740f629ff612e8e50158a0e3b5223747"
+   "sha256": "2fbf38d461b0e0c2e682aa02b5358094147d5b0a201b793eb4b95e469e73205d"
   },
   "item-deep": {
    "kind": "item",
@@ -296,84 +296,90 @@
    "placeholder": "[항목]",
    "depth": 1,
    "file": "parts/item-deep.hwpx",
-   "sha256": "02b9f3ed27f1e3f9d182c9f8fdd76fafd229d5a64cf354efcca445c0c0393b32"
+   "sha256": "4e7e6fe6d60adb6828b3825a14a4fe818484dae66dfdff81247a0345227f9cc0"
   },
   "dash": {
    "kind": "dash",
    "placeholder": "[항목]",
    "depth": 0,
    "file": "parts/dash.hwpx",
-   "sha256": "70e20ba41a2ebadc11ed973f20b239177be350e13e4b5e409fce9c0c8ed57957"
+   "sha256": "9089674b7410e3ba7d67210d42d71e26648d5efb98e18faa37b52fe0e875ba8e"
   },
   "dash-deep": {
    "kind": "dash",
    "placeholder": "[항목]",
    "depth": 1,
    "file": "parts/dash-deep.hwpx",
-   "sha256": "a96c863f09bdfbcfab0c82e51d0652ba9f8ba1866283d593969f398fb2a0cdec"
+   "sha256": "b750fc9a811fa30f3eb39c13691be2b3cf782243cabf6b87bd3bc6119c3651c9"
   },
   "dot": {
    "kind": "dot",
    "placeholder": "[항목]",
    "depth": 0,
    "file": "parts/dot.hwpx",
-   "sha256": "d5afa5c321046d195cc850da5133f5582816d665852ed3297538a244d462da1d"
+   "sha256": "e1279888900b19711a2bdbdd4fde1ab2dfa579badc28c7a70e9a6592e301dc81"
   },
   "dot-deep": {
    "kind": "dot",
    "placeholder": "[항목]",
    "depth": 1,
    "file": "parts/dot-deep.hwpx",
-   "sha256": "4f718cd62ddfc44fbc07e4a518661fbf74f54a06023fa370578b73bfab9026e3"
+   "sha256": "d3a760007c635fd72ddef1a51a49e0676724edbb6515437c9129c4d57ce98f4b"
   },
   "note": {
    "kind": "note",
    "placeholder": "[항목]",
    "depth": 0,
    "file": "parts/note.hwpx",
-   "sha256": "f628b7c940c09c7dc37c5fddfb8e0705cf779dec8f03437c4722ba37306ead86"
+   "sha256": "b6eaa8d19c69d03a9d8cfe385e86bb73385377375a218d28e188f847665ca036"
   },
   "note-deep": {
    "kind": "note",
    "placeholder": "[항목]",
    "depth": 1,
    "file": "parts/note-deep.hwpx",
-   "sha256": "82bcc0d970a29bed8cca0126f09c355c3f6b8d5b2151f6036022620fd68bbb67"
+   "sha256": "cca625d6afda2da9168389aed03a73c7891aa800d627c93affa3d9b22ae46a37"
   },
   "spacer": {
    "kind": "spacer",
    "file": "parts/spacer.hwpx",
-   "sha256": "7f3fd5d94e18941b3e148b05f7704e9c9c52761b1538a0bd74ee317743b9a935"
+   "sha256": "1a3f570c7d64c8ada47ccef239636876b093cc4f88a847a1bc1f3c892262b00a"
   },
   "schedule": {
    "kind": "table",
    "table": {
-    "dataRows": 9,
-    "cols": 3,
+    "headerRows": 1,
+    "unitRows": 1,
+    "headerCells": 3,
+    "unitCells": 3,
+    "repeat": true,
     "header": [
      "주  요  업  무",
      "추 진 일 정",
      "비    고"
     ],
-    "rowHeightHwp": 2322,
-    "firstColumnPrefix": " ○ "
+    "firstColumnPrefix": " ○ ",
+    "role": "schedule"
    },
    "file": "parts/schedule.hwpx",
-   "sha256": "8a2efa7eaf8e04d5f148b8e94c5c5da41a6e25cbc75054328538d8781391593c"
+   "sha256": "bece2ef0b48dd24b009278fa2af718fd578c9c578f88fe07d1fe5883a55f4c79"
   },
   "two-column": {
    "kind": "table",
    "table": {
-    "dataRows": 3,
-    "cols": 2,
+    "headerRows": 1,
+    "unitRows": 1,
+    "headerCells": 2,
+    "unitCells": 2,
+    "repeat": true,
     "header": [
      "구분",
      "내용"
     ],
-    "rowHeightHwp": 1848
+    "role": "grid"
    },
    "file": "parts/two-column.hwpx",
-   "sha256": "0296446a72c2e5a496b15d76c9e4a799e3adc46b21decdb8948503c66bb327e4"
+   "sha256": "3756bb98cfb363e5be576bea28ab71fe8d93a0217ac0a8ac2bae28591c8a689a"
   }
  }
 }

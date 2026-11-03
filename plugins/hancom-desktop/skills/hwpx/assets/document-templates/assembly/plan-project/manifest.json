@@ -1,0 +1,233 @@
+{
+ "schema": "hwpx.assembly-template.v1",
+ "id": "plan-project",
+ "label": "사업형 추진계획(요약·상세)",
+ "source": {
+  "sha256": "5a35f6bf75bb9a877d537d32561480a7c5f4bb5799fea05d29790a34bb652bf8",
+  "title": "완성형 plan-project (교육부 「지역인재육성지원사업 추진계획」에서 준비)",
+  "publisher": "교육부",
+  "license": "완성형 plan-project와 같음",
+  "attribution": "이 조립 양식의 서식은 교육부 「지역인재육성지원사업 추진계획」을 준비한 완성형 사업형(plan-project)에서 가져왔으며 원문 문구는 포함하지 않는다."
+ },
+ "rules": {
+  "spacerBeforeLaterChapters": false,
+  "bodyStartsNewSection": false,
+  "pageNumbers": {
+   "position": "BottomCenter",
+   "format": "Digit",
+   "sideChar": "-"
+  },
+  "deepItemsUnderHeadingLevel": 9,
+  "deepIndentHwp": 1500
+ },
+ "parts": {
+  "cover": {
+   "kind": "cover",
+   "placeholder": {
+    "title": "[종합 계획 제목]",
+    "subtitle": "[종합 계획 부제]",
+    "date": "[종합 계획 작성 연월]",
+    "organization": "[종합 계획 작성 기관]",
+    "department": "[종합 계획 작성 부서]"
+   },
+   "file": "parts/cover.hwpx",
+   "sha256": "986d15eb6d93194d56100c3036aad6013281ccd49e97a2a7c0e57491d3976dca"
+  },
+  "summary": {
+   "kind": "summary",
+   "placeholder": "[요약 계획 제목]",
+   "file": "parts/summary.hwpx",
+   "sha256": "ef123f45e009f169fbbe878cc000644297ea30be4fcf137b3a6b0fa8bc033eb8"
+  },
+  "summary_chapter": {
+   "kind": "summary_chapter",
+   "placeholder": "[요약 장 제목]",
+   "numberPlaceholder": "[요약 장 번호]",
+   "numbering": "roman",
+   "file": "parts/summary_chapter.hwpx",
+   "sha256": "46776659b9e97505641fdf1c3fdff8581f06c5c239e2b38fd3dd12f7fbdc41e0"
+  },
+  "summary_item": {
+   "kind": "item",
+   "context": "summary",
+   "placeholder": "[항목]",
+   "depth": 0,
+   "file": "parts/summary_item.hwpx",
+   "sha256": "10d198c9a4a10b0b6fb72c2a4384976f4ee791b1f16642f7a1c82183a97ad6ea"
+  },
+  "summary_item-deep": {
+   "kind": "item",
+   "context": "summary",
+   "placeholder": "[항목]",
+   "depth": 1,
+   "file": "parts/summary_item-deep.hwpx",
+   "sha256": "51caa5b923c4a3eaa75e0189cffe556b81566fd4533be8fae3c5925140e6dee6"
+  },
+  "summary_task": {
+   "kind": "task",
+   "context": "summary",
+   "placeholder": "[과제 제목]",
+   "numberPlaceholder": "[과제 번호]",
+   "numbering": "boxed",
+   "file": "parts/summary_task.hwpx",
+   "sha256": "3a8663170a4e6202e17fdb08df58e0cf89f4b3a69291ad672cad89af0faf87ce"
+  },
+  "point": {
+   "kind": "point",
+   "placeholder": "[점 내용]",
+   "numberPlaceholder": "[점 번호]",
+   "numbering": "circled",
+   "file": "parts/point.hwpx",
+   "sha256": "33c1b69854041d0208e8e73d34a5f755f8523d760a8ecdd2bd3414d11c2bd2de"
+  },
+  "arrow": {
+   "kind": "arrow",
+   "placeholder": "[항목]",
+   "depth": 0,
+   "file": "parts/arrow.hwpx",
+   "sha256": "f74c2cc356618ee52c29ff3eeb38c921aeaf0ba98bb8c2124cd56befd07f2ac0"
+  },
+  "arrow-deep": {
+   "kind": "arrow",
+   "placeholder": "[항목]",
+   "depth": 1,
+   "file": "parts/arrow-deep.hwpx",
+   "sha256": "1535795ea51372674d290a74f50ce6586b2ff8bb974c1643d3c6387f4d3d6cf3"
+  },
+  "chapter_first": {
+   "kind": "chapter_first",
+   "placeholder": "[장 제목]",
+   "numberPlaceholder": "[장 번호]",
+   "numbering": "roman-bare",
+   "pageBreakBefore": true,
+   "file": "parts/chapter_first.hwpx",
+   "sha256": "6e10ebb0daf42cfc12453d0a090a841df3aab2d9a38aa12df8f2391bea87f147"
+  },
+  "chapter": {
+   "kind": "chapter",
+   "placeholder": "[장 제목]",
+   "numberPlaceholder": "[장 번호]",
+   "numbering": "roman-bare",
+   "file": "parts/chapter.hwpx",
+   "sha256": "c565c54e62f07839d457ca27d4a470ea26698a49e43bf9635008eeece01bb8a3"
+  },
+  "subhead": {
+   "kind": "subhead",
+   "placeholder": "[소제목]",
+   "file": "parts/subhead.hwpx",
+   "sha256": "8197d91c727fbfd05c896eedacd534d36adccf5b1f60fe2208b6897dbe72d62a"
+  },
+  "item": {
+   "kind": "item",
+   "placeholder": "[항목]",
+   "depth": 0,
+   "file": "parts/item.hwpx",
+   "sha256": "ca986392d7ae18a87f06f9fa330570cefcd06af0647948767f695947fceb8a82"
+  },
+  "item-deep": {
+   "kind": "item",
+   "placeholder": "[항목]",
+   "depth": 1,
+   "file": "parts/item-deep.hwpx",
+   "sha256": "0498ed420467df960a34d30442a6a222a3e7b5c5df2c01153b4041a0a57a940f"
+  },
+  "task": {
+   "kind": "task",
+   "placeholder": "[과제 제목]",
+   "numberPlaceholder": "[과제 번호]",
+   "numbering": "boxed",
+   "file": "parts/task.hwpx",
+   "sha256": "c50567f55d583a4c2b03e1a171616ea6e0ab10a549cd43009e87c0a4f4471f28"
+  },
+  "dash": {
+   "kind": "dash",
+   "placeholder": "[항목]",
+   "depth": 0,
+   "file": "parts/dash.hwpx",
+   "sha256": "5c6e367d4e2684ba5dcc14ec2064a39c34cdb3802ec3e9c2c6fb8349583caf69"
+  },
+  "dash-deep": {
+   "kind": "dash",
+   "placeholder": "[항목]",
+   "depth": 1,
+   "file": "parts/dash-deep.hwpx",
+   "sha256": "9e7c68a6c7d1b63986ab5e1bfe48c603a9e034c14579cdbb92fc43708248e538"
+  },
+  "heading1": {
+   "kind": "heading",
+   "placeholder": "[제목]",
+   "numberPlaceholder": "[번호]",
+   "numbering": "digit",
+   "level": 1,
+   "fit": {
+    "cell": 2,
+    "placeholder": "[제목]",
+    "sourceText": "운영 방향",
+    "emHwp": 1600,
+    "maxWidthHwp": 48190
+   },
+   "file": "parts/heading1.hwpx",
+   "sha256": "8da55e8b76439ea56ca6806223b9934220f17e98c263dec664c24c0e81572e4d"
+  },
+  "three-column": {
+   "kind": "table",
+   "table": {
+    "headerRows": 1,
+    "unitRows": 1,
+    "headerCells": 3,
+    "unitCells": 3,
+    "repeat": true,
+    "header": [
+     "영역",
+     "내용",
+     "배점"
+    ],
+    "role": "grid"
+   },
+   "file": "parts/three-column.hwpx",
+   "sha256": "e1528eb6a2155970629ac07be9f0c604117ff11e754c2c5d6d2902d54d1edd1e"
+  },
+  "box": {
+   "kind": "box",
+   "placeholder": "[평가·환류 개요]",
+   "file": "parts/box.hwpx",
+   "sha256": "22f2dfbc46a376a94bbe88115ee06d2bead04fb9d46dfbb5720c35bb24a6d894"
+  },
+  "indicators": {
+   "kind": "table",
+   "table": {
+    "headerRows": 1,
+    "unitRows": 2,
+    "headerCells": 2,
+    "unitCells": 3,
+    "repeat": true,
+    "header": [
+     "중점 추진 과제",
+     "확인할 성과·지표"
+    ],
+    "role": "indicators",
+    "columns": [
+     "과제",
+     "지표 1",
+     "지표 2"
+    ]
+   },
+   "file": "parts/indicators.hwpx",
+   "sha256": "0043a1d9a098133199ad1ef95dc6955404815801b95d6eed001d8d912351f970"
+  },
+  "note": {
+   "kind": "note",
+   "placeholder": "[항목]",
+   "depth": 0,
+   "file": "parts/note.hwpx",
+   "sha256": "65ece3b17b0e7ff2867ca3b8839ad1afcd54819cb08ac5458c4782f22266e303"
+  },
+  "note-deep": {
+   "kind": "note",
+   "placeholder": "[항목]",
+   "depth": 1,
+   "file": "parts/note-deep.hwpx",
+   "sha256": "2e92aa987cdbf42da1a3a46f46deb6f08cf9e146ce24140cd17bb3f35f57f1e6"
+  }
+ }
+}
