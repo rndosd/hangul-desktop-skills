@@ -1,6 +1,6 @@
 """Stable common task interface. Existing guarded engines remain authoritative."""
 from pathlib import Path
-import argparse, hashlib, json, os, sys, runpy
+import argparse, copy, hashlib, json, os, re, sys, runpy
 from contextlib import contextmanager
 from candidate_runtime import activate, identity
 
@@ -26,7 +26,7 @@ def doctor():
     config=ROOT/'environment.json'
     if not config.is_file(): config=Path(os.environ.get('CODEX_HOME',str(Path.home()/'.codex')))/'skills/hwpx/environment.json'
     actual=activate();parser=actual.parent/'opc/xml_utils.py'
-    return dict(status='READY_LOCAL_TOOLS',skillRoot=str(ROOT),configuration=str(config),configurationExists=config.is_file(),python=sys.executable,hwpxModule=str(actual),parserSha256=sha(parser),runtime=identity(),commands=['doctor','schema table','inspect','inspect-body','text-plan','text','layout','replace','table','source','source-check','batch','tool','compose','assemble','fill','preview'],writePermission='UNTESTED',native='NOT_CHECKED',securityModule='NOT_CHECKED')
+    return dict(status='READY_LOCAL_TOOLS',skillRoot=str(ROOT),configuration=str(config),configurationExists=config.is_file(),python=sys.executable,hwpxModule=str(actual),parserSha256=sha(parser),runtime=identity(),commands=['doctor','schema table','inspect','inspect-body','text-plan','text','layout','replace','table','source','source-check','batch','tool','compose','assemble','register','fill','preview'],writePermission='UNTESTED',native='NOT_CHECKED',securityModule='NOT_CHECKED')
 def schema(operation):
     return dict(schema=SCHEMA,operation='table',headers=['열 제목1','열 제목2'],reason='사용자 메모의 완료 업무 삭제와 새 업무 추가',operations=[dict(op='delete',key={'열 제목1':'삭제할 셀의 완전한 문구'}),dict(op='insert_after',key={'열 제목1':'기준 셀의 완전한 문구'},cells=['새 항목명: 설명까지 전체','다른 열 값'],heightHwpunit=2400)])
 def replace(source,output,old,new):
@@ -158,6 +158,31 @@ def compose(request, output, pdf, run_dir, context, timeout=120):
     from compose_native import compose as native_compose
     return native_compose(request,output,pdf,run_dir,context,timeout)
 
+TITLE_KINDS=('chapter','heading','task','subhead')
+def _titles_left_above_tables(outline, pdf):
+    """Outline indexes of titles followed by a table whose text is the last line of a page that is not the last.
+
+    A table that splits across pages floats with the text, so the title's keep-with-next holds only the table's
+    anchor line; when no table row fits below the title, the title stays alone at the page end."""
+    import pymupdf
+    nodes=outline.get('nodes',[])
+    titles=[i for i,n in enumerate(nodes[:-1]) if n.get('t') in TITLE_KINDS and nodes[i+1].get('t')=='table' and not nodes[i].get('pageBreakBefore')]
+    if not titles:return []
+    flat=lambda s:re.sub(r'\s+','',s)
+    ends=[]
+    with pymupdf.open(pdf) as document:
+        for page in list(document)[:-1]:
+            limit=page.rect.height*0.92  # above the page number
+            lines=[(l['bbox'][1],''.join(s['text'] for s in l['spans'])) for b in page.get_text('dict')['blocks'] for l in b.get('lines',[]) if l['bbox'][3]<limit]
+            lines=[t for y,t in sorted(lines) if t.strip()]
+            if lines:ends.append(flat(''.join(lines[-2:])))
+    stranded=[]
+    for i in titles:
+        if any(flat(nodes[i]['text'])[:12] in end for end in ends):
+            while i and nodes[i-1].get('t') in TITLE_KINDS:i-=1  # a chapter right above the title goes with it
+            stranded.append(i)
+    return stranded
+
 def assemble(template, outline, output, pdf, run_dir, context, catalog=None, timeout=240):
     """Outline -> parts of one assembly template, assembled in one owned Hangul job."""
     native_scripts=ROOT.parent/'hwpx-windows-finalize/scripts'
@@ -175,6 +200,20 @@ def assemble(template, outline, output, pdf, run_dir, context, catalog=None, tim
     notes=[]
     plan=build_plan(manifest,outline,tables,notes)
     result=run(plan['base']['path'],'SaveAs',output,pdf,run_dir,context,timeout,composition=plan)
+    stranded=_titles_left_above_tables(outline,pdf) if result['status']=='PASS_NATIVE' else []
+    if stranded:  # a title ended a page and its table began the next: start those titles on the next page, once
+        retry=Path(run_dir).with_name(Path(run_dir).name+'-retry')
+        need(not retry.exists() and not retry.with_name(retry.name+'-tables').exists(),f'already exists: {retry}')
+        retry.mkdir()
+        moved=copy.deepcopy(outline)
+        for index in stranded:moved['nodes'][index]['pageBreakBefore']=True
+        notes=[]
+        plan=build_plan(manifest,moved,retry.with_name(retry.name+'-tables'),notes)
+        again=Path(retry)/'out'
+        result=run(plan['base']['path'],'SaveAs',retry/Path(output).name,retry/Path(pdf).name,again,context,timeout,composition=plan)
+        if result['status']=='PASS_NATIVE':
+            os.replace(retry/Path(output).name,output);os.replace(retry/Path(pdf).name,pdf)
+        result['titlesMovedToNextPage']=[outline['nodes'][i]['text'] for i in stranded]
     result['template']=dict(id=manifest['id'],label=manifest['label'],source=manifest['source'].get('attribution'))
     result['substitutions']=[n for n in notes if n['role']!='block']  # roles, tables and cover fields drawn with a substitute
     result['blocks']=[n for n in notes if n['role']=='block']  # parts that went in with their source wording, to review
@@ -186,6 +225,35 @@ def assemble(template, outline, output, pdf, run_dir, context, catalog=None, tim
         result['wrapAlignment']=measure(pdf)
         result['pageLayout']=page_layout(pdf)
     return result
+
+def register(source, template_id, out):
+    """Register a user's plan as an assembly template (propose, build, self reproduction, other lengths) and report
+    only what the person decides on: the preview, what an outline can use, and source wording left in blocks."""
+    import subprocess
+    need(re.fullmatch(r'[a-z0-9][a-z0-9-]{1,40}',template_id),'--id: 소문자·숫자·- 2~41자')
+    work=Path(out).resolve()
+    need(not work.exists(),f'already exists: {work}')
+    done=subprocess.run([sys.executable,'-X','utf8',str(Path(__file__).with_name('register_assembly_template.py')),str(Path(source).resolve(strict=True)),str(work),'--id',template_id],
+                        capture_output=True,text=True,encoding='utf-8',errors='replace')
+    need((work/'report.json').is_file(),'registration stopped: '+(done.stderr.strip().splitlines() or ['no report'])[-1])
+    report=read(work/'report.json')
+    if report.get('status')=='FAIL_BUILD':
+        return dict(status='FAIL_BUILD',part=report.get('part'),reason=report.get('error'),work=str(work))
+    native_scripts=ROOT.parent/'hwpx-windows-finalize/scripts'
+    sys.path.insert(0,str(native_scripts))
+    from native_assembly import load_template, describe
+    catalog=Path(report['catalog'])
+    blocks=[b for b in report.get('toReview',{}).get('blocks',[]) if b['texts']]
+    info=describe(load_template(catalog,template_id))
+    return dict(status='REGISTERED' if report['status']=='PASS' else 'REVIEW',template=template_id,catalog=str(catalog),
+                use=f'assemble --template {template_id} --catalog "{catalog}"',
+                preview=str(work/'repro.pdf'),sourcePdf=str(work/'source.pdf'),
+                canUse=dict(roles=list(info['roles'].values()),tables=[dict(part=t['part'],role=t['role'],columns=t.get('columns') or t['header'],repeat=t['repeat']) for t in info['tables']],
+                            cover=info['cover']['fields']),
+                problems=report.get('check1',{}).get('problems',[])+[f'{name}: {v.get("error") or v.get("status")}' for name,v in report.get('check2',{}).items() if not v.get('ok')],
+                # parts kept as the source has them: an outline names them only to reuse that wording (a fixed notice)
+                sourceWording=dict(blocks=len(blocks),examples=[b['texts'][0] for b in blocks[:5]]),
+                report=str(work/'report.json'))
 
 def preview(pdf, output):
     native_scripts=ROOT.parent/'hwpx-windows-finalize/scripts'
@@ -230,6 +298,7 @@ def main():
     sub.add_parser('doctor');s=sub.add_parser('schema');s.add_argument('operation',choices=['table'])
     s=sub.add_parser('tool');s.add_argument('script');s.add_argument('arguments',nargs=argparse.REMAINDER)
     s=sub.add_parser('compose');s.add_argument('--request',required=True);s.add_argument('--output',required=True);s.add_argument('--pdf',required=True);s.add_argument('--run',required=True);s.add_argument('--context',choices=['ordinary-shell','host-approved'],required=True);s.add_argument('--timeout',type=int,default=120)
+    s=sub.add_parser('register');s.add_argument('source');s.add_argument('--id',required=True);s.add_argument('--out',required=True)
     s=sub.add_parser('assemble');s.add_argument('--template',required=True);s.add_argument('--describe',action='store_true');s.add_argument('--outline');s.add_argument('--output');s.add_argument('--pdf');s.add_argument('--run');s.add_argument('--context',choices=['ordinary-shell','host-approved']);s.add_argument('--catalog');s.add_argument('--timeout',type=int,default=240)
     s=sub.add_parser('fill');s.add_argument('--template');s.add_argument('--values');s.add_argument('--content');s.add_argument('--output');s.add_argument('--styles');s.add_argument('--catalog',default=str(ROOT/'assets/document-templates/full-plans.json'));s.add_argument('--dry-run',action='store_true')
     s=sub.add_parser('preview');s.add_argument('pdf');s.add_argument('--output',required=True)
@@ -259,6 +328,7 @@ def main():
             else:
                 need(all([a.outline,a.output,a.pdf,a.run,a.context]),'assemble needs --outline --output --pdf --run --context (or --describe)')
                 result=assemble(a.template,read(a.outline),a.output,a.pdf,a.run,a.context,a.catalog,a.timeout)
+        elif a.command=='register':result=register(a.source,a.id,a.out)
         elif a.command=='schema':result=schema(a.operation)
         elif a.command=='preview':result=preview(a.pdf,a.output)
         elif a.command=='layout-check':result=layout_check(a.source,a.pdf)
@@ -306,7 +376,7 @@ def main():
             from prepare_source import check_source
             result=check_source(a.source,a.analysis)
         if a.command!='schema':
-            result.setdefault('native',result.get('status') if a.command in ('compose','assemble') and result.get('status')!='DESCRIBED' else 'NOT_CHECKED');result.setdefault('entryScript',str(Path(__file__).resolve()));result.setdefault('entrySha256',sha(__file__))
+            result.setdefault('native',result.get('status') if a.command in ('compose','assemble','register') and result.get('status')!='DESCRIBED' else 'NOT_CHECKED');result.setdefault('entryScript',str(Path(__file__).resolve()));result.setdefault('entrySha256',sha(__file__))
         displayed=result
         if a.command in ('text','batch','layout','table','replace','fill') and not a.full_output and (a.command!='fill' or a.values or (a.content and result.get('ok') is not None)):
             from inspection_summary import saved_edit_summary

@@ -29,6 +29,7 @@ PART_KINDS = ('cover', 'chapter_first', 'chapter', 'heading', 'task', 'point', '
 # The symbol each text part already draws; the same symbol typed at the start of the text is dropped.
 KIND_SYMBOLS = {'item': '◦○∘•', 'dash': '-–', 'dot': '‧·ㆍ', 'note': '※', 'arrow': '⇒→', 'subhead': '□', 'box': '◈', 'lead': '❍'}
 BOXED_DIGITS = 20  # Hancom private-use squared digits U+F02B1.., and circled ①..⑳
+TABLE_GAP_AFTER = 850  # HWPUNIT (3 mm) below a table that splits across pages
 # The common outline vocabulary. A template draws the roles it has parts for; a role it lacks is drawn by
 # the first available role down this chain (a template may override it in rules.fallbacks), and the
 # result lists every such substitution.
@@ -216,7 +217,7 @@ def table_instance(part, header, units, target, footer=None):
             address = cell.find(HP + 'cellAddr')
             address.set('rowAddr', str(int(address.get('rowAddr')) + index * len(unit)))
         for cell, value in zip([c for i, c in enumerate(cells) if i not in fixed], values):  # fixed cells keep their text
-            _set_cell(cell, value, prefix if cell.find(HP + 'cellAddr').get('colAddr') == '0' and value else '', plain)
+            _set_cell(cell, value, prefix if cell.find(HP + 'cellAddr').get('colAddr') == str(spec.get('prefixColumn', 0)) and value else '', plain)
         for tr in clones:
             table.append(tr)
     labels = spec.get('footerLabelCells', [])
@@ -232,6 +233,13 @@ def table_instance(part, header, units, target, footer=None):
     size = table.find(HP + 'sz')
     size.set('height', str(int(size.get('height')) * count // len(rows)))  # Hangul sets the real height on layout
     table.set('rowCnt', str(count))
+    position = table.find(HP + 'pos')
+    if spec.get('repeat', True) and position is not None and position.get('treatAsChar') == '1':
+        # a table that grows must split at a page end: Hangul keeps an in-line (treatAsChar) table whole
+        position.set('treatAsChar', '0')
+        table.find(HP + 'outMargin').set('bottom', str(TABLE_GAP_AFTER))  # the gap the in-line holder line gave
+        for cell in [c for tr in heads for c in _cells(tr)]:
+            cell.set('header', '1')  # repeated on the next page
     for holder in section.iter(HP + 'p'):
         if holder.find(f'.//{HP}tbl') is table:
             for lines in holder.findall(HP + 'linesegarray'):

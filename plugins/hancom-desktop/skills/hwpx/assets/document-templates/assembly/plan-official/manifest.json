@@ -3,268 +3,82 @@
  "id": "plan-official",
  "label": "공문서형 시행·운영계획",
  "source": {
-  "sha256": "fec96f47157139d1569925cdcfdeb3a9e6481aa1e6a72880faee44dbccb27f9f",
-  "title": "2027학년도 대학수학능력시험 시행기본계획",
-  "publisher": "교육부",
-  "license": "공공누리 제1유형(출처표시)",
-  "attribution": "이 조립 양식의 서식은 교육부 「2027학년도 대학수학능력시험 시행기본계획」(공공누리 제1유형, 출처표시)에서 가져왔으며 원문 문구는 포함하지 않는다."
+  "sha256": "4dd8a4abcb5fdbadb768e4154e014a0de6aac42056a20313731f6f13607febca",
+  "title": "2027. 3. 1.자 공립 유·초등교원 시·도간 교류 추진 계획",
+  "publisher": "경기도교육청",
+  "license": "공공저작물(저작권법 제24조의2), 출처표시",
+  "attribution": "이 조립 양식의 서식은 경기도교육청 「2027. 3. 1.자 공립 유·초등교원 시·도간 교류 추진 계획」에서 가져왔으며 원문 문구와 기관 로고는 포함하지 않는다."
  },
  "rules": {
-  "spacerBeforeLaterChapters": true,
-  "bodyStartsNewSection": true,
+  "spacerBeforeLaterChapters": false,
+  "bodyStartsNewSection": false,
   "pageNumbers": {
    "position": "BottomCenter",
    "format": "Digit",
    "sideChar": "-"
   },
-  "deepItemsUnderHeadingLevel": 3,
-  "deepIndentHwp": 1500
+  "deepItemsUnderHeadingLevel": 9,
+  "headingLevelsMaySkip": false,
+  "textBeforeFirstChapter": false,
+  "deepIndentHwp": 1000
  },
  "parts": {
   "cover": {
    "kind": "cover",
    "placeholder": {
-    "subtitle": "[부제목]",
     "title": "[제목]",
     "date": "[날짜]",
-    "organization": "[기관명]"
+    "organization": "[기관]"
    },
    "file": "parts/cover.hwpx",
-   "sha256": "a05e40470d5c7e5b3161b6059973412115467de885830e87d958f345bb25e2f5"
+   "sha256": "7d535d5bd23f8eff70af87f3de6434ca033b20c81e72b224da33846e04e30eec"
   },
   "chapter_first": {
    "kind": "chapter_first",
    "placeholder": "[장 제목]",
-   "numbering": "roman",
-   "box": {
-    "sourceTitle": "Ⅰ. 시험 개요",
-    "sourceWidthHwp": 15723,
-    "frameRatio": 0.97367,
-    "maxWidthHwp": 48192,
-    "advancePt": {
-     "!": 7.44,
-     "\"": 6.24,
-     "%": 13.8,
-     "&": 12.48,
-     "'": 3.84,
-     "(": 7.44,
-     ")": 7.56,
-     "+": 12.48,
-     ",": 4.32,
-     "-": 12.48,
-     ".": 4.44,
-     "/": 5.04,
-     "0": 8.76,
-     "1": 8.76,
-     "2": 8.76,
-     "3": 8.76,
-     "4": 8.76,
-     "5": 8.76,
-     "6": 8.76,
-     "7": 8.76,
-     "8": 8.76,
-     "9": 8.76,
-     ":": 4.92,
-     "=": 12.48,
-     "?": 7.56,
-     "A": 11.28,
-     "B": 9.96,
-     "C": 10.08,
-     "D": 10.56,
-     "E": 10.08,
-     "F": 9.36,
-     "G": 10.56,
-     "H": 11.28,
-     "I": 5.64,
-     "J": 6.84,
-     "K": 11.28,
-     "L": 9.36,
-     "M": 13.8,
-     "N": 11.28,
-     "O": 10.68,
-     "P": 9.36,
-     "Q": 10.56,
-     "R": 10.08,
-     "S": 9.36,
-     "T": 11.16,
-     "U": 11.28,
-     "V": 10.68,
-     "W": 14.28,
-     "X": 10.08,
-     "Y": 9.96,
-     "Z": 9.36,
-     "[": 7.44,
-     "]": 7.56,
-     "a": 7.56,
-     "b": 8.16,
-     "c": 7.44,
-     "d": 8.16,
-     "e": 8.16,
-     "f": 5.64,
-     "g": 8.04,
-     "h": 8.16,
-     "i": 4.32,
-     "j": 4.44,
-     "k": 8.04,
-     "l": 4.44,
-     "m": 12.48,
-     "n": 8.16,
-     "o": 8.16,
-     "p": 8.04,
-     "q": 8.16,
-     "r": 6.24,
-     "s": 7.56,
-     "t": 5.64,
-     "u": 8.04,
-     "v": 8.16,
-     "w": 11.88,
-     "x": 8.76,
-     "y": 8.76,
-     "z": 6.84,
-     "~": 11.88,
-     "·": 5.04,
-     "‧": 4.32,
-     "Ⅰ": 14.64,
-     "Ⅱ": 14.52,
-     "Ⅲ": 14.52,
-     "Ⅳ": 14.64,
-     "Ⅴ": 14.52,
-     "Ⅵ": 14.52,
-     "Ⅶ": 14.64,
-     "Ⅷ": 14.52,
-     "Ⅸ": 14.52,
-     "Ⅹ": 14.64,
-     "「": 7.56,
-     "」": 7.44,
-     "ㆍ": 15.0,
-     "가": 15.0,
-     " ": 7.56
-    },
-    "fallbackAdvancePt": 15.0
+   "numberPlaceholder": "[장 번호]",
+   "numbering": "roman-bare",
+   "pageBreakBefore": true,
+   "fit": {
+    "cell": 2,
+    "placeholder": "[장 제목]",
+    "sourceText": "목적 및 근거",
+    "emHwp": 1700,
+    "maxWidthHwp": 48190
    },
    "file": "parts/chapter_first.hwpx",
-   "sha256": "f7309014cb8f52538ca489093592e5dec1e29936c058dcc35679c3651d6baf09"
+   "sha256": "47c8a8cd385cecdf9e6be57cae586a501744e2767460b83d7b0d45860fc93c7d"
   },
   "chapter": {
    "kind": "chapter",
    "placeholder": "[장 제목]",
-   "numbering": "roman",
-   "box": {
-    "sourceTitle": "Ⅲ. 시험 관리",
-    "sourceWidthHwp": 15723,
-    "frameRatio": 0.97367,
-    "maxWidthHwp": 48192,
-    "advancePt": {
-     "!": 7.56,
-     "\"": 6.24,
-     "%": 13.8,
-     "&": 12.48,
-     "'": 3.72,
-     "(": 7.56,
-     ")": 7.56,
-     "+": 12.48,
-     ",": 4.44,
-     "-": 12.48,
-     ".": 4.32,
-     "/": 4.92,
-     "0": 8.76,
-     "1": 8.76,
-     "2": 8.76,
-     "3": 8.76,
-     "4": 8.76,
-     "5": 8.76,
-     "6": 8.76,
-     "7": 8.76,
-     "8": 8.76,
-     "9": 8.76,
-     ":": 5.04,
-     "=": 12.36,
-     "?": 7.56,
-     "A": 11.28,
-     "B": 9.96,
-     "C": 9.96,
-     "D": 10.68,
-     "E": 9.96,
-     "F": 9.36,
-     "G": 10.68,
-     "H": 11.28,
-     "I": 5.64,
-     "J": 6.84,
-     "K": 11.28,
-     "L": 9.36,
-     "M": 13.68,
-     "N": 11.28,
-     "O": 10.56,
-     "P": 9.36,
-     "Q": 10.68,
-     "R": 9.96,
-     "S": 9.36,
-     "T": 11.28,
-     "U": 11.28,
-     "V": 10.56,
-     "W": 14.4,
-     "X": 9.96,
-     "Y": 10.08,
-     "Z": 9.36,
-     "[": 7.56,
-     "]": 7.56,
-     "a": 7.56,
-     "b": 8.04,
-     "c": 7.56,
-     "d": 8.16,
-     "e": 8.04,
-     "f": 5.64,
-     "g": 8.16,
-     "h": 8.16,
-     "i": 4.32,
-     "j": 4.32,
-     "k": 8.16,
-     "l": 4.32,
-     "m": 12.48,
-     "n": 8.16,
-     "o": 8.04,
-     "p": 8.16,
-     "q": 8.16,
-     "r": 6.24,
-     "s": 7.44,
-     "t": 5.64,
-     "u": 8.16,
-     "v": 8.16,
-     "w": 11.88,
-     "x": 8.76,
-     "y": 8.76,
-     "z": 6.84,
-     "~": 11.88,
-     "·": 4.92,
-     "‧": 4.32,
-     "Ⅰ": 14.52,
-     "Ⅱ": 14.64,
-     "Ⅲ": 14.52,
-     "Ⅳ": 14.52,
-     "Ⅴ": 14.64,
-     "Ⅵ": 14.52,
-     "Ⅶ": 14.52,
-     "Ⅷ": 14.64,
-     "Ⅸ": 14.52,
-     "Ⅹ": 14.52,
-     "「": 7.44,
-     "」": 7.56,
-     "ㆍ": 15.0,
-     "가": 15.0,
-     " ": 7.44
-    },
-    "fallbackAdvancePt": 15.0
+   "numberPlaceholder": "[장 번호]",
+   "numbering": "roman-bare",
+   "fit": {
+    "cell": 2,
+    "placeholder": "[장 제목]",
+    "sourceText": "방 침",
+    "emHwp": 1700,
+    "maxWidthHwp": 48190
    },
    "file": "parts/chapter.hwpx",
-   "sha256": "3fd45de1a185d008262ee3e0266398376bd69dedcbf80e7110fd61cc17d8de67"
+   "sha256": "cf8f31bb6fd04b2749f40420a53cb79bb17b551ac640e3f6a73ab41b5f9980a6"
   },
   "heading1": {
    "kind": "heading",
    "placeholder": "[1단계 제목]",
+   "numberPlaceholder": "[번호]",
+   "numbering": "digit",
    "level": 1,
-   "numbering": "decimal",
+   "fit": {
+    "cell": 1,
+    "placeholder": "[1단계 제목]",
+    "sourceText": "타시·도 전출",
+    "emHwp": 1600,
+    "maxWidthHwp": 48190
+   },
    "file": "parts/heading1.hwpx",
-   "sha256": "52690a0603236b8b89fca1aa6b3cc3b2a144887335ba07af730e0d75cdaf7482"
+   "sha256": "8d73e070082bb77ad87ff13b5f2f03f67bf8f4e663655ba33e8fdf9a872ba894"
   },
   "heading2": {
    "kind": "heading",
@@ -272,7 +86,7 @@
    "level": 2,
    "numbering": "hangul",
    "file": "parts/heading2.hwpx",
-   "sha256": "1544eaa5872b149ab932a2f4dfcb45e3a5a733f335762f957240c285582a9dd0"
+   "sha256": "37131f79da5223089a9c5f8b4c137a1511d63c253cac12358ce0200c3b19760a"
   },
   "heading3": {
    "kind": "heading",
@@ -280,7 +94,7 @@
    "level": 3,
    "numbering": "paren",
    "file": "parts/heading3.hwpx",
-   "sha256": "2e705ffe350cb0f3d1ff60fffd6e1bf7f468fa2c87289b21445f514f96818e6f"
+   "sha256": "097808f194ba43d80db3322cfd570e1ed20cc40deb05be0bfe515672e69a5f8f"
   },
   "item": {
    "kind": "item",
@@ -288,7 +102,7 @@
    "placeholder": "[항목]",
    "depth": 0,
    "file": "parts/item.hwpx",
-   "sha256": "2fbf38d461b0e0c2e682aa02b5358094147d5b0a201b793eb4b95e469e73205d"
+   "sha256": "0e83231adb548c81638f2ff1fe1a66b3844971c2384062625a7310d9bf43c9b2"
   },
   "item-deep": {
    "kind": "item",
@@ -296,54 +110,59 @@
    "placeholder": "[항목]",
    "depth": 1,
    "file": "parts/item-deep.hwpx",
-   "sha256": "4e7e6fe6d60adb6828b3825a14a4fe818484dae66dfdff81247a0345227f9cc0"
+   "sha256": "662b720c6b43ebe1406df1353a84534270a35c07f887d86f2aff18d426f7b05c"
   },
   "dash": {
    "kind": "dash",
    "placeholder": "[항목]",
    "depth": 0,
    "file": "parts/dash.hwpx",
-   "sha256": "9089674b7410e3ba7d67210d42d71e26648d5efb98e18faa37b52fe0e875ba8e"
+   "sha256": "d007d262350a256fed43c350750fd30a70e7acbd887f4fe2cd683c548deb2944"
   },
   "dash-deep": {
    "kind": "dash",
    "placeholder": "[항목]",
    "depth": 1,
    "file": "parts/dash-deep.hwpx",
-   "sha256": "b750fc9a811fa30f3eb39c13691be2b3cf782243cabf6b87bd3bc6119c3651c9"
+   "sha256": "125c9b1888a8bfdd2e7270ca970aeb01e579afe4a5d0da514a7afc7bd4beb549"
   },
   "dot": {
    "kind": "dot",
+   "symbol": "•",
    "placeholder": "[항목]",
    "depth": 0,
    "file": "parts/dot.hwpx",
-   "sha256": "e1279888900b19711a2bdbdd4fde1ab2dfa579badc28c7a70e9a6592e301dc81"
+   "sha256": "4c7c43b48bca394a53038e502fae61637a07e090d3163e5062694120f8e26635"
   },
   "dot-deep": {
    "kind": "dot",
+   "symbol": "•",
    "placeholder": "[항목]",
    "depth": 1,
    "file": "parts/dot-deep.hwpx",
-   "sha256": "d3a760007c635fd72ddef1a51a49e0676724edbb6515437c9129c4d57ce98f4b"
+   "sha256": "b33a06e72b2193af047e71ee83dc1158c23dccb32b4d353856bb2aa82bbcedf3"
   },
   "note": {
    "kind": "note",
    "placeholder": "[항목]",
    "depth": 0,
    "file": "parts/note.hwpx",
-   "sha256": "b6eaa8d19c69d03a9d8cfe385e86bb73385377375a218d28e188f847665ca036"
+   "sha256": "1424a423fb87dd51428ea22fd15beaf3a9105d4bf90706112c0213d06a7c66c8"
   },
   "note-deep": {
    "kind": "note",
    "placeholder": "[항목]",
    "depth": 1,
    "file": "parts/note-deep.hwpx",
-   "sha256": "cca625d6afda2da9168389aed03a73c7891aa800d627c93affa3d9b22ae46a37"
+   "sha256": "d5c97c680c5dbf6cccafdedc166c478eea33512b2a6f58a8fe47c4a4905e039c"
   },
-  "spacer": {
-   "kind": "spacer",
-   "file": "parts/spacer.hwpx",
-   "sha256": "1a3f570c7d64c8ada47ccef239636876b093cc4f88a847a1bc1f3c892262b00a"
+  "task": {
+   "kind": "task",
+   "placeholder": "[과제 제목]",
+   "numberPlaceholder": "[번호]",
+   "numbering": "boxed",
+   "file": "parts/task.hwpx",
+   "sha256": "45d4a9abcba8b75145c702b39bc88c91de961f07cfd910bdc70b6ab8155acf79"
   },
   "schedule": {
    "kind": "table",
@@ -354,15 +173,21 @@
     "unitCells": 3,
     "repeat": true,
     "header": [
-     "주  요  업  무",
-     "추 진 일 정",
-     "비    고"
+     "기 간",
+     "주 요 업 무 내 용",
+     "비 고"
     ],
-    "firstColumnPrefix": " ○ ",
-    "role": "schedule"
+    "role": "schedule",
+    "columns": [
+     "기간",
+     "주요 업무 내용",
+     "비고"
+    ],
+    "firstColumnPrefix": "○ ",
+    "prefixColumn": 1
    },
    "file": "parts/schedule.hwpx",
-   "sha256": "bece2ef0b48dd24b009278fa2af718fd578c9c578f88fe07d1fe5883a55f4c79"
+   "sha256": "507fa32e34c7c87faecf317cb945dd78096a819342fe2086c029c17ca78a9556"
   },
   "two-column": {
    "kind": "table",
@@ -373,13 +198,17 @@
     "unitCells": 2,
     "repeat": true,
     "header": [
+     "구 분",
+     "주요내용"
+    ],
+    "role": "grid",
+    "columns": [
      "구분",
      "내용"
-    ],
-    "role": "grid"
+    ]
    },
    "file": "parts/two-column.hwpx",
-   "sha256": "3756bb98cfb363e5be576bea28ab71fe8d93a0217ac0a8ac2bae28591c8a689a"
+   "sha256": "2ef324d7adc487fe6f99124fe6ad2b54c7c787a8aee0c40232ffd9076928f8ab"
   }
  }
 }

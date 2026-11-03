@@ -34,8 +34,7 @@ from pathlib import Path
 
 from lxml import etree
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / 'plugins/hancom-desktop/skills/hwpx/scripts'))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import layout_rules as rules  # noqa: E402
 
 FIELDS = ('align', 'left', 'intent', 'lineSpacing', 'lead')

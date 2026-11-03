@@ -44,4 +44,4 @@
 - R2·R3·R6: 같은 역할 문단이 한 가지 문단·글자 서식을 쓰도록 기존 편집 경로로 맞춘다. 공백 문자로 위치를 흉내 내지 않는다.
 - R7: 해당 글자 서식의 옛 글꼴을 내어쓰기를 맞춘 PC에서 실제로 그려진 TrueType 글꼴(PDF의 글꼴 이름으로 확인)로 바꾼 뒤, R1을 다른 판의 한글에서도 출력해 확인한다.
 - R1: 왼쪽 정렬을 먼저 확인하고, 내어쓰기 값을 측정한 차이만큼 조정한다(1mm ≈ 283 HWPUNIT). 저장된 줄 배치(`linesegarray`)가 옛 값으로 남아 있으면 한글이 그대로 쓰므로 해당 문단의 줄 배치를 지우고 다시 출력한다.
-- 양식 자체의 문제는 [완성형 등록](complete-template-registration.md) 단계에서 고친다. 기본 제공 3종은 저장소의 `tools/normalize_template_layout.py`와 `tools/rebuild_template_references.py`로 이 규칙을 적용하고 한글 출력으로 확인했다. 3종 모두 목록·본문은 어절 줄바꿈이다.
+- 양식 자체의 문제는 [완성형 등록](complete-template-registration.md) 단계에서 고친다. 기본 제공 3종은 스킬의 `scripts/normalize_template_layout.py`와 저장소의 `tools/rebuild_template_references.py`로 이 규칙을 적용하고 한글 출력으로 확인했다. 3종 모두 목록·본문은 어절 줄바꿈이다.

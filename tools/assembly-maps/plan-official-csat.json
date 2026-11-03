@@ -1,0 +1,31 @@
+{
+  "schema": "hwpx.assembly-part-map.v1",
+  "id": "plan-official",
+  "label": "공문서형 시행·운영계획",
+  "source": {
+    "sha256": "fec96f47157139d1569925cdcfdeb3a9e6481aa1e6a72880faee44dbccb27f9f",
+    "title": "2027학년도 대학수학능력시험 시행기본계획",
+    "publisher": "교육부",
+    "license": "공공누리 제1유형(출처표시)",
+    "attribution": "이 조립 양식의 서식은 교육부 「2027학년도 대학수학능력시험 시행기본계획」(공공누리 제1유형, 출처표시)에서 가져왔으며 원문 문구는 포함하지 않는다."
+  },
+  "deepIndentHwp": 1500,
+  "parts": {
+    "cover": {"range": [0, 28], "kind": "cover", "check": {"paragraph": 16, "startsWith": "2026. 3. 31."},
+      "fields": {"subtitle": {"paragraph": 4, "placeholder": "[부제목]"}, "title": {"paragraph": 5, "placeholder": "[제목]"},
+                 "date": {"paragraph": 16, "placeholder": "[날짜]"}, "organization": {"paragraph": 20, "copyOf": 16, "placeholder": "[기관명]"}}},
+    "chapter_first": {"range": [65, 68], "kind": "chapter_first", "placeholder": "[장 제목]", "expect": "Ⅰ. 시험 개요"},
+    "chapter": {"range": [197, 199], "kind": "chapter", "placeholder": "[장 제목]", "expect": "Ⅲ. 시험 관리"},
+    "heading1": {"range": [199, 200], "kind": "heading", "level": 1, "placeholder": "[1단계 제목]", "check": {"paragraph": 199, "startsWith": "1. 시험 시행세부계획"}},
+    "heading2": {"range": [257, 258], "kind": "heading", "level": 2, "placeholder": "[2단계 제목]", "check": {"paragraph": 257, "startsWith": "가. 시험감독관"}},
+    "heading3": {"range": [258, 259], "kind": "heading", "level": 3, "placeholder": "[3단계 제목]", "check": {"paragraph": 258, "startsWith": "1) 시험감독관과"}},
+    "item": {"range": [259, 260], "kind": "item", "symbol": "○", "placeholder": "[항목]", "baseLeftHwp": 0, "check": {"paragraph": 259, "startsWith": "◦ 시험감독관 및"}},
+    "dash": {"range": [350, 351], "kind": "dash", "placeholder": "[항목]", "baseLeftHwp": 0, "check": {"paragraph": 350, "startsWith": "- 동일 시험장"}},
+    "dot": {"range": [97, 98], "kind": "dot", "placeholder": "[항목]", "baseLeftHwp": 1272, "check": {"paragraph": 97, "startsWith": "‧ 점자"}},
+    "note": {"range": [108, 109], "kind": "note", "placeholder": "[항목]", "baseLeftHwp": 700, "check": {"paragraph": 108, "startsWith": "※ 응시원서"}},
+    "spacer": {"range": [263, 264], "kind": "spacer"},
+    "schedule": {"range": [80, 81], "kind": "table", "table": {"role": "schedule", "firstColumnPrefix": " ○ "}},
+    "two-column": {"range": [120, 121], "kind": "table", "table": {"role": "grid", 
+      "size": {"widthHwp": 45910, "rowHeightHwp": 2322, "charHeight": 1100, "holderMargins": {"left": 0, "intent": 0}}}}
+  }
+}

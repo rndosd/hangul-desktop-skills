@@ -20,10 +20,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+HERE = Path(__file__).resolve().parent
 PYTHON = sys.executable
-TASK = ROOT / 'plugins/hancom-desktop/skills/hwpx/scripts/Invoke-HangulTask.ps1'
-sys.path.insert(0, str(ROOT / 'tools'))
+TASK = HERE / 'Invoke-HangulTask.ps1'
+sys.path.insert(0, str(HERE))
 from propose_assembly_map import propose  # noqa: E402
 from build_assembly_template import native  # noqa: E402
 
@@ -36,7 +36,7 @@ def build(work, attempt, part_map, source):
     folder = work / f'build-{attempt}'
     folder.mkdir()
     write(folder / 'map.json', part_map)
-    done = subprocess.run([PYTHON, '-X', 'utf8', str(ROOT / 'tools/build_assembly_template.py'), str(folder / 'map.json'), str(source),
+    done = subprocess.run([PYTHON, '-X', 'utf8', str(HERE / 'build_assembly_template.py'), str(folder / 'map.json'), str(source),
                            str(folder / 'work'), '--out', str(folder / 'catalog' / part_map['id'])],
                           capture_output=True, text=True, encoding='utf-8', errors='replace')
     (folder / 'build.log').write_text(done.stdout + done.stderr, encoding='utf-8')
