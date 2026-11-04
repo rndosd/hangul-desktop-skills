@@ -42,7 +42,7 @@ $taskLauncher = Join-Path $taskSkillDir 'scripts/Invoke-HangulTask.ps1'
 
 ## 준비된 완성형 계획서 채우기
 
-계획서 작성은 [완성형 3종](template-selection.md#준비된-완성형-계획서) 중 적합한 하나를 고른 뒤 같은 ID의 [조립](#개요로-공문서형-계획서-조립)을 쓴다. fill은 조립이 실패했을 때의 예비다. `SKILL_DIR`는 실제 hwpx 스킬 폴더이며 실행기는 이미 선택한 환경을 재사용한다.
+계획서 작성은 [완성형 3종](template-selection.md#준비된-완성형-계획서) 중 적합한 하나를 고른 뒤 같은 ID의 [조립](#개요로-조립)을 쓴다. fill은 조립이 실패했을 때의 예비다. `SKILL_DIR`는 실제 hwpx 스킬 폴더이며 실행기는 이미 선택한 환경을 재사용한다.
 
 **구역 늘리기·빼기.** 양식 설명(`fill --template`)의 `sections`는 통째로 반복하거나 뺄 수 있는 구역이다(예: 활동 영역 ① 제목·목적·기간·대상·방법·내용). 내용의 영역 수만큼 `{"sections": {"activities": [영역1, 영역2, 영역3]}}`처럼 구역 입력을 영역마다 하나씩 준다. 복사된 구역의 원 숫자는 ①→②→③으로 이어지고, `heading`을 받는 구역은 제목 문구도 바꿀 수 있다. 빈 목록은 구역을 지우며(최소 개수가 0일 때), 구역 입력을 구역 밖 값과 중복해 주면 거부한다. **내용이 양식 칸보다 많으면 버리지 않는다.** 구역으로 늘리거나, 맞는 양식을 고르거나, 구조 편집으로 보완하고, 그래도 넣지 못한 내용은 사용자에게 알린다. 종합사업형은 과제가 요약·성과표와 연결돼 있어 구역 반복을 제공하지 않는다.
 
@@ -56,96 +56,41 @@ $planCatalog = Join-Path $taskSkillDir 'assets/document-templates/full-plans.jso
 
 아래 블록 입력·`--content`·compose는 필요한 표나 부분 구조를 보완할 때 사용한다.
 
-## 개요로 공문서형 계획서 조립
+## 개요로 조립
 
-장·절 수가 정해지지 않은 공문서형 계획(Ⅰ. / 1. / 가. / 1) / ○ / - / ‧ / ※, 표 포함)은 한 원본에서 잘라 둔 부품을 개요 순서로 붙이는 `assemble`을 쓴다. 공문서형 양식은 `plan-official`(경기도교육청 계획서 서식: 그라데이션 띠 표지, 검은 네모 Ⅰ 장, 상자 번호 1단계, ① 과제, 출처표시, 원문 문구·로고 없음)이다.
+계획서·보고서는 고른 양식의 부품을 개요 순서로 붙이는 `assemble`로 만든다. 어떤 요소를 어디에 쓸지(틀 세우기)는 [조립 개요 설계](outline-design.md)를 따른다.
 
 ```powershell
+& $taskLauncher assemble --template plan-school --describe
 & $taskLauncher assemble --template plan-official --outline 개요.json --output 계획.hwpx --pdf 계획.pdf --run 작업폴더/assemble-run --context host-approved
 ```
 
+`--describe`는 한글을 열지 않고 그 양식의 `roles`(그대로 그리는 역할), `substitutes`(대신 그리는 역할), `tables`(표 역할·칸 수·칸 순서 `columns`), `cover`(표지 항목·필수·붙여 넣는 곳)를 알려 준다. 개요는 이것만 보고 쓴다.
+
 ```json
 {"schema":"hwpx.assembly-outline.v1","template":"plan-official",
- "cover":{"title":"학업성취도 평가 시행계획","subtitle":"2027학년도 ○○도 중학교 3학년","date":"2027. 3. 15.","organization":"○○도교육청"},
+ "cover":{"title":"학업성취도 평가 시행계획","date":"2027. 3. 15.","organization":"○○도교육청"},
  "nodes":[{"t":"chapter","text":"평가 개요"},
           {"t":"heading","level":1,"text":"평가의 목적"},
-          {"t":"item","text":"성취 수준을 진단함."},{"t":"dash","text":"세부 내용"},{"t":"dot","text":"하위 내용"},{"t":"note","text":"참고 사항"},
+          {"t":"item","text":"성취 수준을 진단함."},{"t":"dash","text":"세부 내용"},{"t":"note","text":"참고 사항"},
           {"t":"table","role":"schedule","rows":[["3. 15.(월)","시행계획 안내",""]]}]}
 ```
 
-- 번호(Ⅰ. 1. 가. 1))는 개요에서 만든다. 문구에 번호를 넣지 않는다. 절을 빼면 뒤 번호가 당겨진다.
-- `cover`의 `title`·`date`는 필수다. `subtitle`(제목 위 작은 줄)·`organization`은 빼면 빈 줄로 남는다.
-- 개요의 `t`·표 역할·표지 항목은 모든 조립 양식이 같은 [공통 어휘](#공통-개요-어휘와-양식-조회)를 쓴다.
-- `level` 2는 1 아래, 3은 2 아래에만 둔다. 3단계 제목 아래 항목은 원본처럼 한 단계 깊게 들여 쓴다.
-- 표(역할): `schedule`(기간·주요 업무 내용·비고 3열, 업무 칸 앞에 `○ `), `grid`(부품 `two-column`, 구분·내용 2열). 칸 순서는 `--describe`의 `columns`를 따른다.
-- 제목(장·1. 제목 등) 바로 뒤의 표가 다음 쪽에서 시작해 제목만 쪽 끝에 남으면, 조립이 그 제목을 다음 쪽으로 넘겨 한 번 더 만든다(결과 `titlesMovedToNextPage`). `rows`의 한 항목이 표의 반복 묶음 하나이며 1~100개를 넣는다. 묶음의 칸은 왼쪽 위부터 읽는 순서로 manifest `unitCells`개를 적는다(두 부품은 한 줄 묶음이라 열 수와 같다). 칸 하나에 여러 문단이 필요하면 문자열 목록(`["가", "나"]`)을 쓰고 빈 칸은 `""`이다. 제목 행은 선택 `"header":["학년군","주요 활동"]`(`headerCells`개)로 바꾸며, 빼면 부품의 제목을 쓴다. 묶음이 여러 줄(`unitRows`)이고 칸이 합쳐진 표도 같은 방식이며, `repeat`가 false인 표는 묶음 하나만 받는다. 합계 줄이 있는 표(`--describe`의 `footerCells`)는 반복 묶음 뒤에 그 줄이 한 번 붙고, `"footer":["", "100"]`처럼 '계' 같은 이름 칸을 뺀 값 칸을 읽는 순서로 적는다(빼면 빈 칸). 줄 이름이 정해진 고정 표(`--describe`의 `rowLabels`)는 `rows` 대신 `"values":{"운영 요일":["월~목","월, 화"],"비고":[["가","나"]]}`처럼 줄 이름마다 그 줄의 값 칸을 적는다. 줄 순서는 표를 따르고 뺀 줄은 빈 칸이며, 이때 표는 `part`로 고른다.
-- 장 제목 상자는 제목 길이에 맞춰 넓어진다. 본문 폭을 넘는 제목은 실행 전에 거부한다.
-- 조립 마지막에 마지막 줄이 몇 글자만 넘친 본문 문단은 한글의 '자간 좁게'를 1%씩 최대 10번 적용해 한 줄을 줄이고, 그래도 안 줄면 되돌린다(작성자가 손으로 하던 일). 결과 `assembly.fitShortLines`에 맞춘 문단 수가 나오며, 양식 rules `"fitShortLines": false`로 끈다.
-- 어느 노드든 `"pageBreakBefore": true`를 주면 그 노드부터 새 쪽에서 시작한다. 그 밖의 쪽 나눔은 한글이 정한다.
-- 아래에 내용 없이 이어지는 제목(같은 단계 제목이나 장이 바로 뒤에 옴)은 다음 문단과 묶지 않는다. "1. 기간: 3월"처럼 제목 꼴로 쓴 목록 줄이 통째로 다음 쪽으로 밀리지 않게 하기 위해서다.
+### 개요 규칙
+
+- 번호(Ⅰ, 1., 가., 1), ①)는 조립이 매긴다. 문구에 번호나 기호를 넣지 않는다. 절을 빼면 뒤 번호가 당겨진다.
+- `heading` level 2는 1 아래, 3은 2 아래에만 둔다. "목적: …"처럼 이름표가 붙는 줄은 `item` 문구에 그대로 쓴다.
 - 문구는 줄바꿈·탭 없이 한 문단씩 넣는다. 빈 문구와 `[항목]` 같은 자리표시 문구는 거부한다.
+- 어느 노드든 `"pageBreakBefore": true`면 새 쪽에서 시작한다. 그 밖의 쪽 나눔은 한글이 정한다(분량을 늘리려고 쓰지 않는다).
+- 표지 항목은 `title`·`subtitle`·`date`·`organization`·`department`. 양식에 자리가 없는 항목은 버리지 않고 다른 자리에 붙는다(`substitutions`에 남는다). 필수는 `--describe`의 `cover.required`.
 
-### 사업형(요약·상세) 조립: `plan-project`
+### 공통 어휘
 
-완성형 사업형과 같은 디자인(띠 장 제목 Ⅰ, 번호 탭 1, 네모 번호 과제 제목, □ 소제목, ◦ / - / ⇒ / ※, ◈ 상자)을 길이에 관계없이 조립한다. 표지 다음 쪽에 선택 `summary`(요약 쪽)가 오고, 상세 본문은 새 쪽에서 시작한다. 쪽 번호는 표지 다음 쪽부터 붙는다.
-
-```json
-{"schema":"hwpx.assembly-outline.v1","template":"plan-project",
- "cover":{"title":"사업 추진계획","subtitle":"부제","date":"2027. 3.","organization":"○○교육청","department":"담당 부서"},
- "summary":{"title":"사업 추진계획","nodes":[{"t":"chapter","text":"추진 배경"},{"t":"item","text":"요약 문장"},{"t":"point","text":"현재: 상황"},{"t":"arrow","text":"개선: 방향"}]},
- "nodes":[{"t":"chapter","text":"추진 배경"},{"t":"subhead","text":"추진 필요성"},{"t":"item","text":"배경"},
-          {"t":"chapter","text":"중점 추진 과제"},{"t":"task","text":"첫째 과제"},{"t":"item","text":"(목표) ..."},{"t":"dash","text":"세부"},
-          {"t":"chapter","text":"사업 추진 계획"},{"t":"heading","level":1,"text":"성과 관리"},{"t":"box","text":"핵심 문장"},
-          {"t":"table","role":"indicators","rows":[["과제",["지표 1"],["지표 2"]]]}]}
-```
-
-- `t`: `chapter`(Ⅰ 띠, 요약 안에서는 Ⅰ. 글자 제목), `heading` level 1(번호 탭 1·2·3, 긴 제목이면 탭이 넓어진다), `task`(네모 번호 과제 제목, 장·탭마다 다시 1부터), `subhead`(□ 소제목, 번호 없음), `point`(① 원 번호 줄, 장마다 1부터), `item`·`dash`·`arrow`·`note`, `box`(◈ 상자), `table`. 요약 안의 `item`·`task`는 요약 쪽 간격의 부품을 쓴다.
-- 표(역할): `grid`(부품 `three-column`, 영역·내용·배점 3열, 제목 행은 `header`로 바꾼다), `indicators`(과제 칸이 두 줄에 걸친 2줄 묶음: 칸은 과제·지표 1·지표 2 세 개).
-
-### 학교형·교육사업형 조립: `plan-school`·`plan-education`
-
-완성형 학교형·교육사업형과 같은 디자인(□ 막대 소제목과 ❍ 문단, 번호 탭 1·2·3, 네모 번호 과제 제목, ◦ / -)을 길이에 관계없이 조립한다. 본문은 장 없이 □ 막대(추진 근거·배경·목적·방침 등)로 시작할 수 있고, 첫 `chapter`부터 번호 탭이 붙는다.
-
-```json
-{"schema":"hwpx.assembly-outline.v1","template":"plan-school",
- "cover":{"title":"독서 주간 운영계획(안)","organization":"○○초등학교 · 독서교육 담당"},
- "nodes":[{"t":"subhead","text":"추진 근거"},{"t":"lead","text":"근거 문장"},
-          {"t":"subhead","text":"추진 목적"},{"t":"lead","text":"목적 1"},{"t":"lead","text":"목적 2"},
-          {"t":"chapter","text":"세부 운영 계획"},{"t":"task","text":"운영 개요"},
-          {"t":"item","text":"대상: 전교생"},{"t":"item","text":"운영 내용"},{"t":"dash","text":"월요일 | 활동"},
-          {"t":"item","text":"추진 절차"},
-          {"t":"table","role":"steps","rows":[["준비","운영","공유","평가","담당 / 시기","담당 / 시기","담당 / 시기","담당 / 시기"]]},
-          {"t":"task","text":"기대 효과"},{"t":"lead","text":"효과 문장"}]}
-```
-
-- `t`: `subhead`(□ 막대 제목), `lead`(❍ 문단), `chapter`(번호 탭 1·2·3, 긴 제목이면 탭이 넓어진다), `task`(네모 번호 과제 제목, 장마다 다시 1부터), `item`(◦), `dash`(-), `table`. "목적: …"처럼 이름표가 붙는 줄은 `item` 문구에 그대로 쓴다.
-- `plan-school`: 표지 없이 첫 쪽 머리에 제목 띠와 작성 부서가 온다. `cover`는 `title`(필수)·`organization`. 표 `steps`는 ⇨로 이은 4단계 절차표로 묶음 하나(칸 8개: 단계 4개 → 각 단계의 담당·시기 4개)만 받는다. 쪽 번호는 없다(완성형과 같다).
-- `plan-education`: 표지 쪽 다음에 본문이 온다. `cover`는 `title`·`date`(필수), `subtitle`(제목 위 줄), `organization`이며 `title`·`organization`은 본문 첫 쪽 머리에도 함께 들어간다. 표 `targets`는 순·대상·담당·사업·활동·기간·비고 6칸 반복 표다. 쪽 번호는 본문 쪽부터 붙는다.
-
-### 결과요약형·행사계획형: `report-brief`·`event-plan`
-
-정부 보도자료 붙임 서식(라벨 상자 + 제목 상자, □ / ○(이름표) / - / *)이다. 장이 없고 □ 소제목이 맨 윗단계라, 개요의 `chapter`는 □ 소제목으로 그려진다(`substitutions`). 표지 대신 첫 줄 제목 띠가 오며 `cover`는 `title`(필수)·`subtitle`(왼쪽 라벨 상자: "붙임", "결과", "안내" 등 2~4자). 쪽 번호는 없다.
-
-```json
-{"schema":"hwpx.assembly-outline.v1","template":"report-brief",
- "cover":{"subtitle":"결과","title":"2026학년도 1학기 독서교육 운영 결과"},
- "nodes":[{"t":"subhead","text":"운영 개요"},{"t":"item","text":"(운영기간) 2026. 3. ~ 7."},{"t":"note","text":"참여 인원은 ○○명"},
-          {"t":"subhead","text":"주요 결과"},{"t":"item","text":"(참여) ..."},{"t":"dash","text":"세부"},
-          {"t":"table","role":"grid","part":"table2","rows":[["학년","결과"]]}]}
-```
-
-- `report-brief` 표: `table1`(구분·지표 3개·주요 특징 5칸, 집단별 결과), `table2`(구분·핵심 내용 2칸). 항목 앞 "(이름)"은 문구에 그대로 쓴다.
-- `event-plan` 표: `schedule`(시간·내용·비고 3칸 프로그램). 일시·장소·참석자는 "(일시/장소) ..."처럼 `item`으로 쓴다.
-
-### 공통 개요 어휘와 양식 조회
-
-어떤 요소를 어디에 쓸지(틀 세우기)는 [조립 개요 설계](outline-design.md)를 따른다. 아래는 요소의 뜻과 대신 그리는 순서다.
-
-모든 조립 양식(그리고 앞으로 등록하는 양식)은 같은 개요 어휘를 쓴다. 양식에 없는 역할은 아래 순서로 가까운 부품이 대신 그리고, 결과의 `substitutions`에 위치·원래 역할·대신 쓴 역할을 남긴다. 대신 그린 곳이 있으면 사용자에게 알린다(번호가 새로 생기거나 기호가 바뀔 수 있다).
+모든 조립 양식(등록한 양식 포함)은 같은 어휘를 쓴다. 양식에 없는 역할은 가까운 부품이 대신 그리고 결과 `substitutions`에 남는다. 대신 그린 곳은 사용자에게 알린다.
 
 | `t` | 뜻 | 없을 때 |
 |---|---|---|
-| `chapter` | 장(양식에 따라 Ⅰ 상자·Ⅰ 띠·번호 탭) | `subhead` → `heading` 1 → `task`(장 없는 1~2쪽 양식) |
+| `chapter` | 장(Ⅰ 상자·Ⅰ 띠·번호 탭) | `subhead` → `heading` 1 → `task` |
 | `heading` level 1·2·3 | 1. / 가. / 1) 제목 | 2→1, 3→2, 1→`task`→`subhead` |
 | `task` | 네모 번호 과제 ①② | `heading` 1 → `subhead` |
 | `subhead` | □ 번호 없는 소제목 | `task` → `heading` 1 |
@@ -155,17 +100,28 @@ $planCatalog = Join-Path $taskSkillDir 'assets/document-templates/full-plans.jso
 | `point` | ① 원 번호 줄 | `item` |
 | `box` | ◈ 강조 상자 | `lead` → `item` |
 
-- 표는 `"role"`로 고른다: `schedule`(업무·일정 목록), `grid`(구분·내용), `steps`(가로 단계 흐름), `targets`(대상별 현황), `indicators`(과제별 성과지표). 같은 역할이 없으면 칸 수가 같은 반복 표가 대신하고, 그것도 없으면 이 양식의 표 목록과 칸 수를 알려 주며 거부한다. 부품 이름(`"part"`)으로 고르는 옛 개요도 받는다.
-- 표지 항목은 `title`·`subtitle`·`date`·`organization`·`department`. 이 양식 표지에 자리가 없으면 버리지 않고 `subtitle`은 제목 뒤에 " - ", `date`·`department`는 `organization` 뒤에 " · "로 붙인다. 필수는 양식에 자리가 있는 `title`·`date`다.
-- 개요를 쓰기 전에 고른 양식이 무엇을 갖췄는지 조회한다(한글을 열지 않는다):
+### 표
 
-```powershell
-& $taskLauncher assemble --template plan-school --describe
-```
+- `"role"`로 고른다: `schedule`(일정·프로그램), `grid`(구분·내용), `steps`(가로 단계 흐름), `targets`(대상별 현황), `indicators`(과제별 성과지표). 같은 역할이 없으면 칸 수가 같은 반복 표가 대신하고, 없으면 표 목록을 알려 주며 거부한다. 한 양식에 같은 역할 표가 여럿이면 `"part"`로 고른다.
+- `rows`의 한 항목이 반복 묶음 하나(1~100개)이며, 칸은 `--describe`의 `columns` 순서로 `cells`개를 적는다. 칸 하나에 여러 문단은 `["가", "나"]`, 빈 칸은 `""`. 첫 칸이 기간인 표에 날짜를 둘째 칸에 넣으면 거부한다.
+- 제목 행은 선택 `"header"`로 바꾼다. 합계 줄이 있는 표(`footerCells`)는 `"footer"`에 값 칸만, 줄 이름이 정해진 고정 표(`rowLabels`)는 `"values":{"줄 이름":[값 칸]}`로 적는다.
 
-결과의 `roles`는 그대로 그리는 역할, `substitutes`는 대신 그리는 역할, `tables`는 표 역할·칸 수·칸 이름, `cover`는 표지 항목·필수·붙여 넣는 곳이다.
+### 양식별 차이
 
-입력 검사가 끝난 뒤 한글을 한 번 열어 표지 부품에 장·제목·항목·표 부품을 차례로 붙이고 저장·재열기·PDF를 만든다. 결과의 `assembly`는 저장본에 자리표시가 남지 않았는지와 요청한 문구·표 행 수를 확인한 값이며, `wrapAlignment`·`pageLayout`은 PDF 배치 경고다. `PASS_NATIVE` 뒤에도 쪽 이미지를 확인한다([preview](#준비된-블록-조합)). 내 양식을 부품으로 등록하는 방법은 실행기의 `register 원본.hwpx --id ID --out 폴더`([조립 등록](complete-template-registration.md#계획서보고서-한-명령-조립-등록먼저))이며, 등록한 폴더는 `--catalog`로 지정한다. 부품 지도는 위 공통 어휘의 역할·표 역할만 쓰고, 어휘로 읽히지 않는 부분은 원본 그대로 두는 블록 부품으로 남긴다(개요 `{"t":"block","part":"이름"}`, 결과 `blocks`에 원본 글자 목록). 조립·블록을 나누는 기준과 합격 기준은 저장소 `tools/assembly-maps/README.md`를 따른다. 양식 폴더의 `reproduction/outline.json`(기준 개요)·`expected.json`(기대 쪽·줄 위치)은 저장소의 `tools/check_assembly_reproduction.py`가 모든 양식에 같은 방법으로 조립·비교하는 등록 합격 기준이다.
+| 양식 | 표지 | 장 | 표 | 따로 알 것 |
+|---|---|---|---|---|
+| `plan-official` 공문서형 | 그라데이션 띠 표지 쪽 | 검은 네모 Ⅰ, 상자 번호 1. | `schedule`(기간·○업무·비고), `grid` | |
+| `plan-school` 학교형 | 표지 없음, 첫 쪽 제목 띠 | 번호 탭 1·2·3 | `steps`(4단계, 묶음 하나) | 장 앞에 □·❍로 근거·목적을 쓸 수 있다. 쪽 번호 없음 |
+| `plan-education` 교육사업형 | 표지 쪽 | 번호 탭 | `targets`(6칸) | 장 앞에 □·❍ 가능 |
+| `plan-project` 사업형 | 표지 쪽 | Ⅰ 띠, 번호 탭 1. | `grid`(3칸), `indicators` | 선택 `"summary":{"title":…,"nodes":[…]}`가 표지 다음 요약 쪽이 된다 |
+| `report-brief` 결과요약형 | 제목 띠(라벨 `subtitle` + `title`) | 없음(□가 맨 위) | `table1`(5칸 결과표), `table2`(구분·핵심 내용) | 1~2쪽, 쪽 번호 없음 |
+| `event-plan` 행사계획형 | 제목 띠(라벨 + 제목) | 없음(□가 맨 위) | `schedule`(시간·내용·비고) | 일시·장소·참석자는 "(일시/장소) …" `item` |
+
+### 결과 확인
+
+한글을 한 번 열어 부품을 붙이고 저장·재열기·PDF를 만든다. 결과의 `assembly`는 자리표시가 남지 않았는지와 요청한 문구·표 행 수를 확인한 값이고, `wrapAlignment`·`pageLayout`은 PDF 배치 경고다. 제목만 쪽 끝에 남으면 조립이 그 제목을 다음 쪽으로 넘겨 한 번 더 만든다(`titlesMovedToNextPage`). `PASS_NATIVE` 뒤에도 쪽 이미지를 본다([preview](#준비된-블록-조합)).
+
+내 양식은 `register 원본.hwpx --id ID --out 폴더`로 등록하고([조립 등록](complete-template-registration.md#계획서보고서-한-명령-조립-등록먼저)) `--catalog`로 지정한다. 원본 그대로 남긴 부분은 블록(`{"t":"block","part":"이름"}`, 결과 `blocks`에 원본 글자)이다. 양식 유지보수 기준은 저장소 `tools/assembly-maps/README.md`.
 
 ## 준비된 양식 채우기
 
