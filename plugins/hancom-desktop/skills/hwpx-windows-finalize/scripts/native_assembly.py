@@ -404,7 +404,8 @@ def describe(manifest):
     """What an outline can use on this template: roles drawn as themselves or by a substitute, tables and cover fields."""
     parts, rules = manifest['parts'], manifest['rules']
     roles = {role: resolve_role(parts, rules, role) for role in ROLE_LABELS}
-    fields = next(p for p in parts.values() if p['kind'] == 'cover')['placeholder']
+    cover_part = next(p for p in parts.values() if p['kind'] == 'cover')
+    fields = cover_part['placeholder']
     return dict(
         id=manifest['id'], label=manifest['label'],
         roles={role: ROLE_LABELS[role] for role, used in roles.items() if used == role},
@@ -419,6 +420,7 @@ def describe(manifest):
         blocks=[dict(part=name, texts=p['texts'][:8], numberedLines=p.get('numberedLines', []))
                 for name, p in parts.items() if p['kind'] == 'block'],
         cover=dict(fields=list(fields), required=[k for k in ('title', 'date') if k in fields],
+                   **({'limits': cover_part['fieldLimits']} if cover_part.get('fieldLimits') else {}),
                    carried={k: COVER_CARRY[k][0] for k in COVER_FIELDS if k not in fields and k in COVER_CARRY}),
         summary=any(p['kind'] == 'summary' for p in parts.values()),
         textBeforeFirstChapter=bool(rules.get('textBeforeFirstChapter')))
@@ -456,6 +458,9 @@ def build_plan(manifest, outline, tables_dir=None, notes=None):
             if value:
                 cover[target] = joint.join(v for v in (cover.get(target, ''), value) if v)
                 notes.append(dict(at=f'cover.{key}', role=key, used=target, note=f'이 양식 표지에 {key} 자리가 없어 {target}에 붙였습니다.'))
+    for key, most in parts[cover_part].get('fieldLimits', {}).items():
+        need(len(re.sub(r'\s', '', str(cover.get(key, '')))) <= most,
+             f'cover.{key}: 이 양식의 {key} 자리는 좁은 라벨 상자라 {most}자까지입니다(예: 붙임, 결과, 안내). 긴 말은 title이나 본문에 쓰세요.')
     steps = [dict(op='text', find=place, text=_text(cover.get(key, ''), f'cover.{key}', placeholders, key not in required))
              for key in fields for place in places(fields[key])]
     if rules.get('pageNumbers') and not rules.get('bodyStartsNewSection'):

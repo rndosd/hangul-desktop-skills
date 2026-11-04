@@ -449,6 +449,8 @@ def prepare(name, spec, raw, out_dir, deep_indent):
         entry.update({key: spec[key] for key in ('placeholder', 'numberPlaceholder', 'numbering', 'level') if key in spec})
         if kind == 'cover':
             entry['placeholder'] = spec['fields']
+            if spec.get('fieldLimits'):  # a narrow label box holds a few letters (붙임, 결과)
+                entry['fieldLimits'] = spec['fieldLimits']
         names = flat(entry['placeholder'].values()) if isinstance(entry.get('placeholder'), dict) else [entry['placeholder']]
         names += [entry['numberPlaceholder']] if 'numberPlaceholder' in entry else []
         text = ''.join(''.join(t.itertext()) for t in section.iter(HP + 't'))  # with text after inline controls

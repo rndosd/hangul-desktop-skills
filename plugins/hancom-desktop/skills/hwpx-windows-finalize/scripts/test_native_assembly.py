@@ -398,6 +398,9 @@ class CommonVocabularyTest(unittest.TestCase):
         self.assertEqual([(n['role'], n['used']) for n in notes], [('chapter', 'subhead')])
         self.assertIn(('[소제목]', '운영 개요'), [(s['find'], s['text']) for s in plan['steps'] if s['op'] == 'text'])
         self.assertIn('chapter', a.describe(a.load_template(CATALOG, 'event-plan'))['substitutes'])
+        with self.assertRaisesRegex(ValueError, '좁은 라벨 상자라 4자까지'):  # a school name in the label box wraps letter by letter
+            self.plan('event-plan', {'title': '설명회 계획', 'subtitle': '○○초등학교'}, [{'t': 'item', 'text': '(일시) 3월'}])
+        self.assertEqual(a.describe(a.load_template(CATALOG, 'event-plan'))['cover']['limits'], {'subtitle': 4})
 
     def test_tables_are_picked_by_role_then_by_cell_count(self):
         plan, notes = self.plan('plan-school', {'title': '가상'}, [

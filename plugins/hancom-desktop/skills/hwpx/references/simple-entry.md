@@ -114,8 +114,8 @@ $planCatalog = Join-Path $taskSkillDir 'assets/document-templates/full-plans.jso
 | `plan-school` 학교형 | 표지 없음, 첫 쪽 제목 띠 | 번호 탭 1·2·3 | `steps`(4단계, 묶음 하나) | 장 앞에 □·❍로 근거·목적을 쓸 수 있다. 쪽 번호 없음 |
 | `plan-education` 교육사업형 | 표지 쪽 | 번호 탭 | `targets`(6칸) | 장 앞에 □·❍ 가능 |
 | `plan-project` 사업형 | 표지 쪽 | Ⅰ 띠, 번호 탭 1. | `grid`(3칸), `indicators` | 선택 `"summary":{"title":…,"nodes":[…]}`가 표지 다음 요약 쪽이 된다 |
-| `report-brief` 결과요약형 | 제목 띠(라벨 `subtitle` + `title`) | 없음(□가 맨 위) | `table1`(5칸 결과표), `table2`(구분·핵심 내용) | 1~2쪽, 쪽 번호 없음 |
-| `event-plan` 행사계획형 | 제목 띠(라벨 + 제목) | 없음(□가 맨 위) | `schedule`(시간·내용·비고) | 일시·장소·참석자는 "(일시/장소) …" `item` |
+| `report-brief` 결과요약형 | 제목 띠(라벨 `subtitle` 4자 이내: 결과·보고 + `title`) | 없음(□가 맨 위) | `table1`(5칸 결과표), `table2`(구분·핵심 내용) | 1~2쪽, 쪽 번호 없음 |
+| `event-plan` 행사계획형 | 제목 띠(라벨 4자 이내: 안내·계획 + 제목) | 없음(□가 맨 위) | `schedule`(시간·내용·비고) | 일시·장소·참석자는 "(일시/장소) …" `item` |
 
 ### 결과 확인
 

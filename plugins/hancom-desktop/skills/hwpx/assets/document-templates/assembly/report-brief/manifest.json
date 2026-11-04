@@ -27,7 +27,10 @@
     "title": "[제목]"
    },
    "file": "parts/cover.hwpx",
-   "sha256": "c2dc9bafa1cb653dcafb5f6829bb8647eca9c96840d100ad2e58de4835536165"
+   "sha256": "c2dc9bafa1cb653dcafb5f6829bb8647eca9c96840d100ad2e58de4835536165",
+   "fieldLimits": {
+    "subtitle": 4
+   }
   },
   "subhead": {
    "kind": "subhead",

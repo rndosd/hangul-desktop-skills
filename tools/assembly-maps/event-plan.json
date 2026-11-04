@@ -37,7 +37,10 @@
    },
    "keep": [],
    "dropPictures": true,
-   "dropHeaderFooter": true
+   "dropHeaderFooter": true,
+   "fieldLimits": {
+    "subtitle": 4
+   }
   },
   "subhead": {
    "range": [

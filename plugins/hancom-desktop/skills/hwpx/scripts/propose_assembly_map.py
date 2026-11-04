@@ -247,7 +247,8 @@ def cover_spec(paragraphs, heights):
     value = {'title': clean(' '.join(titles)), **({'subtitle': clean(labels[0])} if labels else {}),
              **({'date': clean(dates[0])} if 'date' in fields else {}),
              **({'organization': clean(orgs[0])} if 'organization' in fields else {})}
-    return dict(replace=replace, fields=fields, keep=sorted(set(keep))), value
+    limits = {'subtitle': max(4, len(re.sub(r'\s', '', labels[0])))} if labels else {}
+    return dict(replace=replace, fields=fields, keep=sorted(set(keep)), **({'fieldLimits': limits} if limits else {})), value
 
 
 def start_of(top, text):
