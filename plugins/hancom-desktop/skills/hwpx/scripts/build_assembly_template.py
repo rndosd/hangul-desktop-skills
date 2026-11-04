@@ -38,6 +38,8 @@ row) once after the repeated units; its "footerLabels" cells (계) keep their te
 A "block" part keeps a source range as it is (an irregular table, a paragraph with footnotes) and lists its texts,
 numbered-looking lines and date-like texts for review. Table "labelColumn" (a fixed table whose rows are named, such as 운영 요일 · 운영 시간) keeps that column's names
 and records each row's value cell count, so an outline can fill the table by row name.
+Item parts take "baseLeftHwp" (left margin; a "-" drawn under ○ with "context": "after-item" starts under
+the ○ text). "spaceBeforeHwp" sets the room above any part's first paragraph (more for higher ranks).
 "keepWithNext": false leaves a heading or subhead
 unbound to the next paragraph (a source that writes body lists as □ or "1. 기간: ..." lines). A cover field
 may name a list of placeholders that take the same value.
@@ -450,6 +452,17 @@ def prepare(name, spec, raw, out_dir, deep_indent):
     if spec.get('dropHeaderFooter'):  # a header or footer the range took from the document it was cut from
         for control in [c for c in section.iter(HP + 'ctrl') if c.find(HP + 'header') is not None or c.find(HP + 'footer') is not None]:
             control.getparent().remove(control)
+    if 'spaceBeforeHwp' in spec:
+        # Room above the part's first paragraph, more for higher ranks (chapter > heading > ○ > -), for a source set so
+        # evenly that its levels read as one block. The paragraph gets its own format copy.
+        first = section.findall(HP + 'p')[0]
+        shapes = header.find(f'.//{HH}paraProperties')
+        clone = copy.deepcopy(shapes.find(f'{HH}paraPr[@id="{first.get("paraPrIDRef")}"]'))
+        clone.set('id', str(max(int(s.get('id')) for s in shapes) + 1))
+        shape_margin(clone, 'prev', spec['spaceBeforeHwp'])
+        shapes.append(clone)
+        shapes.set('itemCnt', str(len(shapes)))
+        first.set('paraPrIDRef', clone.get('id'))
     kind, entry, previews, variants = spec['kind'], {'kind': spec['kind']}, [], []
     if spec.get('context'):
         # "summary": used on the summary page, which spaces lines more tightly; "after-<kind>": right after an outline

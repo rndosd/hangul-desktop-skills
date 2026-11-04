@@ -113,11 +113,16 @@ class AssemblyTest(unittest.TestCase):
 
     def test_items_under_level_three_use_the_deep_parts(self):
         plan = self.plan(CHAPTER, H1, ITEM, H2, H3, ITEM, {'t': 'dash', 'text': '세부'}, H2, ITEM)
-        self.assertEqual(parts(plan), ['chapter_first', 'heading1', 'item', 'heading2', 'heading3', 'item', 'dash', 'heading2', 'item'])
+        self.assertEqual(parts(plan), ['chapter_first', 'heading1', 'item', 'heading2', 'heading3', 'item', 'dash_after_item', 'heading2', 'item'])
         deep = copy.deepcopy(self.manifest)
         deep['rules']['deepItemsUnderHeadingLevel'] = 3  # a source that indents items under 1) one step more
         plan = a.build_plan(deep, outline(CHAPTER, H1, ITEM, H2, H3, ITEM, {'t': 'dash', 'text': '세부'}, H2, ITEM), next(self.tables))
-        self.assertEqual(parts(plan), ['chapter_first', 'heading1', 'item', 'heading2', 'heading3', 'item-deep', 'dash-deep', 'heading2', 'item'])
+        self.assertEqual(parts(plan), ['chapter_first', 'heading1', 'item', 'heading2', 'heading3', 'item-deep', 'dash_after_item-deep', 'heading2', 'item'])
+
+    def test_dash_under_an_item_starts_under_its_text(self):
+        dash, note = {'t': 'dash', 'text': '세부'}, {'t': 'note', 'text': '참고'}
+        plan = self.plan(CHAPTER, H1, dash, ITEM, dash, note, dash, H1, dash)
+        self.assertEqual(parts(plan), ['chapter_first', 'heading1', 'dash', 'item', 'dash_after_item', 'note', 'dash_after_item', 'heading1', 'dash'])
 
     def test_cover_page_numbers_and_title_box_width(self):
         plan = self.plan(CHAPTER, H1, CHAPTER)

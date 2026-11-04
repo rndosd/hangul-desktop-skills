@@ -73,7 +73,8 @@
     "방 침": "[장 제목]"
    },
    "numbering": "roman-bare",
-   "fitTitleCell": true
+   "fitTitleCell": true,
+   "spaceBeforeHwp": 1600
   },
   "heading1": {
    "range": [
@@ -89,7 +90,8 @@
    "replace": {
     "1": "[번호]",
     "타시·도 전출": "[1단계 제목]"
-   }
+   },
+   "spaceBeforeHwp": 900
   },
   "heading2": {
    "range": [
@@ -98,7 +100,8 @@
    ],
    "placeholder": "[2단계 제목]",
    "kind": "heading",
-   "level": 2
+   "level": 2,
+   "spaceBeforeHwp": 600
   },
   "heading3": {
    "range": [
@@ -107,7 +110,8 @@
    ],
    "placeholder": "[3단계 제목]",
    "kind": "heading",
-   "level": 3
+   "level": 3,
+   "spaceBeforeHwp": 400
   },
   "item": {
    "range": [
@@ -118,7 +122,8 @@
    "kind": "item",
    "prefix": "\\s*○\\s*",
    "symbol": "○",
-   "baseLeftHwp": 0
+   "baseLeftHwp": 0,
+   "spaceBeforeHwp": 500
   },
   "dash": {
    "range": [
@@ -128,6 +133,16 @@
    "placeholder": "[항목]",
    "kind": "dash",
    "baseLeftHwp": 0
+  },
+  "dash_after_item": {
+   "range": [
+    162,
+    163
+   ],
+   "placeholder": "[항목]",
+   "kind": "dash",
+   "baseLeftHwp": 2150,
+   "context": "after-item"
   },
   "dot": {
    "range": [
