@@ -656,8 +656,9 @@ def tables_as_char(source, paragraphs, target):
     with zipfile.ZipFile(source) as package:
         infos = package.infolist()
         data = {info.filename: package.read(info) for info in infos}
-    section = etree.fromstring(data['Contents/section0.xml'])
-    top = section.findall(HP + 'p')
+    names = sorted((n for n in data if re.fullmatch(r'Contents/section\d+\.xml', n)), key=lambda n: int(re.search(r'\d+', n).group()))
+    sections = {name: etree.fromstring(data[name]) for name in names}
+    top = [p for name in names for p in sections[name].findall(HP + 'p')]  # numbered on through all sections, as Hangul does
     for index in paragraphs:
         tables = top[index].findall(f'.//{HP}tbl')
         need(tables, f'paragraph {index} holds no table')
@@ -665,7 +666,8 @@ def tables_as_char(source, paragraphs, target):
             table.find(HP + 'pos').attrib.update({'treatAsChar': '1', 'vertOffset': '0', 'horzOffset': '0'})
         for lines in top[index].findall(HP + 'linesegarray'):
             top[index].remove(lines)
-    data['Contents/section0.xml'] = etree.tostring(section, xml_declaration=True, encoding='UTF-8', standalone=True)
+    for name in names:
+        data[name] = etree.tostring(sections[name], xml_declaration=True, encoding='UTF-8', standalone=True)
     with zipfile.ZipFile(target, 'w') as out:
         for info in infos:
             out.writestr(info, data[info.filename])

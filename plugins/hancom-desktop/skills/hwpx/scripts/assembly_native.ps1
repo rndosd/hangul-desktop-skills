@@ -9,8 +9,6 @@ $report = [ordered]@{ checks = @(); saved = @(); rendered = @(); error = $null }
 $mutex = [Threading.Mutex]::new($false, 'Local\CodexHancomAutomation')
 $locked = $false
 $hwp = $null
-. (Join-Path $PSScriptRoot '..\..\hwpx-windows-finalize\scripts\Hancom.Foreground.ps1')
-$personWindow = [IntPtr]::Zero
 function Get-ParagraphText([int]$Index) {
     [void]$hwp.SetPos(0, 0, 0)  # SelectText counts paragraphs of the caret's list; a saved caret may sit in a cell
     [void]$hwp.SelectText($Index, 0, $Index + 1, 0)
@@ -31,10 +29,8 @@ try {
     try { $locked = $mutex.WaitOne(0) } catch [Threading.AbandonedMutexException] { $locked = $true }
     if (!$locked) { throw 'LOCK_CONFLICT: another native runner owns Hangul.' }
     if (@(Get-Process Hwp -ErrorAction SilentlyContinue).Count) { throw 'PROCESS_CONFLICT: Hangul is already running.' }
-    $personWindow = Get-HancomPersonWindow  # the window in front before Hangul takes it
     $hwp = New-Object -ComObject HWPFrame.HwpObject
     $hwp.XHwpWindows.Item(0).Visible = $false
-    try { Restore-HancomPersonWindowAfterStart $personWindow } catch {}
     if (-not $hwp.RegisterModule('FilePathCheckDLL', [string]$environment.security.moduleName)) { throw 'SECURITY_MODULE_NOT_REGISTERED' }
     if ($plan.source) {
         if (-not $hwp.Open([string]$plan.source, 'HWPX', 'forceopen:true')) { throw 'SOURCE_OPEN_FAILED' }
@@ -88,7 +84,7 @@ try {
 finally {
     if ($hwp) {
         try { $hwp.Clear(1) } catch {}
-        Invoke-HancomQuitKeepingFocus { try { $hwp.Quit() } catch {} } $personWindow
+        try { $hwp.Quit() } catch {}
         [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($hwp)
     }
     if ($locked) { $mutex.ReleaseMutex() }; $mutex.Dispose()

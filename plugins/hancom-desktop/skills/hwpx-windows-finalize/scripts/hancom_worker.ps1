@@ -18,8 +18,6 @@ param(
 
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'Hancom.Environment.ps1')
-. (Join-Path $PSScriptRoot 'Hancom.Foreground.ps1')
-$script:PersonWindow=[IntPtr]::Zero
 $script:Owned=$false
 $script:NormalQuit=$false
 $script:Owner=$null
@@ -65,7 +63,6 @@ function New-HancomObject {
     if(@(Get-Process Hwp -ErrorAction SilentlyContinue).Count -ne 0){throw 'PROCESS_CONFLICT: existing Hangul process.'}
     $securityModuleName=Assert-HancomSecurityBinding (Get-HancomEnvironment)
     $birth=[DateTime]::UtcNow
-    $script:PersonWindow=Get-HancomPersonWindow  # the window in front before Hangul takes it
     $object = New-Object -ComObject HWPFrame.HwpObject
     $script:ComCreated=$true
     Write-HancomStage 'com-created'
@@ -90,7 +87,6 @@ function New-HancomObject {
             throw 'Security module registration returned false. No document was opened. Verify the approved Automation module and its registry entry.'
         }
         try { $object.XHwpWindows.Item(0).Visible = $false } catch {}
-        try { Restore-HancomPersonWindowAfterStart $script:PersonWindow } catch {}
         return $object
     }
     catch {
@@ -107,7 +103,7 @@ function Close-HancomObject($Hwp) {
         try { $Hwp.Clear(1) } catch {}
         Write-HancomStage 'cleanup-clear-done'
         Write-HancomStage 'cleanup-quit-start'
-        Invoke-HancomQuitKeepingFocus { try { $Hwp.Quit(); $script:NormalQuit=$true } catch {} } $script:PersonWindow
+        try { $Hwp.Quit(); $script:NormalQuit=$true } catch {}
         Write-HancomStage 'cleanup-quit-done'
     }
     try { [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($Hwp) } catch {}

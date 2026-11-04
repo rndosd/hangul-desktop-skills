@@ -84,9 +84,10 @@ def source_page_starts(source, start=0):
     from lxml import etree
     hp = '{http://www.hancom.co.kr/hwpml/2011/paragraph}'
     with zipfile.ZipFile(source) as package:
-        section = etree.fromstring(package.read('Contents/section0.xml'))
+        names = sorted((n for n in package.namelist() if re.fullmatch(r'Contents/section\d+\.xml', n)), key=lambda n: int(re.search(r'\d+', n).group()))
+        paragraphs = [p for n in names for p in etree.fromstring(package.read(n)).findall(hp + 'p')]  # all sections, in order
     starts, last = [], None
-    for index, p in enumerate(section.findall(hp + 'p')):
+    for index, p in enumerate(paragraphs):
         lines = p.find(hp + 'linesegarray')
         if lines is None or not len(lines):
             continue

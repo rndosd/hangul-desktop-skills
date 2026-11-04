@@ -157,6 +157,12 @@ def role_of(p, numbered_shapes):
     if 'pic' in tags or 'ole' in tags:
         return dict(role='block', why='그림')
     drawn_text = ''.join(t.text or '' for d in p.iter(HP + 'drawText') for t in d.iter(HP + 't')).strip()
+    if 'container' in tags and not text.strip():
+        # a chapter title written in a grouped box with a shadow (Ⅰ. 시험 개요), as ministry plans draw them
+        lines = [''.join(t.text or '' for t in q.iter(HP + 't')).strip() for d in p.iter(HP + 'drawText') for q in d.iter(HP + 'p')]
+        lines = [line for line in lines if line]
+        if len(lines) == 1 and re.match(PATTERNS[0][1], lines[0]):
+            return dict(role='chapter', text=lines[0], box=True)
     if ('container' in tags or 'rect' in tags) and (drawn_text or not text.strip()):
         return dict(role='block', why='글상자·도형')
     if 'footNote' in tags or 'endNote' in tags:
@@ -201,6 +207,16 @@ def pieces_of(p, heights):
 def cover_end_of(paragraphs, heights):
     """Where the cover ends: after the title (the largest letters), at the first paragraph holding body text
     (a long line that is neither the title, an organization nor a date), such as an introduction box."""
+    page_end, last = len(paragraphs), None  # the cover is one page: stop where the saved line positions start over
+    for i, p in enumerate(paragraphs):
+        lines = p.find(HP + 'linesegarray')
+        if lines is None or not len(lines):
+            continue
+        if last is not None and (int(lines[0].get('vertpos')) < last or p.get('pageBreak') == '1'):
+            page_end = i
+            break
+        last = int(lines[-1].get('vertpos'))
+    paragraphs = paragraphs[:page_end]
     found = [(i, x, h) for i, p in enumerate(paragraphs) for x, h in pieces_of(p, heights) if re.search('[가-힣A-Za-z]', x)]
     if not found:
         return len(paragraphs)
@@ -213,7 +229,7 @@ def cover_end_of(paragraphs, heights):
     return len(paragraphs)
 
 
-def cover_spec(paragraphs, heights):
+def cover_spec(paragraphs, heights, labelled=False):
     """Placeholders for the cover's title (its largest letters, lines joined), organization and date; other
     words are dropped, ornaments kept."""
     # exact run texts (replace matches them inside their runs); repeated ones are replaced once, so they are skipped
@@ -225,8 +241,9 @@ def cover_spec(paragraphs, heights):
     need(lettered, '표지에서 제목을 찾지 못했습니다')
     big = [x for x, h in pieces if re.search('[가-힣A-Za-z]', x) and h >= max(lettered) * 0.7]
     titles = [x for x in big if not (re.search(ORG, x) and len(x) <= 20)] or big  # a large organization name is not the title
-    # a short word as large as the title beside it is a label box (붙임, 참고), not part of the title
-    labels = [x for x in titles if len(re.sub(r'\s', '', x)) <= 4] if any(len(re.sub(r'\s', '', x)) > 4 for x in titles) else []
+    # in an attachment's title band, a short word as large as the title beside it is a label box (붙임, 참고), not part
+    # of the title; on a full cover such a word is a heading of the next page (차 례) and is dropped like other words
+    labels = [x for x in titles if len(re.sub(r'\s', '', x)) <= 4] if labelled and any(len(re.sub(r'\s', '', x)) > 4 for x in titles) else []
     titles = [x for x in titles if x not in labels]
     dates = [x for x, _ in pieces if x not in titles and re.fullmatch(DATE, x)]
     orgs = [x for x, _ in pieces if x not in titles and x not in dates and re.search(ORG, x) and len(x) <= 40]
@@ -264,20 +281,19 @@ def start_of(top, text):
 def propose(source, template_id, exclude=(), start_text=None):
     with zipfile.ZipFile(source) as package:
         header = etree.fromstring(package.read('Contents/header.xml'))
-        section = etree.fromstring(package.read('Contents/section0.xml'))
-        sections = [n for n in package.namelist() if re.fullmatch(r'Contents/section\d+\.xml', n)]
+        names = sorted((n for n in package.namelist() if re.fullmatch(r'Contents/section\d+\.xml', n)), key=lambda n: int(re.search(r'\d+', n).group()))
+        sections = [etree.fromstring(package.read(n)) for n in names]
     numbered = {s.get('id') for s in header.iter(HH + 'paraPr') if s.find(HH + 'heading') is not None and s.find(HH + 'heading').get('type') != 'NONE'}
-    top = section.findall(HP + 'p')
+    # Hangul numbers top paragraphs on through all sections (a cover section, then the body), as block saving counts them
+    top, bounds = [], []
+    for section in sections:
+        bounds.append(len(top))
+        top += section.findall(HP + 'p')
     start = start_of(top, start_text) if start_text else 0
     roles = [role_of(p, numbered) if i >= start else dict(role='empty') for i, p in enumerate(top)]
     for index, info in enumerate(roles):
         if info['role'] in exclude or f'p{index}' in exclude:
             info.update(role='block', why=f'{info["role"]} 부품 빌드 실패로 블록')
-    # the cover may hold tables (a title band); the body starts at the first chapter or vocabulary line
-    first = next((i for i, r in enumerate(roles) if r['role'] not in ('empty', 'block', 'table') and i > start), None)
-    need(first is not None or len(sections) == 1, f'본문이 둘째 구역 이후에 있습니다(구역 {len(sections)}개, 표지만 첫 구역). '
-         '구역이 나뉜 문서는 아직 등록할 수 없습니다.')
-    need(first is not None, '공통 어휘로 읽히는 문단이 없습니다')
     # number tabs (1 | 타시·도 전출) under Roman-numbered chapters are first-level titles drawn as tabs
     tabs = [i for i, r in enumerate(roles) if r['role'] == 'chapter' and r.get('table') and r['number'].strip('.').isdigit()]
     if tabs and any(r['role'] == 'chapter' and r.get('number', r.get('text', ' '))[0] in ROMAN for r in roles):
@@ -286,12 +302,21 @@ def propose(source, template_id, exclude=(), start_text=None):
     chapters = [i for i, r in enumerate(roles) if r['role'] == 'chapter']  # none: □ titles lead (a one-page report)
     need(chapters or any(r['role'] in ('subhead', 'heading1', 'task') for r in roles),
          '장(Ⅰ)도 □·1.·① 제목도 없어 조립 양식으로 만들 수 없습니다. 빈칸 채우기로 등록하세요.')
+    # a body that starts in a later section: what comes before it there (a contents list, a summary) stays as the source has it
+    body_section = max((k for k, b in enumerate(bounds) if chapters and b <= chapters[0]), default=0)
+    if body_section:
+        for j in range(start, bounds[body_section]):
+            if roles[j]['role'] not in ('empty', 'block'):
+                roles[j] = dict(role='block', why='본문 앞 구역(차례 등)')
+    # the cover may hold tables (a title band); the body starts at the first chapter or vocabulary line
+    first = next((i for i, r in enumerate(roles) if r['role'] not in ('empty', 'block', 'table') and i > start), None)
+    need(first is not None, '공통 어휘로 읽히는 문단이 없습니다')
     heights = {c.get('id'): int(c.get('height')) for c in header.iter(HH + 'charPr')}
     # lines whose letters the author squeezed (negative spacing) to fit them: parts draw one look, so these may wrap
     condensed = {c.get('id') for c in header.iter(HH + 'charPr') if int(c.find(HH + 'spacing').get('hangul')) < 0}
     squeezed = sum(1 for i, r in enumerate(roles) if r['role'] not in ('empty', 'block', 'table', 'chapter') and look(top[i])[1] in condensed)
     cover_end = start + cover_end_of(top[start:first], heights)
-    cover, cover_value = cover_spec(top[start:cover_end], heights)
+    cover, cover_value = cover_spec(top[start:cover_end], heights, labelled=bool(start))
     parts, notes = {}, []
 
     def chapter_number(i):
@@ -319,6 +344,8 @@ def propose(source, template_id, exclude=(), start_text=None):
 
     def chapter_part(i, kind):
         info = roles[i]
+        if info.get('box'):  # the build fits the box to each title and numbers it Ⅰ. Ⅱ.
+            return dict(range=[i, i + 1], kind=kind, placeholder='[장 제목]', expect=info['text'])
         spec = dict(range=[i, i + 1], kind=kind, placeholder='[장 제목]', numberPlaceholder='[장 번호]')
         number = info['number'] if info.get('table') else re.match(NUMBERED_PREFIX['chapter'], info['text']).group(0).strip()
         title = info['title'] if info.get('table') else re.sub(NUMBERED_PREFIX['chapter'], '', info['text'])
@@ -414,12 +441,15 @@ def propose(source, template_id, exclude=(), start_text=None):
             node['pageBreakBefore'] = True
         nodes.append(node)
     close_block(len(top))
-    rules = dict(spacerBeforeLaterChapters=spacer, bodyStartsNewSection=False, deepItemsUnderHeadingLevel=9,
-                 pageNumbers=page_numbers(section), headingLevelsMaySkip=True)
+    numbers = page_numbers(sections[body_section])
+    rules = dict(spacerBeforeLaterChapters=spacer, bodyStartsNewSection=bool(body_section and numbers), deepItemsUnderHeadingLevel=9,
+                 pageNumbers=numbers, headingLevelsMaySkip=True)
+    if body_section and not numbers:  # no own page numbers to start: the body still begins on a page of its own
+        parts['chapter_first']['pageBreakBefore'] = True
     if nodes and nodes[0]['t'] != 'chapter':
         rules['textBeforeFirstChapter'] = True
-    if len(sections) > 1:
-        notes.append(f'구역이 {len(sections)}개입니다. 첫 구역만 등록했습니다.')
+    if body_section:
+        notes.append(f'본문이 {body_section + 1}번째 구역에서 시작합니다. 앞 구역의 표지 뒤 내용은 원본 그대로 블록입니다.')
     part_map = dict(schema='hwpx.assembly-part-map.v1', id=template_id, label=f'등록: {cover_value["title"]}',
                     source=dict(sha256=hashlib.sha256(Path(source).read_bytes()).hexdigest(), title=Path(source).name,
                                 publisher='', license='사용자 등록', attribution='사용자가 등록한 문서에서 만든 조립 양식'),
