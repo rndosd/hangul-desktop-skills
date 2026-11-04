@@ -42,7 +42,7 @@ and records each row's value cell count, so an outline can fill the table by row
 unbound to the next paragraph (a source that writes body lists as □ or "1. 기간: ..." lines). A cover field
 may name a list of placeholders that take the same value.
 
-Usage: build_assembly_template.py MAP SOURCE.hwpx WORK_DIR [--out DIR] [--alt-source ORIGINAL.hwpx]
+Usage: build_assembly_template.py MAP SOURCE.hwpx WORK_DIR [--out DIR] [--alt-source ORIGINAL.hwpx] [--render-source PDF]
 """
 from __future__ import annotations
 
@@ -61,6 +61,7 @@ from lxml import etree
 from normalize_template_layout import substitute_fonts
 
 HERE = Path(__file__).resolve().parent
+NO_WINDOW = getattr(subprocess, 'CREATE_NO_WINDOW', 0)  # no console window taking the screen focus per Hangul step
 TEMPLATES = HERE.parent / 'assets/document-templates/assembly'  # the skill's own templates (the repository's when built there)
 HP = '{http://www.hancom.co.kr/hwpml/2011/paragraph}'
 HH = '{http://www.hancom.co.kr/hwpml/2011/head}'
@@ -97,10 +98,12 @@ def need(ok, message):
 
 
 def native(plan, work, name):
+    if not plan.get('blocks') and not plan.get('renders'):
+        return  # nothing to save or print: Hangul is not opened
     plan_path = work / f'{name}.json'
     plan_path.write_text(json.dumps(plan, ensure_ascii=False, indent=1), encoding='utf-8')
     argv = ['powershell', '-NoProfile', '-STA', '-File', str(HERE / 'assembly_native.ps1'), '-PlanPath', str(plan_path)]
-    done = subprocess.run(argv, capture_output=True, text=True, encoding='utf-8-sig', errors='replace')
+    done = subprocess.run(argv, capture_output=True, text=True, encoding='utf-8-sig', errors='replace', creationflags=NO_WINDOW)
     (work / f'{name}.result.json').write_text(done.stdout + done.stderr, encoding='utf-8')
     need(done.returncode == 0, f'Hangul step {name} failed: {done.stdout[-600:]} {done.stderr[-600:]}')
 
@@ -611,9 +614,9 @@ def wrap_offset(pdf, symbol):
     return lines[first][1]['bbox'][0] - lines[first + 1][0]['bbox'][0]
 
 
-def calibrate_hanging(parts, out_dir, work):
+def calibrate_hanging(parts, out_dir, work, extra=()):
     """Set the hanging indent of each item part and each prefixed first table column so wrapped
-    lines start under the first body character."""
+    lines start under the first body character. extra renders (other measurements) go in the checking run."""
     items = {name: entry for name, entry in parts.items() if entry['kind'] in ITEM_KINDS and entry['depth'] == 0}
     tables = {name: entry for name, entry in parts.items() if entry.get('table', {}).get('firstColumnPrefix')}
     def render(name, entry, attempt):
@@ -627,7 +630,8 @@ def calibrate_hanging(parts, out_dir, work):
         return PDF_SYMBOL.get(entry['kind']) or entry.get('symbol', SYMBOL[entry['kind']])
     targets = {**items, **tables}
     for attempt in range(2):
-        native(dict(renders=[render(name, entry, attempt) for name, entry in targets.items()]), work, f'hanging-{attempt}')
+        native(dict(renders=[render(name, entry, attempt) for name, entry in targets.items()] + (list(extra) if attempt else [])),
+               work, f'hanging-{attempt}')
         offsets = {name: wrap_offset(work / f'hanging-{attempt}-{name}.pdf', symbol(name, entry)) for name, entry in targets.items()}
         if attempt:
             return {name: round(offset * 25.4 / 72, 2) for name, offset in offsets.items()}
@@ -670,6 +674,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('map'); parser.add_argument('source'); parser.add_argument('work'); parser.add_argument('--out')
     parser.add_argument('--alt-source', help='original of a prepared source, for parts marked fromAltSource')
+    parser.add_argument('--render-source', help="also print the source to this PDF in the block-saving run (registration's check 1)")
     args = parser.parse_args()
     part_map = json.loads(Path(args.map).read_text(encoding='utf-8'))
     need(part_map.get('schema') == 'hwpx.assembly-part-map.v1', 'unsupported part map schema')
@@ -693,7 +698,8 @@ def main():
         blocks = [dict(name=name, start=spec['range'][0], end=spec['range'][1], path=str(raw_dir / f'{name}.hwpx'),
                        **({'check': spec['check']} if 'check' in spec else {}))
                   for name, spec in part_map['parts'].items() if bool(spec.get('fromAltSource')) == alt]
-        native(dict(source=str(path), blocks=blocks, renders=[]), work, 'save-blocks' + ('-alt' if alt else ''))
+        renders = [dict(part=str(source), pdf=str(Path(args.render_source).resolve()))] if args.render_source and not alt else []
+        native(dict(source=str(path), blocks=blocks, renders=renders), work, 'save-blocks' + ('-alt' if alt else ''))
 
     parts = {}
     for name, spec in part_map['parts'].items():
@@ -715,12 +721,12 @@ def main():
         left = leftover_wording(out_dir / entry['file'], allowed + entry.get('table', {}).get('header', []))
         need(not left, f'part {name}: source wording left in the prepared part: {left[:60]!r}')
 
-    residual = calibrate_hanging(parts, out_dir, work)
-    need(all(abs(value) <= 0.3 for value in residual.values()), f'hanging calibration did not converge: {residual}')
+    # chapter boxes are measured in the run that checks the hanging indents: one Hangul start fewer
     renders = [dict(part=str(out_dir / entry['file']), find=entry['placeholder'], text=text, boxWidth=CALIBRATION_BOX_HWP,
                     pdf=str(work / f'calibrate-{name}-{index}.pdf'))
                for name, entry in parts.items() if 'box' in entry for index, text in enumerate(CALIBRATION)]
-    native(dict(renders=renders), work, 'calibrate')
+    residual = calibrate_hanging(parts, out_dir, work, renders)
+    need(all(abs(value) <= 0.3 for value in residual.values()), f'hanging calibration did not converge: {residual}')
     for name, entry in parts.items():
         if 'box' not in entry:
             continue

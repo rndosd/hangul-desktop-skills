@@ -5,7 +5,8 @@
      (its role, or its paragraph for a table) and the build runs again
   3. check 1, self reproduction, no large misalignment: about the source's page count (source pages from its saved
      line positions), no empty page, chapter numbers as in the source; lines may move between pages
-  4. check 2, other lengths: "more", "fewer" and "long" outlines must assemble (PASS_NATIVE)
+  4. check 2, other lengths: a "more" outline (more lines and rows, longer texts) and a "fewer" one must assemble
+     (PASS_NATIVE). Each step opens Hangul once; the source PDF is printed inside the build's run.
   5. report.json: the checks, the blocks and their source wording to review, pages to look at
 Checks 3 to 5 of tools/assembly-maps/README.md (source wording, describe-only use, approval) stay with the person.
 
@@ -25,7 +26,7 @@ PYTHON = sys.executable
 TASK = HERE / 'Invoke-HangulTask.ps1'
 sys.path.insert(0, str(HERE))
 from propose_assembly_map import propose  # noqa: E402
-from build_assembly_template import native  # noqa: E402
+from build_assembly_template import NO_WINDOW  # noqa: E402
 
 
 def settle(limit=60):
@@ -33,7 +34,8 @@ def settle(limit=60):
     step refuses to start beside a running Hangul. Nothing is closed here; a Hangul the person opened stays."""
     import time
     for _ in range(limit):
-        done = subprocess.run(['tasklist', '/FI', 'IMAGENAME eq Hwp.exe', '/NH'], capture_output=True, text=True, errors='replace')
+        done = subprocess.run(['tasklist', '/FI', 'IMAGENAME eq Hwp.exe', '/NH'], capture_output=True, text=True, errors='replace',
+                              creationflags=NO_WINDOW)
         if 'Hwp.exe' not in done.stdout:
             return
         time.sleep(1)
@@ -43,14 +45,15 @@ def write(path, value):
     path.write_text(json.dumps(value, ensure_ascii=False, indent=1), encoding='utf-8')
 
 
-def build(work, attempt, part_map, source):
+def build(work, attempt, part_map, source, source_pdf):
     folder = work / f'build-{attempt}'
     folder.mkdir()
     write(folder / 'map.json', part_map)
     settle()
+    # the source's own PDF (check 1) is printed in the build's calibration run instead of opening Hangul once more
     done = subprocess.run([PYTHON, '-X', 'utf8', str(HERE / 'build_assembly_template.py'), str(folder / 'map.json'), str(source),
-                           str(folder / 'work'), '--out', str(folder / 'catalog' / part_map['id'])],
-                          capture_output=True, text=True, encoding='utf-8', errors='replace')
+                           str(folder / 'work'), '--out', str(folder / 'catalog' / part_map['id']), '--render-source', str(source_pdf)],
+                          capture_output=True, text=True, encoding='utf-8', errors='replace', creationflags=NO_WINDOW)
     (folder / 'build.log').write_text(done.stdout + done.stderr, encoding='utf-8')
     failed = re.findall(r'part ([\w-]+): (.*)', done.stderr)
     return folder / 'catalog', (done.returncode == 0), failed[-1] if failed else (None, done.stderr.strip().splitlines()[-1:] or [''])
@@ -63,7 +66,7 @@ def assemble(catalog, template_id, outline, work, name):
     done = subprocess.run(['powershell', '-NoProfile', '-File', str(TASK), 'assemble', '--template', template_id, '--outline', str(path),
                            '--output', str(work / f'{name}.hwpx'), '--pdf', str(work / f'{name}.pdf'), '--run', str(work / f'run-{name}'),
                            '--context', 'ordinary-shell', '--catalog', str(catalog)],
-                          capture_output=True, text=True, encoding='utf-8-sig', errors='replace')
+                          capture_output=True, text=True, encoding='utf-8-sig', errors='replace', creationflags=NO_WINDOW)
     try:
         result = json.loads(done.stdout)
     except json.JSONDecodeError:
@@ -158,11 +161,12 @@ def cover_problems(pdf, cover):
 
 
 def variants(outline, part_map):
-    """Other-length outlines: more lines and rows, fewer chapters and rows, longer texts."""
+    """Other-length outlines, one Hangul run each: more (lines, rows and every text twice as long) and fewer."""
     def repeats(node):
         return node['t'] == 'table' and 'rows' in node and part_map['parts'][node['part']]['table'].get('repeat', True)
 
     def more(o):
+        long(o)
         nodes = []
         for node in o['nodes']:
             nodes.append(node)
@@ -191,7 +195,7 @@ def variants(outline, part_map):
         o['cover']['title'] += '(세부 운영 계획)'
 
     out = {}
-    for name, change in (('more', more), ('fewer', fewer), ('long', long)):
+    for name, change in (('more', more), ('fewer', fewer)):
         value = copy.deepcopy(outline)
         change(value)
         out[name] = value
@@ -211,7 +215,7 @@ def main():
     report, exclude = dict(source=str(source), id=args.id, demoted=[]), []
     for attempt in range(1, args.retries + 2):
         part_map, outline, summary = propose(source, args.id, exclude, args.start)
-        catalog, ok, (failed, message) = build(work, attempt, part_map, source)
+        catalog, ok, (failed, message) = build(work, attempt, part_map, source, work / 'source.pdf')
         if ok:
             break
         if failed in (None, 'cover', 'chapter', 'chapter_first') or failed not in part_map['parts']                 or part_map['parts'][failed]['kind'] == 'block' or attempt > args.retries:  # a block has nothing to fall back to
@@ -225,9 +229,7 @@ def main():
     write(work / 'map.json', part_map)
     write(work / 'outline.json', outline)
     report.update(proposal=summary, catalog=str(catalog))
-    # check 1: self reproduction against the source's own pages
-    settle()
-    native(dict(source=str(source), blocks=[], renders=[dict(part=str(source), pdf=str(work / 'source.pdf'))]), work, 'render-source')
+    # check 1: self reproduction against the source's own pages (source.pdf came from the build)
     repro = assemble(catalog, args.id, outline, work, 'repro')
     check1 = dict(status=repro['status'], pages=repro['pages'], blocks=repro['blocks'])
     if repro['status'] == 'PASS_NATIVE':
@@ -258,7 +260,7 @@ def main():
     report['status'] = 'PASS' if check1['ok'] and all(v['ok'] for v in report['check2'].values()) else 'REVIEW'
     report['toReview'] = dict(blocks=[dict(part=b['used'], texts=b['texts'][:12], reviewTexts=b.get('reviewTexts', []),
                                            numberedLines=b.get('numberedLines', [])) for b in check1['blocks']],
-                              pdfs=[str(work / f'{n}.pdf') for n in ('source', 'repro', 'v-more', 'v-fewer', 'v-long')])
+                              pdfs=[str(work / f'{n}.pdf') for n in ('source', 'repro', 'v-more', 'v-fewer')])
     write(work / 'report.json', report)
     print(json.dumps({k: report[k] for k in ('status', 'demoted', 'check2')} | {'check1': {k: v for k, v in check1.items() if k != 'blocks'}},
                      ensure_ascii=False, indent=1))

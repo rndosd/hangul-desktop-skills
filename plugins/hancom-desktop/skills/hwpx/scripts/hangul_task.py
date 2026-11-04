@@ -234,7 +234,7 @@ def register(source, template_id, out, start=None):
     work=Path(out).resolve()
     need(not work.exists(),f'already exists: {work}')
     done=subprocess.run([sys.executable,'-X','utf8',str(Path(__file__).with_name('register_assembly_template.py')),str(Path(source).resolve(strict=True)),str(work),'--id',template_id,*(['--start',start] if start else [])],
-                        capture_output=True,text=True,encoding='utf-8',errors='replace')
+                        capture_output=True,text=True,encoding='utf-8',errors='replace',creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
     need((work/'report.json').is_file(),'registration stopped: '+(done.stderr.strip().splitlines() or ['no report'])[-1])
     report=read(work/'report.json')
     if report.get('status')=='FAIL_BUILD':
