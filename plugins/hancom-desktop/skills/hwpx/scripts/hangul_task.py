@@ -298,7 +298,7 @@ def main():
     sub.add_parser('doctor');s=sub.add_parser('schema');s.add_argument('operation',choices=['table'])
     s=sub.add_parser('tool');s.add_argument('script');s.add_argument('arguments',nargs=argparse.REMAINDER)
     s=sub.add_parser('compose');s.add_argument('--request',required=True);s.add_argument('--output',required=True);s.add_argument('--pdf',required=True);s.add_argument('--run',required=True);s.add_argument('--context',choices=['ordinary-shell','host-approved'],required=True);s.add_argument('--timeout',type=int,default=120)
-    s=sub.add_parser('register');s.add_argument('source');s.add_argument('--id',required=True);s.add_argument('--out',required=True);s.add_argument('--start')
+    s=sub.add_parser('register');s.add_argument('source');s.add_argument('--id',required=True);s.add_argument('--work',required=True);s.add_argument('--start')
     s=sub.add_parser('assemble');s.add_argument('--template',required=True);s.add_argument('--describe',action='store_true');s.add_argument('--outline');s.add_argument('--output');s.add_argument('--pdf');s.add_argument('--run');s.add_argument('--context',choices=['ordinary-shell','host-approved']);s.add_argument('--catalog');s.add_argument('--timeout',type=int,default=240)
     s=sub.add_parser('fill');s.add_argument('--template');s.add_argument('--values');s.add_argument('--content');s.add_argument('--output');s.add_argument('--styles');s.add_argument('--catalog',default=str(ROOT/'assets/document-templates/full-plans.json'));s.add_argument('--dry-run',action='store_true')
     s=sub.add_parser('preview');s.add_argument('pdf');s.add_argument('--output',required=True)
@@ -328,7 +328,7 @@ def main():
             else:
                 need(all([a.outline,a.output,a.pdf,a.run,a.context]),'assemble needs --outline --output --pdf --run --context (or --describe)')
                 result=assemble(a.template,read(a.outline),a.output,a.pdf,a.run,a.context,a.catalog,a.timeout)
-        elif a.command=='register':result=register(a.source,a.id,a.out,a.start)
+        elif a.command=='register':result=register(a.source,a.id,a.work,a.start)
         elif a.command=='schema':result=schema(a.operation)
         elif a.command=='preview':result=preview(a.pdf,a.output)
         elif a.command=='layout-check':result=layout_check(a.source,a.pdf)

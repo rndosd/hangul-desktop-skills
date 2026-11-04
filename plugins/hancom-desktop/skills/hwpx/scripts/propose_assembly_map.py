@@ -274,6 +274,8 @@ def propose(source, template_id, exclude=(), start_text=None):
             info.update(role='block', why=f'{info["role"]} 부품 빌드 실패로 블록')
     # the cover may hold tables (a title band); the body starts at the first chapter or vocabulary line
     first = next((i for i, r in enumerate(roles) if r['role'] not in ('empty', 'block', 'table') and i > start), None)
+    need(first is not None or len(sections) == 1, f'본문이 둘째 구역 이후에 있습니다(구역 {len(sections)}개, 표지만 첫 구역). '
+         '구역이 나뉜 문서는 아직 등록할 수 없습니다.')
     need(first is not None, '공통 어휘로 읽히는 문단이 없습니다')
     # number tabs (1 | 타시·도 전출) under Roman-numbered chapters are first-level titles drawn as tabs
     tabs = [i for i, r in enumerate(roles) if r['role'] == 'chapter' and r.get('table') and r['number'].strip('.').isdigit()]

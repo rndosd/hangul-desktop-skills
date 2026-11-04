@@ -31,7 +31,7 @@ def main():
             continue
         began = time.time()
         argv = ['powershell', '-NoProfile', '-File', str(LAUNCHER), 'register', str(sources / name), '--id', template_id,
-                '--out', str(work / template_id), *(['--start', start] if start else [])]
+                '--work', str(work / template_id), *(['--start', start] if start else [])]
         done = subprocess.run(argv, capture_output=True, text=True, encoding='utf-8-sig', errors='replace')
         try:
             result = json.loads(done.stdout)
