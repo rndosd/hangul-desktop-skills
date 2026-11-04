@@ -36,7 +36,7 @@ TABLE_GAP_AFTER = 850  # HWPUNIT (3 mm) below a table that splits across pages
 ROLE_LABELS = {'chapter': '장', 'heading1': '1. 제목', 'heading2': '가. 제목', 'heading3': '1) 제목', 'task': '네모 번호 과제',
                'subhead': '□ 소제목', 'lead': '❍ 머리 문단', 'item': '○ 항목', 'dash': '- 항목', 'dot': '‧ 항목', 'note': '※ 참고',
                'arrow': '⇒ 결과', 'point': '① 원 번호 줄', 'box': '◈ 강조 상자'}
-FALLBACKS = {'heading1': ['task', 'subhead'], 'heading2': ['heading1'], 'heading3': ['heading2'], 'task': ['heading1', 'subhead'],
+FALLBACKS = {'chapter': ['subhead', 'heading1', 'task'], 'heading1': ['task', 'subhead'], 'heading2': ['heading1'], 'heading3': ['heading2'], 'task': ['heading1', 'subhead'],
              'subhead': ['task', 'heading1'], 'lead': ['item'], 'dash': ['item'], 'dot': ['dash'], 'note': ['dash'], 'arrow': ['dash'],
              'point': ['item'], 'box': ['lead']}
 TABLE_ROLES = {'schedule': '업무·일정 목록', 'grid': '구분·내용 표', 'steps': '가로 단계 흐름', 'targets': '대상별 현황', 'indicators': '과제별 성과지표'}
@@ -76,7 +76,9 @@ def load_template(catalog, template_id):
         need(path.parent.parent == folder.resolve() and path.is_file(), f'부품 파일이 없습니다: {name}')
         need(sha(path) == part['sha256'], f'부품 파일이 manifest와 다릅니다: {name}')
         part['path'] = str(path)
-    required = ('cover', 'chapter_first', 'chapter', *(('spacer',) if manifest['rules'].get('spacerBeforeLaterChapters') else ()))
+    chaptered = any(p['kind'] in ('chapter_first', 'chapter') for p in parts.values())  # a one-page report has none
+    required = ('cover', *(('chapter_first', 'chapter') if chaptered else ()),
+                *(('spacer',) if manifest['rules'].get('spacerBeforeLaterChapters') else ()))
     for kind in required:
         need(sum(p['kind'] == kind for p in parts.values()) == 1, f'조립 양식에 {kind} 부품이 하나 있어야 합니다.')
     return manifest
@@ -323,6 +325,23 @@ def fitted_instance(part, values, target, loose=False):
             out.writestr(info, data[info.filename])
 
 
+DATE_HEADS = ('기간', '일정', '시기', '일시', '시간', '날짜')
+DATE_LIKE = re.compile(r'\d{1,2}\s*[.월/:]|[○◯]\s*[.월]|상시|수시|연중|학기|분기|[상중하]순')
+
+
+def _check_date_column(spec, rows, where):
+    """A table whose first column holds dates (기간 | 업무 | 비고) given rows in another order (업무 | 기간 | 비고) would
+    fill without error and print every task in the date column: most rows that look swapped stop the plan."""
+    columns = spec.get('columns') or spec.get('header') or []
+    if not columns or not any(h in re.sub(r'\s+', '', columns[0]) for h in DATE_HEADS) or spec['unitCells'] < 2:
+        return
+    def plain(cell):
+        return ' '.join(cell) if isinstance(cell, list) else cell
+    swapped = [r for r, row in enumerate(rows, 1) if not DATE_LIKE.search(plain(row[0])) and DATE_LIKE.search(plain(row[1]))]
+    need(len(swapped) * 2 <= len(rows), f'{where}: 이 표의 칸 순서는 {", ".join(columns)}입니다. {swapped[:5]}행은 둘째 칸에 날짜가 있어 '
+         f'순서가 바뀐 것 같습니다. 첫 칸에 {columns[0]}을 적으세요.')
+
+
 def _by_label(spec, values, where):
     """The one unit of a fixed table with named rows, from {row name: [value cells]}; rows left out stay empty."""
     labels = spec.get('rowLabels')
@@ -385,7 +404,8 @@ def describe(manifest):
     """What an outline can use on this template: roles drawn as themselves or by a substitute, tables and cover fields."""
     parts, rules = manifest['parts'], manifest['rules']
     roles = {role: resolve_role(parts, rules, role) for role in ROLE_LABELS}
-    fields = next(p for p in parts.values() if p['kind'] == 'cover')['placeholder']
+    cover_part = next(p for p in parts.values() if p['kind'] == 'cover')
+    fields = cover_part['placeholder']
     return dict(
         id=manifest['id'], label=manifest['label'],
         roles={role: ROLE_LABELS[role] for role, used in roles.items() if used == role},
@@ -400,6 +420,7 @@ def describe(manifest):
         blocks=[dict(part=name, texts=p['texts'][:8], numberedLines=p.get('numberedLines', []))
                 for name, p in parts.items() if p['kind'] == 'block'],
         cover=dict(fields=list(fields), required=[k for k in ('title', 'date') if k in fields],
+                   **({'limits': cover_part['fieldLimits']} if cover_part.get('fieldLimits') else {}),
                    carried={k: COVER_CARRY[k][0] for k in COVER_FIELDS if k not in fields and k in COVER_CARRY}),
         summary=any(p['kind'] == 'summary' for p in parts.values()),
         textBeforeFirstChapter=bool(rules.get('textBeforeFirstChapter')))
@@ -437,6 +458,9 @@ def build_plan(manifest, outline, tables_dir=None, notes=None):
             if value:
                 cover[target] = joint.join(v for v in (cover.get(target, ''), value) if v)
                 notes.append(dict(at=f'cover.{key}', role=key, used=target, note=f'이 양식 표지에 {key} 자리가 없어 {target}에 붙였습니다.'))
+    for key, most in parts[cover_part].get('fieldLimits', {}).items():
+        need(len(re.sub(r'\s', '', str(cover.get(key, '')))) <= most,
+             f'cover.{key}: 이 양식의 {key} 자리는 좁은 라벨 상자라 {most}자까지입니다(예: 붙임, 결과, 안내). 긴 말은 title이나 본문에 쓰세요.')
     steps = [dict(op='text', find=place, text=_text(cover.get(key, ''), f'cover.{key}', placeholders, key not in required))
              for key in fields for place in places(fields[key])]
     if rules.get('pageNumbers') and not rules.get('bodyStartsNewSection'):
@@ -595,6 +619,7 @@ def build_plan(manifest, outline, tables_dir=None, notes=None):
                 for r, row in enumerate(rows, 1):
                     need(isinstance(row, list) and len(row) == spec['unitCells'], f'{where}: {r}행의 칸 수가 {spec["unitCells"]}이 아닙니다.')
                     rows[r - 1] = [_cell(cell, f'{where}.rows[{r}][{c}]', placeholders) for c, cell in enumerate(row, 1)]
+                _check_date_column(spec, rows, where)
                 need(tables_dir is not None, 'table nodes need a folder for table copies')
                 name = f'{table_name}@{len(instances) + 1}'
                 target = Path(tables_dir) / f'{table_name}-{len(instances) + 1}.hwpx'

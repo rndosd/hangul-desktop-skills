@@ -42,7 +42,10 @@ try {
                 if (!$ok) { throw "RANGE_CHECK_FAILED: $($block.name)" }
             }
             [void]$hwp.SetPos(0, 0, 0)
-            [void]$hwp.SelectText([int]$block.start, 0, [int]$block.end, 0)
+            if (-not $hwp.SelectText([int]$block.start, 0, [int]$block.end, 0)) {
+                # a range that ends with the document has no paragraph at its end: select from its start to the end
+                [void]$hwp.SetPos(0, [int]$block.start, 0); [void]$hwp.Run('MoveSelDocEnd')
+            }
             $set = $hwp.HParameterSet.HFileOpenSave
             [void]$hwp.HAction.GetDefault('FileSaveBlock_S', $set.HSet)
             $set.filename = [string]$block.path; $set.Format = 'HWPX'
@@ -79,7 +82,11 @@ try {
     }
 } catch { $report.error = $_.Exception.Message }
 finally {
-    if ($hwp) { try { $hwp.Clear(1) } catch {}; try { $hwp.Quit() } catch {}; [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($hwp) }
+    if ($hwp) {
+        try { $hwp.Clear(1) } catch {}
+        try { $hwp.Quit() } catch {}
+        [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($hwp)
+    }
     if ($locked) { $mutex.ReleaseMutex() }; $mutex.Dispose()
 }
 $report | ConvertTo-Json -Depth 5

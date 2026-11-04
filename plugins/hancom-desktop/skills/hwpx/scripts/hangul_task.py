@@ -183,7 +183,7 @@ def _titles_left_above_tables(outline, pdf):
             stranded.append(i)
     return stranded
 
-def assemble(template, outline, output, pdf, run_dir, context, catalog=None, timeout=240):
+def assemble(template, outline, output, pdf, run_dir, context, catalog=None, timeout=240, check=False):
     """Outline -> parts of one assembly template, assembled in one owned Hangul job."""
     native_scripts=ROOT.parent/'hwpx-windows-finalize/scripts'
     need((native_scripts/'native_assembly.py').is_file(), 'paired native assembly helper required')
@@ -191,6 +191,13 @@ def assemble(template, outline, output, pdf, run_dir, context, catalog=None, tim
     from native_assembly import load_template, build_plan, check_output, describe
     if outline is None:  # --describe: what an outline can use on this template, no Hangul
         return dict(status='DESCRIBED',template=describe(load_template(catalog or ROOT/'assets/document-templates/assembly',template)))
+    if check:  # --check: the whole outline validation with no Hangul, so a run that would be refused is not started
+        import tempfile
+        notes=[]
+        with tempfile.TemporaryDirectory() as folder:
+            plan=build_plan(load_template(catalog or ROOT/'assets/document-templates/assembly',template),outline,Path(folder)/'tables',notes)
+        return dict(status='CHECKED',steps=len(plan['steps']),substitutions=[n for n in notes if n['role']!='block'],
+                    blocks=[n for n in notes if n['role']=='block'])
     from run_native_job import run
     from wrap_alignment import measure
     from page_layout import measure as page_layout
@@ -226,15 +233,15 @@ def assemble(template, outline, output, pdf, run_dir, context, catalog=None, tim
         result['pageLayout']=page_layout(pdf)
     return result
 
-def register(source, template_id, out):
+def register(source, template_id, out, start=None):
     """Register a user's plan as an assembly template (propose, build, self reproduction, other lengths) and report
     only what the person decides on: the preview, what an outline can use, and source wording left in blocks."""
     import subprocess
     need(re.fullmatch(r'[a-z0-9][a-z0-9-]{1,40}',template_id),'--id: 소문자·숫자·- 2~41자')
     work=Path(out).resolve()
     need(not work.exists(),f'already exists: {work}')
-    done=subprocess.run([sys.executable,'-X','utf8',str(Path(__file__).with_name('register_assembly_template.py')),str(Path(source).resolve(strict=True)),str(work),'--id',template_id],
-                        capture_output=True,text=True,encoding='utf-8',errors='replace')
+    done=subprocess.run([sys.executable,'-X','utf8',str(Path(__file__).with_name('register_assembly_template.py')),str(Path(source).resolve(strict=True)),str(work),'--id',template_id,*(['--start',start] if start else [])],
+                        capture_output=True,text=True,encoding='utf-8',errors='replace',creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
     need((work/'report.json').is_file(),'registration stopped: '+(done.stderr.strip().splitlines() or ['no report'])[-1])
     report=read(work/'report.json')
     if report.get('status')=='FAIL_BUILD':
@@ -298,8 +305,8 @@ def main():
     sub.add_parser('doctor');s=sub.add_parser('schema');s.add_argument('operation',choices=['table'])
     s=sub.add_parser('tool');s.add_argument('script');s.add_argument('arguments',nargs=argparse.REMAINDER)
     s=sub.add_parser('compose');s.add_argument('--request',required=True);s.add_argument('--output',required=True);s.add_argument('--pdf',required=True);s.add_argument('--run',required=True);s.add_argument('--context',choices=['ordinary-shell','host-approved'],required=True);s.add_argument('--timeout',type=int,default=120)
-    s=sub.add_parser('register');s.add_argument('source');s.add_argument('--id',required=True);s.add_argument('--out',required=True)
-    s=sub.add_parser('assemble');s.add_argument('--template',required=True);s.add_argument('--describe',action='store_true');s.add_argument('--outline');s.add_argument('--output');s.add_argument('--pdf');s.add_argument('--run');s.add_argument('--context',choices=['ordinary-shell','host-approved']);s.add_argument('--catalog');s.add_argument('--timeout',type=int,default=240)
+    s=sub.add_parser('register');s.add_argument('source');s.add_argument('--id',required=True);s.add_argument('--work',required=True);s.add_argument('--start')
+    s=sub.add_parser('assemble');s.add_argument('--template',required=True);s.add_argument('--describe',action='store_true');s.add_argument('--check',action='store_true');s.add_argument('--outline');s.add_argument('--output');s.add_argument('--pdf');s.add_argument('--run');s.add_argument('--context',choices=['ordinary-shell','host-approved']);s.add_argument('--catalog');s.add_argument('--timeout',type=int,default=240)
     s=sub.add_parser('fill');s.add_argument('--template');s.add_argument('--values');s.add_argument('--content');s.add_argument('--output');s.add_argument('--styles');s.add_argument('--catalog',default=str(ROOT/'assets/document-templates/full-plans.json'));s.add_argument('--dry-run',action='store_true')
     s=sub.add_parser('preview');s.add_argument('pdf');s.add_argument('--output',required=True)
     s=sub.add_parser('layout-check');s.add_argument('source');s.add_argument('--pdf')
@@ -325,10 +332,13 @@ def main():
         elif a.command=='compose':result=compose(read(a.request),a.output,a.pdf,a.run,a.context,a.timeout)
         elif a.command=='assemble':
             if a.describe:result=assemble(a.template,None,None,None,None,None,a.catalog)
+            elif a.check:
+                need(bool(a.outline),'assemble --check needs --outline')
+                result=assemble(a.template,read(a.outline),None,None,None,None,a.catalog,check=True)
             else:
                 need(all([a.outline,a.output,a.pdf,a.run,a.context]),'assemble needs --outline --output --pdf --run --context (or --describe)')
                 result=assemble(a.template,read(a.outline),a.output,a.pdf,a.run,a.context,a.catalog,a.timeout)
-        elif a.command=='register':result=register(a.source,a.id,a.out)
+        elif a.command=='register':result=register(a.source,a.id,a.work,a.start)
         elif a.command=='schema':result=schema(a.operation)
         elif a.command=='preview':result=preview(a.pdf,a.output)
         elif a.command=='layout-check':result=layout_check(a.source,a.pdf)
@@ -376,14 +386,14 @@ def main():
             from prepare_source import check_source
             result=check_source(a.source,a.analysis)
         if a.command!='schema':
-            result.setdefault('native',result.get('status') if a.command in ('compose','assemble','register') and result.get('status')!='DESCRIBED' else 'NOT_CHECKED');result.setdefault('entryScript',str(Path(__file__).resolve()));result.setdefault('entrySha256',sha(__file__))
+            result.setdefault('native',result.get('status') if a.command in ('compose','assemble','register') and result.get('status') not in ('DESCRIBED','CHECKED') else 'NOT_CHECKED');result.setdefault('entryScript',str(Path(__file__).resolve()));result.setdefault('entrySha256',sha(__file__))
         displayed=result
         if a.command in ('text','batch','layout','table','replace','fill') and not a.full_output and (a.command!='fill' or a.values or (a.content and result.get('ok') is not None)):
             from inspection_summary import saved_edit_summary
             output=getattr(a,'output',None) or result.get('output',{}).get('filename')
             displayed=saved_edit_summary(result,output)
             if 'contentSelection' in result:displayed['contentSelection']=result['contentSelection']
-        print(json.dumps(displayed,ensure_ascii=False,indent=2));return (0 if result.get('status') in ('PASS_NATIVE','DESCRIBED') else 3) if a.command in ('compose','assemble') else (2 if result.get('status') in ('STALE','BLOCKED') else 0)
+        print(json.dumps(displayed,ensure_ascii=False,indent=2));return (0 if result.get('status') in ('PASS_NATIVE','DESCRIBED','CHECKED') else 3) if a.command in ('compose','assemble') else (2 if result.get('status') in ('STALE','BLOCKED') else 0)
     except Exception as ex:
         print(json.dumps(dict(status='BLOCKED',reason=str(ex),errorType=type(ex).__name__,native='NOT_CHECKED',nextStep='reason에 해당하는 입력·지원 범위를 references/simple-entry.md에서 확인하세요. 보존·revision 실패는 중단하고 같은 요청을 자동 재시도하지 마세요.'),ensure_ascii=False));return 2
 if __name__=='__main__':raise SystemExit(main())

@@ -30,7 +30,7 @@ table cells, or number and title in separate runs; a prepared source may already
 page. "fromAltSource" parts come from the map's altSource (the original of a prepared source), and the
 map's "rules" override the default page numbering, section and spacer rules ("textBeforeFirstChapter"
 lets an outline open with bars and text). Other part options: "tableAsChar" saves a floating table from a
-copy where it sits in the line, "keepFaces" keeps a cover's display faces, "dropPictures" removes its pictures (a logo), "context": "after-<kind>" marks a
+copy where it sits in the line, "keepFaces" keeps a cover's display faces, "dropPictures" removes its pictures (a logo), "dropHeaderFooter" its header and footer, "context": "after-<kind>" marks a
 spacing variant used right after an outline node of that kind, table "role" (schedule, grid, steps, targets,
 indicators) and "columns" (names of the unit cells) let an outline pick a table by role, table "fixedTexts" cells (step arrows) keep
 their text and take no value, and table "holderLineSpacing" sets the holding line's spacing. Table "footerRows" keeps the source's last rows (a total or remarks
@@ -42,7 +42,7 @@ and records each row's value cell count, so an outline can fill the table by row
 unbound to the next paragraph (a source that writes body lists as □ or "1. 기간: ..." lines). A cover field
 may name a list of placeholders that take the same value.
 
-Usage: build_assembly_template.py MAP SOURCE.hwpx WORK_DIR [--out DIR] [--alt-source ORIGINAL.hwpx]
+Usage: build_assembly_template.py MAP SOURCE.hwpx WORK_DIR [--out DIR] [--alt-source ORIGINAL.hwpx] [--render-source PDF]
 """
 from __future__ import annotations
 
@@ -61,6 +61,7 @@ from lxml import etree
 from normalize_template_layout import substitute_fonts
 
 HERE = Path(__file__).resolve().parent
+NO_WINDOW = getattr(subprocess, 'CREATE_NO_WINDOW', 0)  # no console window taking the screen focus per Hangul step
 TEMPLATES = HERE.parent / 'assets/document-templates/assembly'  # the skill's own templates (the repository's when built there)
 HP = '{http://www.hancom.co.kr/hwpml/2011/paragraph}'
 HH = '{http://www.hancom.co.kr/hwpml/2011/head}'
@@ -97,10 +98,12 @@ def need(ok, message):
 
 
 def native(plan, work, name):
+    if not plan.get('blocks') and not plan.get('renders'):
+        return  # nothing to save or print: Hangul is not opened
     plan_path = work / f'{name}.json'
     plan_path.write_text(json.dumps(plan, ensure_ascii=False, indent=1), encoding='utf-8')
     argv = ['powershell', '-NoProfile', '-STA', '-File', str(HERE / 'assembly_native.ps1'), '-PlanPath', str(plan_path)]
-    done = subprocess.run(argv, capture_output=True, text=True, encoding='utf-8-sig', errors='replace')
+    done = subprocess.run(argv, capture_output=True, text=True, encoding='utf-8-sig', errors='replace', creationflags=NO_WINDOW)
     (work / f'{name}.result.json').write_text(done.stdout + done.stderr, encoding='utf-8')
     need(done.returncode == 0, f'Hangul step {name} failed: {done.stdout[-600:]} {done.stderr[-600:]}')
 
@@ -433,6 +436,9 @@ def prepare(name, spec, raw, out_dir, deep_indent):
     if spec.get('dropPictures'):  # an agency logo on a cover is the source's mark, not its layout
         for picture in list(section.iter(HP + 'pic')):
             picture.getparent().remove(picture)
+    if spec.get('dropHeaderFooter'):  # a header or footer the range took from the document it was cut from
+        for control in [c for c in section.iter(HP + 'ctrl') if c.find(HP + 'header') is not None or c.find(HP + 'footer') is not None]:
+            control.getparent().remove(control)
     kind, entry, previews, variants = spec['kind'], {'kind': spec['kind']}, [], []
     if spec.get('context'):
         # "summary": used on the summary page, which spaces lines more tightly; "after-<kind>": right after an outline
@@ -446,6 +452,8 @@ def prepare(name, spec, raw, out_dir, deep_indent):
         entry.update({key: spec[key] for key in ('placeholder', 'numberPlaceholder', 'numbering', 'level') if key in spec})
         if kind == 'cover':
             entry['placeholder'] = spec['fields']
+            if spec.get('fieldLimits'):  # a narrow label box holds a few letters (붙임, 결과)
+                entry['fieldLimits'] = spec['fieldLimits']
         names = flat(entry['placeholder'].values()) if isinstance(entry.get('placeholder'), dict) else [entry['placeholder']]
         names += [entry['numberPlaceholder']] if 'numberPlaceholder' in entry else []
         text = ''.join(''.join(t.itertext()) for t in section.iter(HP + 't'))  # with text after inline controls
@@ -606,9 +614,9 @@ def wrap_offset(pdf, symbol):
     return lines[first][1]['bbox'][0] - lines[first + 1][0]['bbox'][0]
 
 
-def calibrate_hanging(parts, out_dir, work):
+def calibrate_hanging(parts, out_dir, work, extra=()):
     """Set the hanging indent of each item part and each prefixed first table column so wrapped
-    lines start under the first body character."""
+    lines start under the first body character. extra renders (other measurements) go in the checking run."""
     items = {name: entry for name, entry in parts.items() if entry['kind'] in ITEM_KINDS and entry['depth'] == 0}
     tables = {name: entry for name, entry in parts.items() if entry.get('table', {}).get('firstColumnPrefix')}
     def render(name, entry, attempt):
@@ -622,7 +630,10 @@ def calibrate_hanging(parts, out_dir, work):
         return PDF_SYMBOL.get(entry['kind']) or entry.get('symbol', SYMBOL[entry['kind']])
     targets = {**items, **tables}
     for attempt in range(2):
-        native(dict(renders=[render(name, entry, attempt) for name, entry in targets.items()]), work, f'hanging-{attempt}')
+        if attempt and not extra:
+            return {}  # the checking run only re-measures (residuals have been 0); it runs when other measurements ride on it
+        native(dict(renders=[render(name, entry, attempt) for name, entry in targets.items()] + (list(extra) if attempt else [])),
+               work, f'hanging-{attempt}')
         offsets = {name: wrap_offset(work / f'hanging-{attempt}-{name}.pdf', symbol(name, entry)) for name, entry in targets.items()}
         if attempt:
             return {name: round(offset * 25.4 / 72, 2) for name, offset in offsets.items()}
@@ -645,8 +656,9 @@ def tables_as_char(source, paragraphs, target):
     with zipfile.ZipFile(source) as package:
         infos = package.infolist()
         data = {info.filename: package.read(info) for info in infos}
-    section = etree.fromstring(data['Contents/section0.xml'])
-    top = section.findall(HP + 'p')
+    names = sorted((n for n in data if re.fullmatch(r'Contents/section\d+\.xml', n)), key=lambda n: int(re.search(r'\d+', n).group()))
+    sections = {name: etree.fromstring(data[name]) for name in names}
+    top = [p for name in names for p in sections[name].findall(HP + 'p')]  # numbered on through all sections, as Hangul does
     for index in paragraphs:
         tables = top[index].findall(f'.//{HP}tbl')
         need(tables, f'paragraph {index} holds no table')
@@ -654,7 +666,8 @@ def tables_as_char(source, paragraphs, target):
             table.find(HP + 'pos').attrib.update({'treatAsChar': '1', 'vertOffset': '0', 'horzOffset': '0'})
         for lines in top[index].findall(HP + 'linesegarray'):
             top[index].remove(lines)
-    data['Contents/section0.xml'] = etree.tostring(section, xml_declaration=True, encoding='UTF-8', standalone=True)
+    for name in names:
+        data[name] = etree.tostring(sections[name], xml_declaration=True, encoding='UTF-8', standalone=True)
     with zipfile.ZipFile(target, 'w') as out:
         for info in infos:
             out.writestr(info, data[info.filename])
@@ -665,6 +678,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('map'); parser.add_argument('source'); parser.add_argument('work'); parser.add_argument('--out')
     parser.add_argument('--alt-source', help='original of a prepared source, for parts marked fromAltSource')
+    parser.add_argument('--render-source', help="also print the source to this PDF in the block-saving run (registration's check 1)")
     args = parser.parse_args()
     part_map = json.loads(Path(args.map).read_text(encoding='utf-8'))
     need(part_map.get('schema') == 'hwpx.assembly-part-map.v1', 'unsupported part map schema')
@@ -688,7 +702,8 @@ def main():
         blocks = [dict(name=name, start=spec['range'][0], end=spec['range'][1], path=str(raw_dir / f'{name}.hwpx'),
                        **({'check': spec['check']} if 'check' in spec else {}))
                   for name, spec in part_map['parts'].items() if bool(spec.get('fromAltSource')) == alt]
-        native(dict(source=str(path), blocks=blocks, renders=[]), work, 'save-blocks' + ('-alt' if alt else ''))
+        renders = [dict(part=str(source), pdf=str(Path(args.render_source).resolve()))] if args.render_source and not alt else []
+        native(dict(source=str(path), blocks=blocks, renders=renders), work, 'save-blocks' + ('-alt' if alt else ''))
 
     parts = {}
     for name, spec in part_map['parts'].items():
@@ -710,12 +725,12 @@ def main():
         left = leftover_wording(out_dir / entry['file'], allowed + entry.get('table', {}).get('header', []))
         need(not left, f'part {name}: source wording left in the prepared part: {left[:60]!r}')
 
-    residual = calibrate_hanging(parts, out_dir, work)
-    need(all(abs(value) <= 0.3 for value in residual.values()), f'hanging calibration did not converge: {residual}')
+    # chapter boxes are measured in the run that checks the hanging indents: one Hangul start fewer
     renders = [dict(part=str(out_dir / entry['file']), find=entry['placeholder'], text=text, boxWidth=CALIBRATION_BOX_HWP,
                     pdf=str(work / f'calibrate-{name}-{index}.pdf'))
                for name, entry in parts.items() if 'box' in entry for index, text in enumerate(CALIBRATION)]
-    native(dict(renders=renders), work, 'calibrate')
+    residual = calibrate_hanging(parts, out_dir, work, renders)
+    need(all(abs(value) <= 0.3 for value in residual.values()), f'hanging calibration did not converge: {residual}')
     for name, entry in parts.items():
         if 'box' not in entry:
             continue

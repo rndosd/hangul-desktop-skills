@@ -8,6 +8,8 @@ import argparse,json,os,subprocess,sys,hashlib
 from pathlib import Path
 from classify_hancom_failure import classify
 S=Path(__file__).resolve().parent
+# A console window flashing up for each PowerShell step takes the screen focus from the person at the computer.
+NO_WINDOW=getattr(subprocess,'CREATE_NO_WINDOW',0)
 def require(ok,message):
  if not ok:raise ValueError(message)
 def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
@@ -71,7 +73,7 @@ def run(source,mode,output,pdf,run_dir,context,timeout=120,preflight_only=False,
   composition_sha=sha(r/'composition.json')
   write(r/'composition-dependencies.json',{n:dict(path=str(S/n),sha256=sha(S/n)) for n in ['native_composition.py','Hancom.Composition.ps1','native_assembly.py','Hancom.Assembly.ps1']})
  argv=[str(ps),'-NoProfile','-STA','-File',str(S/'check_native_context.ps1'),'-OutputPath',str(r/'context.json')]
- p=subprocess.run(argv,env=env,capture_output=True,text=True,encoding='utf-8-sig',errors='replace',timeout=30)
+ p=subprocess.run(argv,env=env,capture_output=True,text=True,encoding='utf-8-sig',errors='replace',timeout=30,creationflags=NO_WINDOW)
  write(r/'preflight-command.json',dict(argv=argv,exitCode=p.returncode,stdout=p.stdout,stderr=p.stderr))
  if p.returncode!=0:
   result=dict(status='BLOCKED_PREFLIGHT',comCreated='NOT_CALLED',securityModuleRegistered='NOT_CALLED',context=read(r/'context.json') if (r/'context.json').exists() else None)
@@ -82,7 +84,7 @@ def run(source,mode,output,pdf,run_dir,context,timeout=120,preflight_only=False,
   if dst:argv+=['-OutputPath',str(dst)]
   if pdf_path:argv+=['-PdfPath',str(pdf_path)]
   try:
-   p=subprocess.run(argv,env=env,capture_output=True,text=True,encoding='utf-8-sig',errors='replace',timeout=timeout+30)
+   p=subprocess.run(argv,env=env,capture_output=True,text=True,encoding='utf-8-sig',errors='replace',timeout=timeout+30,creationflags=NO_WINDOW)
    command=dict(argv=argv,exitCode=p.returncode,stdout=p.stdout,stderr=p.stderr);write(r/'controller-command.json',command)
    receipt=read(r/'native/receipt.json') if (r/'native/receipt.json').exists() else command
    result=dict(status='PASS_NATIVE' if p.returncode==0 and receipt.get('status')=='PASS_FULL' else 'BLOCKED_NATIVE',classification=classify(receipt),comCreated=receipt.get('comCreated','NOT_RECORDED'),securityModuleRegistered=receipt.get('securityModuleRegistered','NOT_RECORDED'),receiptPath=str(r/'native/receipt.json'))

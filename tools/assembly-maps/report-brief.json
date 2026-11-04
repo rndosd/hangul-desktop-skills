@@ -1,0 +1,123 @@
+{
+ "schema": "hwpx.assembly-part-map.v1",
+ "id": "report-brief",
+ "label": "결과요약형(붙임 1~2쪽)",
+ "source": {
+  "sha256": "5cc48d3ed5462b2897356559c13e39df88f43ddec04446b398f93efa788700f6",
+  "title": "2026년도 전 생애 노동교육 실태조사 주요 결과",
+  "publisher": "고용노동부",
+  "license": "공공누리 제1유형(출처표시, 텍스트)",
+  "attribution": "이 조립 양식의 서식은 고용노동부 「2026년도 전 생애 노동교육 실태조사 주요 결과」(정책브리핑, 공공누리 제1유형)에서 가져왔으며 원문 문구·그림은 포함하지 않는다.",
+  "url": "https://www.korea.kr/briefing/pressReleaseView.do?newsId=156787685"
+ },
+ "rules": {
+  "spacerBeforeLaterChapters": false,
+  "bodyStartsNewSection": false,
+  "deepItemsUnderHeadingLevel": 9,
+  "pageNumbers": null,
+  "headingLevelsMaySkip": true,
+  "textBeforeFirstChapter": true
+ },
+ "deepIndentHwp": 1000,
+ "parts": {
+  "cover": {
+   "range": [
+    29,
+    30
+   ],
+   "kind": "cover",
+   "keepFaces": true,
+   "replace": {
+    "붙임": "[부제목]",
+    "2026년도 전 생애 노동교육 실태조사 주요 결과": "[제목]"
+   },
+   "fields": {
+    "subtitle": "[부제목]",
+    "title": "[제목]"
+   },
+   "keep": [],
+   "dropPictures": true,
+   "dropHeaderFooter": true,
+   "fieldLimits": {
+    "subtitle": 4
+   }
+  },
+  "subhead": {
+   "range": [
+    30,
+    31
+   ],
+   "placeholder": "[소제목]",
+   "kind": "subhead"
+  },
+  "item": {
+   "range": [
+    33,
+    34
+   ],
+   "placeholder": "[항목]",
+   "kind": "item",
+   "prefix": "\\s*ㅇ\\s*",
+   "symbol": "ㅇ",
+   "baseLeftHwp": 0
+  },
+  "dash": {
+   "range": [
+    41,
+    42
+   ],
+   "placeholder": "[항목]",
+   "kind": "dash",
+   "baseLeftHwp": 0
+  },
+  "note": {
+   "range": [
+    32,
+    33
+   ],
+   "placeholder": "[항목]",
+   "kind": "note",
+   "prefix": "\\s*\\*\\s*",
+   "symbol": "*",
+   "baseLeftHwp": 0
+  },
+  "table1": {
+   "range": [
+    50,
+    51
+   ],
+   "kind": "table",
+   "table": {
+    "headerRows": 1,
+    "unitRows": 1,
+    "role": "grid",
+    "keepWrap": true,
+    "columns": [
+     "구분",
+     "필요성 인식",
+     "경험률",
+     "의무교육 제외 경험률",
+     "주요 특징"
+    ],
+    "unitRow": 1
+   }
+  },
+  "table2": {
+   "range": [
+    54,
+    55
+   ],
+   "kind": "table",
+   "table": {
+    "headerRows": 1,
+    "unitRows": 1,
+    "role": "grid",
+    "keepWrap": true,
+    "columns": [
+     "구분",
+     "핵심 내용"
+    ]
+   }
+  }
+ }
+}

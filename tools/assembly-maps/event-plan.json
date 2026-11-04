@@ -1,0 +1,83 @@
+{
+ "schema": "hwpx.assembly-part-map.v1",
+ "id": "event-plan",
+ "label": "행사계획형(붙임 개요·프로그램)",
+ "source": {
+  "sha256": "47f91a2275e2f7a396f63eb9ba6afb158805a57ba5a2a01ea28ef58fa6613e30",
+  "title": "동아제약 현장방문 개요",
+  "publisher": "산업통상부",
+  "license": "공공누리 제1유형(출처표시, 텍스트)",
+  "attribution": "이 조립 양식의 서식은 산업통상부 「동아제약 현장방문 개요」(정책브리핑, 공공누리 제1유형)에서 가져왔으며 원문 문구·그림은 포함하지 않는다.",
+  "url": "https://www.korea.kr/briefing/pressReleaseView.do?newsId=156787748"
+ },
+ "rules": {
+  "spacerBeforeLaterChapters": false,
+  "bodyStartsNewSection": false,
+  "deepItemsUnderHeadingLevel": 9,
+  "pageNumbers": null,
+  "headingLevelsMaySkip": true,
+  "textBeforeFirstChapter": true
+ },
+ "deepIndentHwp": 1000,
+ "parts": {
+  "cover": {
+   "range": [
+    23,
+    26
+   ],
+   "kind": "cover",
+   "keepFaces": true,
+   "replace": {
+    "붙임 1": "[부제목]",
+    "동아제약 현장방문 개요": "[제목]"
+   },
+   "fields": {
+    "subtitle": "[부제목]",
+    "title": "[제목]"
+   },
+   "keep": [],
+   "dropPictures": true,
+   "dropHeaderFooter": true,
+   "fieldLimits": {
+    "subtitle": 4
+   }
+  },
+  "subhead": {
+   "range": [
+    26,
+    27
+   ],
+   "placeholder": "[소제목]",
+   "kind": "subhead"
+  },
+  "item": {
+   "range": [
+    28,
+    29
+   ],
+   "placeholder": "[항목]",
+   "kind": "item",
+   "prefix": "\\s*ㅇ\\s*",
+   "symbol": "ㅇ",
+   "baseLeftHwp": 0
+  },
+  "table1": {
+   "range": [
+    42,
+    43
+   ],
+   "kind": "table",
+   "table": {
+    "headerRows": 1,
+    "unitRows": 1,
+    "role": "schedule",
+    "keepWrap": true,
+    "columns": [
+     "시간",
+     "내용",
+     "비고"
+    ]
+   }
+  }
+ }
+}

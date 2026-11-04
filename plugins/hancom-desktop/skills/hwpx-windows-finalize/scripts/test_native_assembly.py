@@ -143,6 +143,13 @@ class AssemblyTest(unittest.TestCase):
         self.rejects('rows\\[1\\]\\[3\\]\\[2\\]: 빈 문구', CHAPTER, {'t': 'table', 'part': 'schedule', 'rows': [['안내', '3. 15.', ['a', '']]]})
         self.rejects("표 부품 'item'", CHAPTER, {'t': 'table', 'part': 'item', 'rows': [['a']]})
 
+    def test_rows_in_the_old_schedule_order_are_stopped(self):
+        """기간 | 업무 | 비고 given as 업무 | 기간 | 비고 would print tasks in the date column without an error."""
+        swapped = [['시행계획 수립', '2027. 1. ○.', '교무부'], ['배치고사 실시', '2027. 2. ○.(○)', '전 교직원']]
+        self.rejects('칸 순서는 기간, 주요 업무 내용, 비고', CHAPTER, {'t': 'table', 'role': 'schedule', 'rows': swapped})
+        self.plan(CHAPTER, {'t': 'table', 'role': 'schedule', 'rows': [[b, a, c] for a, b, c in swapped]})
+        self.plan(CHAPTER, {'t': 'table', 'role': 'schedule', 'rows': [['상시', '민원 응대', ''], ['3월 중', '2차 협의(3. 15.)', '']]})
+
     def test_a_unit_of_merged_rows_repeats(self):
         """Unit of two rows whose first cell spans both: each repeat shifts row addresses and keeps the span."""
         cell = ('<hp:tc><hp:subList><hp:p paraPrIDRef="1"><hp:run charPrIDRef="1"/></hp:p></hp:subList>'
@@ -384,6 +391,16 @@ class CommonVocabularyTest(unittest.TestCase):
         _, notes = self.plan('plan-official', {'title': '가상', 'date': '2027.'},
                              [{'t': 'chapter', 'text': '개요'}, {'t': 'subhead', 'text': '소제목'}, {'t': 'lead', 'text': '문단'}])
         self.assertEqual([(n['role'], n['used']) for n in notes], [('subhead', 'task'), ('lead', 'item')])
+
+    def test_a_template_without_chapters_draws_them_as_bars(self):
+        plan, notes = self.plan('report-brief', {'title': '가상 결과', 'subtitle': '결과'},
+                                [{'t': 'chapter', 'text': '운영 개요'}, {'t': 'item', 'text': '(기간) 3월'}])
+        self.assertEqual([(n['role'], n['used']) for n in notes], [('chapter', 'subhead')])
+        self.assertIn(('[소제목]', '운영 개요'), [(s['find'], s['text']) for s in plan['steps'] if s['op'] == 'text'])
+        self.assertIn('chapter', a.describe(a.load_template(CATALOG, 'event-plan'))['substitutes'])
+        with self.assertRaisesRegex(ValueError, '좁은 라벨 상자라 4자까지'):  # a school name in the label box wraps letter by letter
+            self.plan('event-plan', {'title': '설명회 계획', 'subtitle': '○○초등학교'}, [{'t': 'item', 'text': '(일시) 3월'}])
+        self.assertEqual(a.describe(a.load_template(CATALOG, 'event-plan'))['cover']['limits'], {'subtitle': 4})
 
     def test_tables_are_picked_by_role_then_by_cell_count(self):
         plan, notes = self.plan('plan-school', {'title': '가상'}, [

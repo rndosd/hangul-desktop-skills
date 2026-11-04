@@ -1,0 +1,136 @@
+{
+ "schema": "hwpx.assembly-template.v1",
+ "id": "report-brief",
+ "label": "결과요약형(붙임 1~2쪽)",
+ "source": {
+  "sha256": "5cc48d3ed5462b2897356559c13e39df88f43ddec04446b398f93efa788700f6",
+  "title": "2026년도 전 생애 노동교육 실태조사 주요 결과",
+  "publisher": "고용노동부",
+  "license": "공공누리 제1유형(출처표시, 텍스트)",
+  "attribution": "이 조립 양식의 서식은 고용노동부 「2026년도 전 생애 노동교육 실태조사 주요 결과」(정책브리핑, 공공누리 제1유형)에서 가져왔으며 원문 문구·그림은 포함하지 않는다.",
+  "url": "https://www.korea.kr/briefing/pressReleaseView.do?newsId=156787685"
+ },
+ "rules": {
+  "spacerBeforeLaterChapters": false,
+  "bodyStartsNewSection": false,
+  "pageNumbers": null,
+  "deepItemsUnderHeadingLevel": 9,
+  "headingLevelsMaySkip": true,
+  "textBeforeFirstChapter": true,
+  "deepIndentHwp": 1000
+ },
+ "parts": {
+  "cover": {
+   "kind": "cover",
+   "placeholder": {
+    "subtitle": "[부제목]",
+    "title": "[제목]"
+   },
+   "file": "parts/cover.hwpx",
+   "sha256": "c2dc9bafa1cb653dcafb5f6829bb8647eca9c96840d100ad2e58de4835536165",
+   "fieldLimits": {
+    "subtitle": 4
+   }
+  },
+  "subhead": {
+   "kind": "subhead",
+   "placeholder": "[소제목]",
+   "file": "parts/subhead.hwpx",
+   "sha256": "00c72839de28608fd57aa79ab54b3355405f25a72c1d997ff7ddbdaa65d8988b"
+  },
+  "item": {
+   "kind": "item",
+   "symbol": "ㅇ",
+   "placeholder": "[항목]",
+   "depth": 0,
+   "file": "parts/item.hwpx",
+   "sha256": "6444cec8dd89196a34f281bce300d7bc56b46779cb5c5439563fda2d7816bdc9"
+  },
+  "item-deep": {
+   "kind": "item",
+   "symbol": "ㅇ",
+   "placeholder": "[항목]",
+   "depth": 1,
+   "file": "parts/item-deep.hwpx",
+   "sha256": "59dbc94f0dce4b2bb60d2de63cd79e5d3324003c23312ba880b59e1ecdedeb71"
+  },
+  "dash": {
+   "kind": "dash",
+   "placeholder": "[항목]",
+   "depth": 0,
+   "file": "parts/dash.hwpx",
+   "sha256": "892e1e494390f5cc2a092afa1dd09794f66eda005d0159269d7e0004b9326611"
+  },
+  "dash-deep": {
+   "kind": "dash",
+   "placeholder": "[항목]",
+   "depth": 1,
+   "file": "parts/dash-deep.hwpx",
+   "sha256": "91b647cb5317fc7020df479db8858c5c18a58559e26f1a0567009a173fa28df9"
+  },
+  "note": {
+   "kind": "note",
+   "symbol": "*",
+   "placeholder": "[항목]",
+   "depth": 0,
+   "file": "parts/note.hwpx",
+   "sha256": "2b66bd63e29c307e980c8bd876131bdab885d4e5bb760e4c4db01363bbc7d599"
+  },
+  "note-deep": {
+   "kind": "note",
+   "symbol": "*",
+   "placeholder": "[항목]",
+   "depth": 1,
+   "file": "parts/note-deep.hwpx",
+   "sha256": "f0d2bad7ec38bd8b492d938abe4f492e281dfaf3643cef997cd164bf154ef924"
+  },
+  "table1": {
+   "kind": "table",
+   "table": {
+    "headerRows": 1,
+    "unitRows": 1,
+    "headerCells": 5,
+    "unitCells": 5,
+    "repeat": true,
+    "header": [
+     "구 분",
+     "필요성인식",
+     "경험률",
+     "의무교육 제외경험률",
+     "주요 특징"
+    ],
+    "role": "grid",
+    "columns": [
+     "구분",
+     "필요성 인식",
+     "경험률",
+     "의무교육 제외 경험률",
+     "주요 특징"
+    ]
+   },
+   "file": "parts/table1.hwpx",
+   "sha256": "f9e8767611b4c1d49e592602b958b30e9f649b476bcd057f84c599e9d4c966f4"
+  },
+  "table2": {
+   "kind": "table",
+   "table": {
+    "headerRows": 1,
+    "unitRows": 1,
+    "headerCells": 2,
+    "unitCells": 2,
+    "repeat": true,
+    "header": [
+     "구 분",
+     "핵심 내용"
+    ],
+    "role": "grid",
+    "columns": [
+     "구분",
+     "핵심 내용"
+    ]
+   },
+   "file": "parts/table2.hwpx",
+   "sha256": "0f95ed1c29e2f2abcbed68b856904470b2308d1ec7d140c3e71238b54a92601a"
+  }
+ }
+}
