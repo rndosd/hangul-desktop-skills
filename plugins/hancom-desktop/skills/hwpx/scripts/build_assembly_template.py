@@ -630,6 +630,8 @@ def calibrate_hanging(parts, out_dir, work, extra=()):
         return PDF_SYMBOL.get(entry['kind']) or entry.get('symbol', SYMBOL[entry['kind']])
     targets = {**items, **tables}
     for attempt in range(2):
+        if attempt and not extra:
+            return {}  # the checking run only re-measures (residuals have been 0); it runs when other measurements ride on it
         native(dict(renders=[render(name, entry, attempt) for name, entry in targets.items()] + (list(extra) if attempt else [])),
                work, f'hanging-{attempt}')
         offsets = {name: wrap_offset(work / f'hanging-{attempt}-{name}.pdf', symbol(name, entry)) for name, entry in targets.items()}

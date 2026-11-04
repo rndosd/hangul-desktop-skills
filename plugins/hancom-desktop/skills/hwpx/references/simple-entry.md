@@ -62,10 +62,11 @@ $planCatalog = Join-Path $taskSkillDir 'assets/document-templates/full-plans.jso
 
 ```powershell
 & $taskLauncher assemble --template plan-school --describe
+& $taskLauncher assemble --template plan-official --check --outline 개요.json
 & $taskLauncher assemble --template plan-official --outline 개요.json --output 계획.hwpx --pdf 계획.pdf --run 작업폴더/assemble-run --context host-approved
 ```
 
-`--describe`는 한글을 열지 않고 그 양식의 `roles`(그대로 그리는 역할), `substitutes`(대신 그리는 역할), `tables`(표 역할·칸 수·칸 순서 `columns`), `cover`(표지 항목·필수·붙여 넣는 곳)를 알려 준다. 개요는 이것만 보고 쓴다.
+`--describe`는 한글을 열지 않고 그 양식의 `roles`(그대로 그리는 역할), `substitutes`(대신 그리는 역할), `tables`(표 역할·칸 수·칸 순서 `columns`), `cover`(표지 항목·필수·붙여 넣는 곳, 좁은 칸의 글자 수 `limits`)를 알려 준다. 개요는 이것만 보고 쓴다. `--check`는 조립과 같은 개요 검사를 한글 없이 1초 안에 하고 `CHECKED`(대신 그릴 곳 `substitutions` 포함)나 거부 사유를 낸다. 한글은 켤 때마다 화면 초점을 잠깐 가져가므로, 조립 전에 `--check`로 고쳐 실행 횟수를 줄인다.
 
 ```json
 {"schema":"hwpx.assembly-outline.v1","template":"plan-official",
