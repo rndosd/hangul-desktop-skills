@@ -183,6 +183,28 @@ def _titles_left_above_tables(outline, pdf):
             stranded.append(i)
     return stranded
 
+def _tables_split_thin(outline, pdf, layout):
+    """Outline indexes to start on a new page for tables that begin on a page and leave one row on either side
+    of its end (TABLE_SPLIT_THIN): the table with the titles right above it, as an author would move them."""
+    import pymupdf
+    nodes=outline.get('nodes',[])
+    pages=[f['page'] for f in layout.get('findings',[]) if f['code']=='TABLE_SPLIT_THIN']
+    if not pages:return []
+    flat=lambda s:re.sub(r'\s+','',s)
+    with pymupdf.open(pdf) as document:
+        texts=[flat(page.get_text()) for page in document]
+    moved=[]
+    for p in pages:
+        for i,n in enumerate(nodes):
+            if n.get('t')!='table' or n.get('pageBreakBefore'):continue
+            keys=[max((flat(str(c)) for c in row),key=len,default='')[:14] for row in n.get('rows',[])]  # the longest cell: a prefix (○) may be drawn before it
+            on=lambda page:[bool(k) and k in texts[page-1] for k in keys]
+            here,there=on(p),on(p+1) if p<len(texts) else []
+            if keys and here[0] and any(there) and not (p>1 and on(p-1)[0]):  # begins on this page, ends on the next
+                while i and nodes[i-1].get('t') in TITLE_KINDS and not nodes[i].get('pageBreakBefore'):i-=1
+                moved.append(i);break
+    return sorted(set(moved))
+
 def assemble(template, outline, output, pdf, run_dir, context, catalog=None, timeout=240, check=False):
     """Outline -> parts of one assembly template, assembled in one owned Hangul job."""
     native_scripts=ROOT.parent/'hwpx-windows-finalize/scripts'
@@ -208,19 +230,29 @@ def assemble(template, outline, output, pdf, run_dir, context, catalog=None, tim
     plan=build_plan(manifest,outline,tables,notes)
     result=run(plan['base']['path'],'SaveAs',output,pdf,run_dir,context,timeout,composition=plan)
     stranded=_titles_left_above_tables(outline,pdf) if result['status']=='PASS_NATIVE' else []
-    if stranded:  # a title ended a page and its table began the next: start those titles on the next page, once
+    first=page_layout(pdf) if result['status']=='PASS_NATIVE' else {}
+    thin=[i for i in _tables_split_thin(outline,pdf,first) if i not in stranded] if first else []
+    if stranded or thin:  # start those titles (and tables) on the next page, once
         retry=Path(run_dir).with_name(Path(run_dir).name+'-retry')
         need(not retry.exists() and not retry.with_name(retry.name+'-tables').exists(),f'already exists: {retry}')
         retry.mkdir()
         moved=copy.deepcopy(outline)
-        for index in stranded:moved['nodes'][index]['pageBreakBefore']=True
-        notes=[]
-        plan=build_plan(manifest,moved,retry.with_name(retry.name+'-tables'),notes)
-        again=Path(retry)/'out'
-        result=run(plan['base']['path'],'SaveAs',retry/Path(output).name,retry/Path(pdf).name,again,context,timeout,composition=plan)
-        if result['status']=='PASS_NATIVE':
-            os.replace(retry/Path(output).name,output);os.replace(retry/Path(pdf).name,pdf)
-        result['titlesMovedToNextPage']=[outline['nodes'][i]['text'] for i in stranded]
+        for index in stranded+thin:moved['nodes'][index]['pageBreakBefore']=True
+        retry_notes=[]
+        retry_plan=build_plan(manifest,moved,retry.with_name(retry.name+'-tables'),retry_notes)
+        again=run(retry_plan['base']['path'],'SaveAs',retry/Path(output).name,retry/Path(pdf).name,retry/'out',context,timeout,composition=retry_plan)
+        if again['status']=='PASS_NATIVE':
+            counts=lambda layout:layout.get('counts',{})
+            after=counts(page_layout(retry/Path(pdf).name))
+            # a stranded title always moves; a thin split moves only if the table is whole and no page gap is left
+            if stranded or (after.get('TABLE_SPLIT_THIN',0)<counts(first).get('TABLE_SPLIT_THIN',0)
+                            and after.get('PAGE_GAP',0)<=counts(first).get('PAGE_GAP',0)):
+                os.replace(retry/Path(output).name,output);os.replace(retry/Path(pdf).name,pdf)
+                result,plan,notes=again,retry_plan,retry_notes
+                if stranded:result['titlesMovedToNextPage']=[outline['nodes'][i]['text'] for i in stranded]
+                if thin:result['tablesMovedToNextPage']=[outline['nodes'][i].get('text') or outline['nodes'][i].get('role') for i in thin]
+        elif stranded:
+            result=again
     result['template']=dict(id=manifest['id'],label=manifest['label'],source=manifest['source'].get('attribution'))
     result['substitutions']=[n for n in notes if n['role']!='block']  # roles, tables and cover fields drawn with a substitute
     result['blocks']=[n for n in notes if n['role']=='block']  # parts that went in with their source wording, to review

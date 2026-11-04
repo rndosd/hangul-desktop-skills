@@ -120,7 +120,7 @@ $planCatalog = Join-Path $taskSkillDir 'assets/document-templates/full-plans.jso
 
 ### 결과 확인
 
-한글을 한 번 열어 부품을 붙이고 저장·재열기·PDF를 만든다. 결과의 `assembly`는 자리표시가 남지 않았는지와 요청한 문구·표 행 수를 확인한 값이고, `wrapAlignment`·`pageLayout`은 PDF 배치 경고다. 제목만 쪽 끝에 남으면 조립이 그 제목을 다음 쪽으로 넘겨 한 번 더 만든다(`titlesMovedToNextPage`). `PASS_NATIVE` 뒤에도 쪽 이미지를 본다([preview](#준비된-블록-조합)).
+한글을 한 번 열어 부품을 붙이고 저장·재열기·PDF를 만든다. 결과의 `assembly`는 자리표시가 남지 않았는지와 요청한 문구·표 행 수를 확인한 값이고, `wrapAlignment`·`pageLayout`은 PDF 배치 경고다. 제목만 쪽 끝에 남으면 조립이 그 제목을 다음 쪽으로 넘겨 한 번 더 만든다(`titlesMovedToNextPage`). 표가 쪽 경계에서 1행만 남고 나뉘면 그 표와 바로 위 제목을 다음 쪽으로 옮겨 본 뒤, 쪽 아래가 크게 비지 않을 때만 그 결과를 쓴다(`tablesMovedToNextPage`). `PASS_NATIVE` 뒤에도 쪽 이미지를 본다([preview](#준비된-블록-조합)).
 
 내 양식은 `register 원본.hwpx --id ID --work 폴더`로 등록하고([조립 등록](complete-template-registration.md#계획서보고서-한-명령-조립-등록먼저)) `--catalog`로 지정한다. 원본 그대로 남긴 부분은 블록(`{"t":"block","part":"이름"}`, 결과 `blocks`에 원본 글자)이다. 양식 유지보수 기준은 저장소 `tools/assembly-maps/README.md`.
 
