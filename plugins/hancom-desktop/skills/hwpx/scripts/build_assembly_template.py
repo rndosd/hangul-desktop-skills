@@ -376,7 +376,6 @@ def write_part(raw, target, section, header, preview=None):
         infos = package.infolist()
         data = {info.filename: package.read(info) for info in infos}
     data['Contents/section0.xml'] = etree.tostring(section, xml_declaration=True, encoding='UTF-8', standalone=True)
-    data['Contents/header.xml'] = etree.tostring(header, xml_declaration=True, encoding='UTF-8', standalone=True)
     hpf = data['Contents/content.hpf'].decode('utf-8')
     hpf = re.sub(r'<opf:title[^>]*?(?:/>|>.*?</opf:title>)', '<opf:title/>', hpf, flags=re.S)
     hpf = re.sub(r'(<opf:meta name="(?:creator|lastsaveby)" content="text">)[^<]*', r'\1', hpf)
@@ -387,6 +386,18 @@ def write_part(raw, target, section, header, preview=None):
             hpf = hpf.replace(item, '')
             href = re.search(r'href="([^"]*)"', item).group(1)
             infos = [info for info in infos if info.filename != href]
+    # A block that ends where the source's next section starts is saved with that section's empty first
+    # paragraph as a section of its own; inserted, it adds an empty page before the next section break.
+    for name in [n for n in data if re.fullmatch(r'Contents/section[1-9]\d*\.xml', n)]:
+        extra = etree.fromstring(data[name])
+        if text_of(extra).strip() or any(extra.iter(HP + 'tbl', HP + 'pic', HP + 'container', HP + 'rect')):
+            continue
+        sid = name[len('Contents/'):-len('.xml')]
+        hpf = re.sub(rf'<opf:item id="{sid}" [^>]*/>|<opf:itemref idref="{sid}"[^>]*/>', '', hpf)
+        infos = [info for info in infos if info.filename != name]
+    count = sum(bool(re.fullmatch(r'Contents/section\d+\.xml', info.filename)) for info in infos)
+    header.set('secCnt', str(count))
+    data['Contents/header.xml'] = etree.tostring(header, xml_declaration=True, encoding='UTF-8', standalone=True)
     data['Contents/content.hpf'] = hpf.encode('utf-8')
     if preview is not None:
         data['Preview/PrvText.txt'] = preview.encode('utf-8')

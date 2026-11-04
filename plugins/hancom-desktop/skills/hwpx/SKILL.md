@@ -26,7 +26,7 @@ description: "한글 문서(.hwpx/OWPML)의 읽기·편집·작성·양식 채�
 1. **양식 고르기**: 개인 등록 양식이 있으면 그것, 없으면 [조립 양식 고르기](references/template-selection.md#조립-양식-고르기) 표에서 문서의 쓰임으로 하나를 고른다. 기본 6종: `plan-school`(교내 운영)·`plan-education`(대상별 교육사업)·`plan-project`(종합계획)·`plan-official`(시행계획)·`report-brief`(1~2쪽 결과 요약)·`event-plan`(행사 개요·프로그램). 공문서형을 기본값으로 쓰지 않는다.
 2. **양식 조회**: `assemble --template ID --describe`로 쓸 수 있는 역할·표(칸 순서)·표지 항목을 본다.
 3. **개요 쓰기**: 틀은 에이전트가 세운다. [조립 개요 설계](references/outline-design.md)대로 점검표로 빠진 항목을 채우고 내용의 생김새에 따라 소제목·과제·하위 항목·표를 고른다. 어휘와 표 입력은 [개요 조립](references/simple-entry.md#개요로-조립).
-4. **조립과 확인**: 먼저 `assemble --template ID --check --outline 개요.json`으로 한글 없이 개요를 검사해 거부 사유를 고친다(한글은 켤 때마다 화면 초점을 잠깐 가져가므로 실행 횟수를 줄인다). 그다음 `assemble --template ID --outline 개요.json --output … --pdf … --run … --context host-approved`. 결과의 `substitutions`·`titlesMovedToNextPage`는 알리고 쪽 이미지를 본다. 장과 ○만 나열한 개요, 쪽 나눔으로 늘린 분량, `PAGE_GAP` 경고가 남은 결과는 완료가 아니다.
+4. **조립과 확인**: 먼저 `assemble --template ID --check --outline 개요.json`으로 한글 없이 개요를 검사해 거부 사유를 고친다(한글은 켤 때마다 화면 초점을 잠깐 가져가므로 실행 횟수를 줄인다). 그다음 `assemble --template ID --outline 개요.json --output … --pdf … --run … --context host-approved`. 결과의 `substitutions`·`titlesMovedToNextPage`·`tablesMovedToNextPage`는 알리고 쪽 이미지를 본다. 장과 ○만 나열한 개요, 쪽 나눔으로 늘린 분량, `PAGE_GAP` 경고가 남은 결과는 완료가 아니다.
 
 부품을 직접 고르거나 블록을 따로 붙이지 않는다. 옛 원본·서식 합본·블록 목록을 자동 선택하지 않는다. 완성형 채우기([공통 fill](references/simple-entry.md#준비된-완성형-계획서-채우기))는 조립이 실패했을 때의 예비다. 맞는 기본형이 없는 문서 종류는 사용자 양식을 받아 등록한다.
 
