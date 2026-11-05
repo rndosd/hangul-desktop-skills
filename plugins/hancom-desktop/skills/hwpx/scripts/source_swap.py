@@ -168,15 +168,84 @@ def _entry(index, pair, reason, targets):
     return entry
 
 
-def _path_key(path):
-    return tuple(int(n) for n in re.findall(r'\[(\d+)\]', path))
+HEADING = re.compile(r'^[ 　]*(?:□|■|◆|◇|[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]+\.|\d{1,2}\.|[가-하]\.)[ 　]*\S')
 
 
-def _paragraph_nodes(agent, find, *, exact):
-    result = agent.query(f'paragraph:contains("{find}")', limit=50).to_dict()
-    nodes = result['nodes']
-    if exact:
-        nodes = [n for n in nodes if n['summary'].get('text', '').strip() == find.strip()]
+def _body_rows(path):
+    """Top-level body paragraphs per section: (own text, is a plain blank spacer)."""
+    sections = []
+    for _, root in se.sections(io.BytesIO(Path(path).read_bytes())):
+        rows = []
+        for p in (n for n in root if se.local(n) == 'p'):
+            runs = [r for r in p if se.local(r) == 'run']
+            text = ''.join(''.join(t.itertext()) for r in runs for t in r if se.local(t) == 't')
+            blank = (not text.strip() and p.get('pageBreak') != '1' and p.get('columnBreak') != '1'
+                     and all(se.local(c) in ('run', 'linesegarray') for c in p)
+                     and all(se.local(t) == 't' and not len(t) for r in runs for t in r))
+            rows.append((text, blank))
+        sections.append(rows)
+    return sections
+
+
+def _is_heading(text):
+    line = text.strip()
+    return bool(HEADING.match(text)) and len(line) <= 40 and ':' not in line and not line.endswith(('다.', '다'))
+
+
+def _body_layout(rows_by_section, paths_by_section, deleted_paths):
+    """Spacer blanks to remove with deleted lines, and heading lines to keep with the next.
+
+    Source documents space their lines with blank paragraphs, so a deleted
+    line between two blanks leaves a double gap: the later blank goes too.
+    Their headings are rarely set to keep with the next paragraph (authors
+    placed page breaks by hand), so a rewritten, shorter or longer text can
+    leave a heading alone at a page end: headings and the blanks under them
+    are set to keep with the next paragraph.
+    """
+    spacers, keep = [], []
+    for rows, paths in zip(rows_by_section, paths_by_section):
+        if len(paths) != len(rows):
+            continue  # agent view and XML disagree: leave this section alone
+        index = {path: i for i, path in enumerate(paths, 1)}
+        removed = {index[p] for p in deleted_paths if p in index}
+        for i in sorted(set(removed)):
+            prev, nxt = i - 1, i + 1
+            while prev in removed:
+                prev -= 1
+            while nxt in removed:
+                nxt += 1
+            if 1 <= prev and nxt <= len(rows) and rows[prev-1][1] and rows[nxt-1][1]:
+                removed.add(nxt)
+                spacers.append(paths[nxt-1])
+        for i, (text, blank) in enumerate(rows, 1):
+            if i in removed or blank or not _is_heading(text):
+                continue
+            j, under = i + 1, []
+            while j <= len(rows) and (j in removed or rows[j-1][1]):
+                if j not in removed:
+                    under.append(j)
+                j += 1
+            if j > len(rows) or _is_heading(rows[j-1][0]):
+                continue
+            keep += [paths[k-1] for k in [i] + under]
+    return spacers, keep
+
+
+def _order_key(body_order):
+    """Document-order key: the body paragraph holding the node, then positions inside it."""
+    def key(path):
+        owner = max((p for p in body_order if path == p or path.startswith(p + '/')), key=len, default=None)
+        rest = path[len(owner):] if owner else path
+        return (body_order.get(owner, (0, 0)), tuple(int(n) for n in re.findall(r'\[(\d+)\]', rest)))
+    return key
+
+
+def _paragraph_nodes(agent, find):
+    """Lines containing find; when several, the one whose whole text is find."""
+    nodes = agent.query(f'paragraph:contains("{find}")', limit=50).to_dict()['nodes']
+    if len(nodes) > 1:
+        exact = [n for n in nodes if n['summary'].get('text', '').strip() == find.strip()]
+        nodes = exact or nodes
     return nodes
 
 
@@ -225,38 +294,58 @@ def swap(source, output, pairs, batch_runner):
                                 'replace': pair['replace'], 'style': pair.get('style', 'base')})
             if changes:
                 plan = se.combine_plans(inspection, changes)
-                target = output if not later else Path(temp)/'stage-text.hwpx'
+                target = Path(temp)/'stage-text.hwpx'
                 receipt = se.apply_plan(source, target, plan)
                 applied = receipt['selected_edits']
                 follow_up = receipt['layout_follow_up']
                 stage = target
         commands, deleted, rewritten, touched_cells = [], 0, 0, set()
-        if later:
+        spacers_removed = headings_kept = 0
+        body_order = {}
+        deleted_lines = []
+        if stage != source or later:
             from hwpx_automation.office.agent import HwpxAgentDocument
             with HwpxAgentDocument.open(stage) as agent:
                 revision = agent.revision
                 for i, pair in later:
-                    nodes = _paragraph_nodes(agent, pair['find'], exact=bool(pair.get('delete')))
+                    nodes = _paragraph_nodes(agent, pair['find'])
                     if not nodes or (len(nodes) > 1 and not pair.get('all')):
                         reason = 'not_found' if not nodes else 'ambiguous'
                         entry = {'pair': i, 'find': pair['find'][:60], 'reason': reason}
-                        entry['hint'] = ('지울 줄은 줄 전체 글자와 같아야 합니다.' if pair.get('delete') and not nodes else
-                                         '여러 줄에 있습니다. 더 긴 문구 또는 "all": true.' if nodes else
-                                         'flatten은 줄 안의 고유한 일부 글자로 찾습니다.')
+                        entry['hint'] = ('여러 줄에 있습니다. 더 긴 문구 또는 "all": true.' if nodes else
+                                         '그 글이 든 줄이 없습니다. swap --list의 글자를 그대로 복사하세요.')
                         unresolved.append(entry)
                         continue
                     for node in nodes:
                         if pair.get('delete'):
                             commands.append({'commandId': f'delete{i}-{len(commands)}', 'op': 'remove', 'path': node['path']})
                             deleted += 1
+                            deleted_lines.append(node['summary'].get('text', '')[:60])
                             if '/cell[' in node['path']:
                                 touched_cells.add(node['path'].rsplit('/paragraph[', 1)[0])
                         else:
                             commands.append({'commandId': f'flatten{i}-{len(commands)}', 'op': 'set', 'path': node['path'],
                                              'properties': {'text': _keep_marker(node['summary'].get('text', ''), pair['replace'])}})
                             rewritten += 1
+                rows = _body_rows(stage)
+                views = [agent.get(f'/section[{k}]', depth=1, child_limit=200).to_dict() for k in range(1, len(rows) + 1)]
+                paths = [[c['path'] for c in v['children']] if not v['coverage']['truncatedChildren'] else []
+                         for v in views]
+                body_order = {c['path']: (k, i) for k, v in enumerate(views, 1)
+                              for i, c in enumerate(v['children'], 1)}
+                keep_now = {c['path']: c['summary'].get('keepWithNext') for v in views for c in v['children']}
+                spacers, keep = _body_layout(rows, paths, [c['path'] for c in commands if c['op'] == 'remove'])
+                for path in spacers:
+                    commands.append({'commandId': f'spacer{len(commands)}', 'op': 'remove', 'path': path})
+                    spacers_removed += 1
+                for path in keep:
+                    if not keep_now.get(path):
+                        commands.append({'commandId': f'keep{len(commands)}', 'op': 'set', 'path': path,
+                                         'properties': {'keepWithNext': True}})
+                        headings_kept += 1
             if commands:
-                commands.sort(key=lambda c: _path_key(c['path']), reverse=True)
+                # Later nodes first, so positional paths of earlier ones stay valid.
+                commands.sort(key=lambda c: _order_key(body_order)(c['path']), reverse=True)
                 request = {'schemaVersion': 'hwpx.agent-batch/v1', 'input': {'filename': str(stage)},
                            'output': {'filename': str(output), 'overwrite': False}, 'commands': commands,
                            'expectedRevision': revision, 'idempotencyKey': 'swap-' + se.digest(stage)[:16],
@@ -277,8 +366,9 @@ def swap(source, output, pairs, batch_runner):
     pictures = _pictures(output) if published else None
     return {'status': ('PASS_STRUCTURE' if not unresolved else 'PARTIAL') if published else 'NOTHING_APPLIED',
             'output': str(output) if published else None, 'documentPublished': published,
-            'replaced': applied, 'deleted': deleted, 'flattened': rewritten,
+            'replaced': applied, 'deleted': deleted, 'deletedLines': deleted_lines, 'flattened': rewritten,
             'flattenRequestsKeptStyle': flatten_as_line,
+            'spacersRemoved': spacers_removed, 'keptWithNext': headings_kept,
             'unresolved': unresolved, 'layoutFollowUp': follow_up,
             'pictures': pictures,
             'nextStep': ('Fix unresolved pairs and run swap again on the output; ' if unresolved else '')

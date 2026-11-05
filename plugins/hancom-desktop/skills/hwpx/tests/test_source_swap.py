@@ -139,6 +139,27 @@ class SourceSwapTests(unittest.TestCase):
         self.assertEqual(runs[1], ('(방향) ', self.bold))
         self.assertEqual(runs[2][0], '새 연수를 늘린다')
 
+    def test_deleting_a_spaced_line_takes_one_blank_and_headings_keep_with_next(self):
+        spaced = self.root/'spaced.hwpx'
+        with HwpxDocument.new() as doc:
+            for text in ['□ 추진 계획', '', ' ㅇ 첫째 내용입니다', '', ' ㅇ 지울 내용입니다', '', ' ㅇ 셋째 내용입니다']:
+                doc.add_paragraph(text)
+            doc.save_to_path(spaced)
+        out = self.root/'spaced-out.hwpx'
+        result = source_swap.swap(spaced, out, [{'find': '지울 내용', 'delete': True}], batch)
+        self.assertEqual((result['deleted'], result['spacersRemoved']), (1, 1), result)
+        self.assertEqual(result['deletedLines'], [' ㅇ 지울 내용입니다'])
+        with HwpxDocument.open(out) as doc:
+            texts = [p.text for p in doc.paragraphs][-5:]
+        self.assertEqual(texts, ['□ 추진 계획', '', ' ㅇ 첫째 내용입니다', '', ' ㅇ 셋째 내용입니다'])
+        self.assertEqual(result['keptWithNext'], 2)
+        from hwpx_automation.office.agent import HwpxAgentDocument
+        with HwpxAgentDocument.open(out) as agent:
+            nodes = agent.get('/section[1]', depth=1, child_limit=50).to_dict()['children']
+        keep = {n['summary'].get('text', ''): n['summary'].get('keepWithNext') for n in nodes}
+        self.assertTrue(keep['□ 추진 계획'])
+        self.assertFalse(keep[' ㅇ 첫째 내용입니다'])
+
     def test_bad_pairs_are_rejected(self):
         with self.assertRaises(ValueError):
             source_swap.swap(self.source, self.root/'x.hwpx', [{'find': 'a'}], batch)
