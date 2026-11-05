@@ -50,6 +50,25 @@ def dependencies():
  for n in ['verify_hwpx_with_hancom.ps1','Hancom.OwnedExit.ps1','hancom_worker.ps1','Hancom.Environment.ps1','check_native_context.ps1','classify_hancom_failure.py']:
   require((S/n).is_file(),'missing selected candidate script:'+n);files[n]=dict(path=str(S/n),sha256=sha(S/n))
  return dict(config=dict(path=str(config),sha256=sha(config)),files=files,moduleName=sec['moduleName']),ps
+def finished_progress(progress):
+ """True when a progress log ends with the worker's normal quit (a completed earlier run)."""
+ rows=[]
+ for line in progress.read_text(encoding='utf-8-sig',errors='replace').splitlines():
+  try:row=json.loads(line)
+  except ValueError:continue
+  if isinstance(row,dict):rows.append(row)
+ return bool(rows) and rows[-1].get('normalQuit') is True
+def clear_stale_progress(pdf_path):
+ """The worker refuses to start over an existing progress log (it keeps evidence of
+ an earlier run). A log left by a finished earlier run under the same PDF name is moved
+ aside, never deleted; a log of an interrupted run still stops the job, with the reason."""
+ progress=Path(str(pdf_path)+'.progress.jsonl');cancel=Path(str(progress)+'.cancel')
+ require(not cancel.exists(),f'an interrupted earlier run left {cancel.name}; inspect it or use another PDF name')
+ if not progress.exists():return None
+ require(finished_progress(progress),f'an earlier run under this PDF name did not record a normal finish ({progress.name}); inspect it or use another PDF name')
+ import time;kept=progress.with_name(progress.name[:-len('.jsonl')]+time.strftime('.%Y%m%d-%H%M%S')+'.jsonl')
+ require(not kept.exists(),'archived progress name already exists; retry in a second')
+ progress.rename(kept);return str(kept)
 def run(source,mode,output,pdf,run_dir,context,timeout=120,preflight_only=False,*,composition=None):
  require(context in ['ordinary-shell','host-approved'],'explicit host/user execution context required')
  require(mode in ['OpenOnly','SaveAs'] and type(timeout) is int and 10<=timeout<=300,'invalid native mode/timeout')
@@ -61,6 +80,7 @@ def run(source,mode,output,pdf,run_dir,context,timeout=120,preflight_only=False,
  for p,ext in [(dst,'.hwpx'),(pdf_path,'.pdf')]:
   if p:require(p.suffix.lower()==ext and not p.exists() and p.parent.is_dir(),'new artifact in existing parent required');paths.append(p.resolve())
  require(len(set(paths))==len(paths),'paths must be distinct')
+ archived=clear_stale_progress(pdf_path) if pdf_path and not preflight_only else None
  if composition is not None:
   from native_composition import validate,inputs,check_inputs
   require(mode=='SaveAs' and pdf_path is not None,'composition requires SaveAs and PDF')
@@ -88,7 +108,9 @@ def run(source,mode,output,pdf,run_dir,context,timeout=120,preflight_only=False,
    command=dict(argv=argv,exitCode=p.returncode,stdout=p.stdout,stderr=p.stderr);write(r/'controller-command.json',command)
    receipt=read(r/'native/receipt.json') if (r/'native/receipt.json').exists() else command
    result=dict(status='PASS_NATIVE' if p.returncode==0 and receipt.get('status')=='PASS_FULL' else 'BLOCKED_NATIVE',classification=classify(receipt),comCreated=receipt.get('comCreated','NOT_RECORDED'),securityModuleRegistered=receipt.get('securityModuleRegistered','NOT_RECORDED'),receiptPath=str(r/'native/receipt.json'))
+   if not (r/'native/receipt.json').exists():result['error']=((p.stderr or '')+(p.stdout or '')).strip()[-600:] or 'controller exited without a receipt or message'
   except subprocess.TimeoutExpired as e:result=dict(status='BLOCKED_CONTROLLER_TIMEOUT',comCreated='NOT_RECORDED',securityModuleRegistered='NOT_RECORDED',error='Owned controller timeout; preserve artifacts, inspect remaining process, do not auto-retry or kill Hwp.')
+ if archived:result['earlierProgressArchived']=archived
  result.update(sourceUnchanged=sha(source)==before,settingsChanged=False,automaticRetry=False,fullDocumentAcceptance='NOT_CHECKED')
  if not result['sourceUnchanged']:result['status']='FAIL_SOURCE_CHANGED'
  if composition is not None:

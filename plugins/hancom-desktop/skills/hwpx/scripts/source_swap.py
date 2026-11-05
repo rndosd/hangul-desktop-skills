@@ -16,6 +16,7 @@ from pathlib import Path
 import safe_edit as se
 
 PAIR_KEYS = {'find', 'replace', 'delete', 'style', 'all', 'flatten', 'line'}
+PICTURE_FORMATS = {'.png': 'png', '.jpg': 'jpg', '.jpeg': 'jpg', '.bmp': 'bmp', '.gif': 'gif'}
 # Leading indentation and list mark of a line, kept when a whole line is rewritten.
 MARKER = re.compile(r'^[ 　]*(?:[□■○●ㅇ◦▸▶▷·•◇◆※＊*\-]+[ 　]*)?')
 REASON_HINTS = {
@@ -58,6 +59,41 @@ def _pictures(source):
                    for n in package.namelist() if n.startswith('Contents/section'))
 
 
+def _picture_table(path, agent=None):
+    """Body pictures in document order: number, agent path, place, size in mm."""
+    from hwpx import HwpxDocument
+    with HwpxDocument.open(path) as doc:
+        refs = doc.media.picture_references()
+    own = agent is None
+    if own:
+        from hwpx_automation.office.agent import HwpxAgentDocument
+        agent = HwpxAgentDocument.open(path)
+    try:
+        nodes = agent.query('picture', limit=100).to_dict()['nodes']
+    finally:
+        if own:
+            agent.close()
+    rows = []
+    for number, ref in enumerate(refs, 1):
+        node_path = nodes[number-1]['path'] if len(nodes) == len(refs) else None
+        cell = re.search(r'row\[(\d+)\]/cell\[(\d+)\]', node_path or '')
+        place = f'표 칸 {cell.group(1)}행{cell.group(2)}열' if cell else ('본문' if node_path else '위치 미확인')
+        rows.append({'picture': number, 'path': node_path, 'place': place,
+                     'widthMm': round(ref.width * 25.4 / 7200) if ref.width else None,
+                     'heightMm': round(ref.height * 25.4 / 7200) if ref.height else None,
+                     'width': ref.width, 'height': ref.height})
+    return rows
+
+
+def _image_size(data):
+    try:
+        import pymupdf
+    except ImportError:  # older PyMuPDF
+        import fitz as pymupdf
+    pix = pymupdf.Pixmap(data)
+    return pix.width, pix.height
+
+
 def listing(source):
     source = se.source_path(source)
     lines, editable = [], 0
@@ -71,6 +107,8 @@ def listing(source):
     return {'status': 'LISTED', 'source': str(source), 'sourceSha256': se.digest(source),
             'paragraphs': len(lines), 'editable': editable, 'pictures': _pictures(source),
             'lines': lines,
+            'pictureList': [f"[그림{r['picture']}] {r['place']} · {r['widthMm']}×{r['heightMm']}mm"
+                            for r in _picture_table(source)],
             'nextStep': 'Write pairs: [{"find":"옛 문구","replace":"새 문구"}, {"find":"지울 줄 전체","delete":true}] then swap.'}
 
 
@@ -78,6 +116,17 @@ def _check_pairs(pairs):
     if not isinstance(pairs, list) or not pairs or len(pairs) > se.MAX_EDITS:
         raise ValueError('pairs must be a list of 1..100 objects')
     for pair in pairs:
+        if isinstance(pair, dict) and 'picture' in pair:
+            if set(pair) - {'picture', 'replace', 'delete'} or type(pair['picture']) is not int or pair['picture'] < 1:
+                raise ValueError('picture pairs: {"picture": N (from --list), "replace": "image file"} or {"picture": N, "delete": true}')
+            if pair.get('delete') is True:
+                if 'replace' in pair:
+                    raise ValueError('picture delete takes no replace')
+            else:
+                image = Path(str(pair.get('replace', '')))
+                if image.suffix.lower() not in PICTURE_FORMATS or not image.is_file():
+                    raise ValueError('picture replace needs an existing png/jpg/bmp/gif file: ' + str(image))
+            continue
         if not isinstance(pair, dict) or 'find' not in pair or set(pair) - PAIR_KEYS:
             raise ValueError('each pair needs find and replace or delete:true; other keys: style, all, flatten')
         se.single_line(pair['find'], search=True)
@@ -256,10 +305,15 @@ def swap(source, output, pairs, batch_runner):
         raise ValueError('new .hwpx output path required (existing parent, not the source)')
     _check_pairs(pairs)
     before = se.digest(source)
+    pictures_in = [(i, p) for i, p in enumerate(pairs) if 'picture' in p]
+    pairs = [p if 'picture' not in p else {'_picture': True} for p in pairs]
     pairs, flatten_as_line = _expand_lines(source, pairs, before)
     unresolved, changes = [], []
-    edits = [(i, p) for i, p in enumerate(pairs) if not p.get('delete') and not p.get('flatten')]
-    later = [(i, p) for i, p in enumerate(pairs) if p.get('delete') or p.get('flatten')]
+    edits = [(i, p) for i, p in enumerate(pairs) if not p.get('_picture') and not p.get('delete') and not p.get('flatten')]
+    later = [(i, p) for i, p in enumerate(pairs) if not p.get('_picture') and (p.get('delete') or p.get('flatten'))]
+    picture_swaps = [(i, p) for i, p in pictures_in if not p.get('delete')]
+    picture_drops = [(i, p) for i, p in pictures_in if p.get('delete')]
+    picture_notes, pictures_replaced, pictures_deleted = [], 0, 0
     stage = source
     applied = 0
     follow_up = []
@@ -299,11 +353,43 @@ def swap(source, output, pairs, batch_runner):
                 applied = receipt['selected_edits']
                 follow_up = receipt['layout_follow_up']
                 stage = target
+        if picture_swaps:
+            # Public media API: the picture keeps its box (size, place, crop);
+            # only the image it shows changes.
+            from hwpx import HwpxDocument
+            from hwpx.tools.package_validator import validate_editor_open_safety
+            table = {r['picture']: r for r in _picture_table(stage)}
+            target = Path(temp)/'stage-picture.hwpx'
+            with HwpxDocument.open(stage) as doc:
+                for i, pair in picture_swaps:
+                    row = table.get(pair['picture'])
+                    if row is None:
+                        unresolved.append({'pair': i, 'find': f"그림{pair['picture']}", 'reason': 'not_found',
+                                           'hint': f'그림은 1~{len(table)}번까지 있습니다(swap --list의 pictureList).'})
+                        continue
+                    image = Path(pair['replace'])
+                    data = image.read_bytes()
+                    doc.media.replace_picture(data, PICTURE_FORMATS[image.suffix.lower()],
+                                              picture_index=pair['picture'] - 1)
+                    pictures_replaced += 1
+                    try:
+                        w, h = _image_size(data)
+                        box, new = row['width'] / row['height'], w / h
+                        if abs(new / box - 1) > 0.1:
+                            picture_notes.append(f"그림{pair['picture']}: 칸 비율 {box:.2f}, 새 그림 비율 {new:.2f} - 늘어나 보일 수 있으니 같은 비율의 그림을 쓰거나 한글에서 크기를 맞추세요.")
+                    except Exception:
+                        picture_notes.append(f"그림{pair['picture']}: 새 그림 크기를 읽지 못해 비율을 확인하지 못했습니다.")
+                if pictures_replaced:
+                    doc.save_to_path(target)
+            if pictures_replaced:
+                if not validate_editor_open_safety(target).ok:
+                    raise ValueError('picture replacement failed open-safety validation; no output published')
+                stage = target
         commands, deleted, rewritten, touched_cells = [], 0, 0, set()
         spacers_removed = headings_kept = 0
         body_order = {}
         deleted_lines = []
-        if stage != source or later:
+        if stage != source or later or picture_drops:
             from hwpx_automation.office.agent import HwpxAgentDocument
             with HwpxAgentDocument.open(stage) as agent:
                 revision = agent.revision
@@ -327,6 +413,16 @@ def swap(source, output, pairs, batch_runner):
                             commands.append({'commandId': f'flatten{i}-{len(commands)}', 'op': 'set', 'path': node['path'],
                                              'properties': {'text': _keep_marker(node['summary'].get('text', ''), pair['replace'])}})
                             rewritten += 1
+                if picture_drops:
+                    table = {r['picture']: r for r in _picture_table(stage, agent)}
+                    for i, pair in picture_drops:
+                        row = table.get(pair['picture'])
+                        if row is None or not row['path']:
+                            unresolved.append({'pair': i, 'find': f"그림{pair['picture']}", 'reason': 'not_found',
+                                               'hint': f'그림은 1~{len(table)}번까지 있습니다(swap --list의 pictureList).'})
+                            continue
+                        commands.append({'commandId': f'picture{i}', 'op': 'remove', 'path': row['path']})
+                        pictures_deleted += 1
                 rows = _body_rows(stage)
                 views = [agent.get(f'/section[{k}]', depth=1, child_limit=200).to_dict() for k in range(1, len(rows) + 1)]
                 paths = [[c['path'] for c in v['children']] if not v['coverage']['truncatedChildren'] else []
@@ -369,8 +465,9 @@ def swap(source, output, pairs, batch_runner):
             'replaced': applied, 'deleted': deleted, 'deletedLines': deleted_lines, 'flattened': rewritten,
             'flattenRequestsKeptStyle': flatten_as_line,
             'spacersRemoved': spacers_removed, 'keptWithNext': headings_kept,
+            'picturesReplaced': pictures_replaced, 'picturesDeleted': pictures_deleted, 'pictureNotes': picture_notes,
             'unresolved': unresolved, 'layoutFollowUp': follow_up,
             'pictures': pictures,
             'nextStep': ('Fix unresolved pairs and run swap again on the output; ' if unresolved else '')
-                        + 'then open in Hangul (PDF) and check every page. Pictures (logos, marks) are unchanged — tell the user.',
+                        + 'then open in Hangul (PDF) and check every page. Pictures not replaced or deleted keep the source logos and marks - tell the user.',
             'native': 'NOT_CHECKED'}

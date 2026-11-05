@@ -17,6 +17,7 @@ commands=[
     [sys.executable,'-X','utf8','-B',str(SKILL/'scripts/candidate_runtime.py'),str(SKILL/'scripts/test_safe_replace.py')],
     [sys.executable,'-X','utf8','-B',str(SKILL.parent/'hwpx-windows-finalize/scripts/test_hancom_completion_gate.py')],
     [sys.executable,'-X','utf8','-B',str(SKILL.parent/'hwpx-windows-finalize/scripts/test_native_assembly.py')],
+    [sys.executable,'-X','utf8','-B',str(SKILL.parent/'hwpx-windows-finalize/scripts/test_native_rerun.py')],
 ]
 for argv in commands:
     result=subprocess.run(argv,cwd=ROOT)

@@ -245,9 +245,17 @@ def inspect_targets(source, find, *, table=None, row=None, column=None, limit=20
                                   'column': column, 'limit': limit}])[0]
 
 
-def _paragraph_split(source, find):
-    """Parts of `find` when it only exists across consecutive paragraphs of one story (a cell or the body)."""
-    for _, root in sections(io.BytesIO(Path(source).read_bytes())):
+def _paragraph_splits(source, finds):
+    """For each find, its parts when it only exists across consecutive paragraphs
+    of one story (a cell or the body). One extra parse for all missing finds."""
+    if not finds:
+        return {}
+    roots = [root for _, root in sections(io.BytesIO(Path(source).read_bytes()))]
+    return {find: _paragraph_split(roots, find) for find in finds}
+
+
+def _paragraph_split(roots, find):
+    for root in roots:
         for story in root.iter():
             paragraphs = [p for p in story if local(p) == 'p']
             if len(paragraphs) < 2:
@@ -286,6 +294,7 @@ def inspect_many(source, queries):
     before = digest(source)
     by_find = candidates_many(source, [q['find'] for q in queries], before)
     result = []
+    splits = _paragraph_splits(source, sorted({q['find'] for q in queries if not by_find[q['find']]}))
     for query in queries:
         find, limit = query['find'], query.get('limit', 200)
         table, row, column = (query.get(k) for k in ('table', 'row', 'column'))
@@ -302,7 +311,7 @@ def inspect_many(source, queries):
                  'total': len(targets), 'truncated': len(targets) > limit,
                  'targets': [public_target(t) for t in targets[:limit]], 'native_render': 'not_checked'}
         if not targets:
-            parts = _paragraph_split(source, find)
+            parts = splits.get(find)
             if parts:
                 entry['hint'] = {'reason': 'spans_paragraphs', 'parts': parts,
                                  'nextStep': 'The text continues over several paragraphs (for example lines in one cell). Query each part separately.'}
