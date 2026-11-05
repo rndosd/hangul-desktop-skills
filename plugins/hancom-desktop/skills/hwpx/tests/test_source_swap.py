@@ -160,11 +160,52 @@ class SourceSwapTests(unittest.TestCase):
         self.assertTrue(keep['□ 추진 계획'])
         self.assertFalse(keep[' ㅇ 첫째 내용입니다'])
 
+    def png(self, name, width, height):
+        import pymupdf
+        doc = pymupdf.open()
+        page = doc.new_page(width=width, height=height)
+        page.draw_rect(page.rect, color=(0, 0.4, 0), fill=(0, 0.4, 0))
+        path = self.root/name
+        page.get_pixmap().save(str(path))
+        return path
+
+    def test_pictures_are_listed_replaced_and_deleted(self):
+        pictured = self.root/'pictured.hwpx'
+        old = self.png('old.png', 200, 40)
+        with HwpxDocument.open(self.source) as doc:
+            doc.add_picture(old.read_bytes(), 'png', width_mm=50, height_mm=10)
+            doc.add_picture(old.read_bytes(), 'png', width_mm=50, height_mm=10)
+            doc.save_to_path(pictured)
+        listed = source_swap.listing(pictured)['pictureList']
+        self.assertEqual(len(listed), 2)
+        self.assertIn('50×10mm', listed[0])
+        new = self.png('new.png', 250, 50)
+        out = self.root/'pictured-out.hwpx'
+        result = source_swap.swap(pictured, out, [
+            {'picture': 1, 'replace': str(new)}, {'picture': 2, 'delete': True}], batch)
+        self.assertEqual((result['status'], result['picturesReplaced'], result['picturesDeleted']),
+                         ('PASS_STRUCTURE', 1, 1), result)
+        self.assertEqual(result['pictureNotes'], [])
+        with HwpxDocument.open(out) as doc:
+            refs = doc.media.picture_references()
+            images = {str(item) for item in doc.media.images}
+        self.assertEqual(len(refs), 1)
+        self.assertEqual(round(refs[0].width * 25.4 / 7200), 50)
+        self.assertIn(refs[0].binary_item_id_ref, images)
+        square = self.png('square.png', 40, 40)
+        notes = source_swap.swap(pictured, self.root/'square-out.hwpx',
+                                 [{'picture': 1, 'replace': str(square)}], batch)['pictureNotes']
+        self.assertTrue(notes and '늘어나' in notes[0])
+        missing = source_swap.swap(pictured, self.root/'missing.hwpx', [{'picture': 9, 'delete': True}], batch)
+        self.assertEqual(missing['unresolved'][0]['reason'], 'not_found')
+
     def test_bad_pairs_are_rejected(self):
         with self.assertRaises(ValueError):
             source_swap.swap(self.source, self.root/'x.hwpx', [{'find': 'a'}], batch)
         with self.assertRaises(ValueError):
             source_swap.swap(self.source, self.root/'x.hwpx', [{'find': 'a"b', 'delete': True}], batch)
+        with self.assertRaises(ValueError):
+            source_swap.swap(self.source, self.root/'x.hwpx', [{'picture': 1, 'replace': 'no-such.png'}], batch)
 
 
 if __name__ == '__main__':

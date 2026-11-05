@@ -84,7 +84,9 @@ class BatchSelectionTests(unittest.TestCase):
         with patch.object(edit, 'sections', wraps=edit.sections) as parsed:
             with patch.object(edit, 'paragraph_view', wraps=edit.paragraph_view) as viewed:
                 edit.inspect_many(self.source, self.queries)
-        self.assertEqual(parsed.call_count, 1)
+        # One parse for every query, plus one shared parse for the hint on
+        # queries that found nothing ('MISSING' here).
+        self.assertEqual(parsed.call_count, 2)
         self.assertEqual(viewed.call_count, paragraph_count)
         self.assertIsInstance(parsed.call_args.args[0], io.BytesIO)
         self.assertEqual(hashlib.sha256(parsed.call_args.args[0].getvalue()).hexdigest(), self.sha)
