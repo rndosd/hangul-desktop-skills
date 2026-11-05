@@ -31,6 +31,9 @@ POLICY = 'preserve-matched-run-lengths-extra-in-last-run'
 # rewritten span are emptied rather than re-filled by character position.
 # "Most" is summed per character style, since plain text is often split.
 EDIT_STYLES = ('keep', 'base')
+# Spaces Hancom writes as empty elements inside one hp:t (<hp:t>a<hp:fwSpace/>b</hp:t>).
+# They stay where they are; the text pieces around them are edited one by one.
+ATOM_CHARS = {'fwSpace': '\u3000', 'nbSpace': '\u00a0'}
 LINE_LEAD = re.compile(r'^[ 　]*(?:[□■○●ㅇ◦▸▶▷·•◇◆※＊*\-]+[ 　]*)?')
 IMPLEMENTATION_VERSION = '0.3.2'
 MAX_EDITS = 100
@@ -128,6 +131,21 @@ def paragraph_view(node, ancestry, table_ordinals, *, allow_empty_runs=False):
                          and not any(local(n) in ('p','t','tbl','pic','fieldBegin','fieldEnd')
                                      for c in children for n in c.iter()))
         if metadata_only:
+            continue
+        if (len(ts) == 1 and len(children) == 1 and len(ts[0][1])
+                and all(local(c) in ATOM_CHARS and not len(c) and not c.attrib for c in ts[0][1])):
+            text_index, t = ts[0]
+            char_pr = child.get('charPrIDRef')
+            runs.append({'path': [index, text_index], 'text': t.text or '', 'char_pr': char_pr,
+                         'start': len(text), 'segment': 'text'})
+            text += t.text or ''
+            for k, atom in enumerate(t):
+                runs.append({'path': [index, text_index, k, -1], 'text': ATOM_CHARS[local(atom)],
+                             'char_pr': char_pr, 'start': len(text), 'frozen': True})
+                text += ATOM_CHARS[local(atom)]
+                runs.append({'path': [index, text_index, k], 'text': atom.tail or '', 'char_pr': char_pr,
+                             'start': len(text), 'segment': 'tail'})
+                text += atom.tail or ''
             continue
         if len(ts) != 1 or len(children) != 1 or len(ts[0][1]):
             reason = 'unsupported_run_control_or_mixed_text'
@@ -409,17 +427,22 @@ def compile_edits(source, plan, source_sha):
     emphasis = emphasized_styles(source) if any(style == 'base' for _, _, style in selected) else {}
     changed_paragraphs = set()
     for target, replacement, style in selected:
-        if style == 'base':
-            patches = base_style_patches(target, replacement, emphasis)
-        else:
-            patches = []
-            pieces = run_pieces(target['_runs'], target['start'], target['end'])
-            remaining = replacement
-            for i, (run, a, b) in enumerate(pieces):
-                addition = remaining if i == len(pieces)-1 else remaining[:b-a]
-                remaining = remaining[len(addition):]
-                patches.append((run, a, b, addition))
+        patches = []
+        for sub, part in split_at_atoms(target, replacement):
+            if sub['_paragraph_text'][sub['start']:sub['end']] == part:
+                continue
+            if style == 'base':
+                patches += base_style_patches(sub, part, emphasis)
+            else:
+                pieces = run_pieces(sub['_runs'], sub['start'], sub['end'])
+                remaining = part
+                for i, (run, a, b) in enumerate(pieces):
+                    addition = remaining if i == len(pieces)-1 else remaining[:b-a]
+                    remaining = remaining[len(addition):]
+                    patches.append((run, a, b, addition))
         for run, a, b, addition in patches:
+            if run.get('frozen'):
+                raise ValueError('unsupported_edit_over_fixed_space: a full-width space cannot be rewritten')
             key = (target['part'], tuple(target['paragraph_path']), tuple(run['path']))
             run_originals[key] = run
             run_patches[key].append((a, b, addition))
@@ -431,9 +454,30 @@ def compile_edits(source, plan, source_sha):
         for a, b, addition in sorted(patches, reverse=True):
             new = new[:a] + addition + new[b:]
         if new != original:
-            updates.append({'part': key[0], 'paragraph_path': key[1], 'run_path': key[2],
-                            'before': original, 'after': new, 'char_pr': run_originals[key]['char_pr']})
+            update = {'part': key[0], 'paragraph_path': key[1], 'run_path': key[2],
+                      'before': original, 'after': new, 'char_pr': run_originals[key]['char_pr']}
+            if run_originals[key].get('segment'):
+                update['segment'] = run_originals[key]['segment']
+            updates.append(update)
     return [(t, r) for t, r, _ in selected], updates, changed_paragraphs
+
+
+def split_at_atoms(target, replacement):
+    """(sub-target, new text) pieces of an edit split at fixed spaces inside its span.
+
+    The new text must hold the same fixed spaces in the same order (a full-width
+    space stays a full-width space), so each piece between them is edited alone.
+    """
+    marks = [r for r in target['_runs'] if r.get('frozen') and target['start'] <= r['start'] < target['end']]
+    if not marks:
+        return [(target, replacement)]
+    found = [c for c in replacement if c in ATOM_CHARS.values()]
+    if found != [r['text'] for r in marks]:
+        raise ValueError('unsupported_fixed_space_count: keep the same full-width spaces (　) in the new text, '
+                         'or rewrite the whole line with flatten')
+    parts = re.split('[' + ''.join(ATOM_CHARS.values()) + ']', replacement)
+    bounds = [target['start']] + [x for r in marks for x in (r['start'], r['start'] + 1)] + [target['end']]
+    return [(dict(target, start=bounds[2*i], end=bounds[2*i+1]), part) for i, part in enumerate(parts)]
 
 
 def run_pieces(runs, start, end):
@@ -543,9 +587,11 @@ def base_style_patches(target, replacement, emphasis=None):
     return [(run, a, b, middle if i == base else '') for i, (run, a, b) in enumerate(pieces)]
 
 
-def snapshot(path, overrides=None, changed_paragraphs=None, *, attribute_overrides=None, xml_roots=None, added_plain_text=None):
+def snapshot(path, overrides=None, changed_paragraphs=None, *, attribute_overrides=None, xml_roots=None, added_plain_text=None,
+             tail_overrides=None):
     """Whole-package comparison; only selected paragraph caches may differ."""
     overrides = overrides or {}
+    tail_overrides = tail_overrides or {}
     changed_paragraphs = changed_paragraphs or set()
     attribute_overrides = attribute_overrides or {}
     xml_roots = xml_roots or {}
@@ -584,7 +630,7 @@ def snapshot(path, overrides=None, changed_paragraphs=None, *, attribute_overrid
                 value = overrides.get((member, location), node.text or '')
                 attributes = dict(node.attrib)
                 attributes.update(attribute_overrides.get((member, location), {}))
-                return tag, tuple(sorted(attributes.items())), value, node.tail or '', children
+                return tag, tuple(sorted(attributes.items())), value, tail_overrides.get(key, node.tail or ''), children
             preceding, following = [], []
             sibling = root.getprevious()
             while sibling is not None:
@@ -619,10 +665,12 @@ def apply_run_updates(source, output, updates, changed, *, source_sha, dry_run=F
     if not validate_editor_open_safety(source).ok:
         raise ValueError('source open-safety validation failed')
     overrides = {(u['part'], u['paragraph_path']+u['run_path']): u['after']
-                 for u in updates if not u.get('create_plain_text')}
+                 for u in updates if not u.get('create_plain_text') and u.get('segment') != 'tail'}
+    tail_overrides = {(u['part'], u['paragraph_path']+u['run_path']): u['after']
+                      for u in updates if u.get('segment') == 'tail'}
     additions = {(u['part'], u['paragraph_path']+(u['run_path'][0],)): u['after']
                  for u in updates if u.get('create_plain_text')}
-    expected = snapshot(source, overrides, changed, added_plain_text=additions)
+    expected = snapshot(source, overrides, changed, added_plain_text=additions, tail_overrides=tail_overrides)
     with workspace_candidate_directory(prefix='hwpx-selected-', dir=output.parent) as tmp:
         candidate = Path(tmp)/'candidate.hwpx'
         doc = HwpxDocument.open(source)
@@ -635,6 +683,21 @@ def apply_run_updates(source, output, updates, changed, *, source_sha, dry_run=F
                     node = node[index]
                 paragraph = HwpxOxmlParagraph(node, section)
                 run = next((r for r in paragraph.runs if r.element is node[update['run_path'][0]]), None)
+                if update.get('segment'):
+                    # A text piece beside fixed spaces: the public replace_text walks
+                    # the pieces and keeps the space elements; it must find the old
+                    # piece exactly once in the run so no other piece changes.
+                    t = run.element[update['run_path'][1]] if run is not None else None
+                    piece = (None if t is None else t.text if update['segment'] == 'text'
+                             else t[update['run_path'][2]].tail)
+                    joined = '' if t is None else (t.text or '') + ''.join(c.tail or '' for c in t)
+                    if (run is None or (piece or '') != update['before'] or run.char_pr_id_ref != update['char_pr']
+                            or not update['before'] or joined.count(update['before']) != 1):
+                        raise ValueError('unsupported_fixed_space_piece: the text beside a full-width space is '
+                                         'empty or repeated in its run; rewrite the whole line with flatten')
+                    if run.replace_text(update['before'], update['after'], count=1) != 1:
+                        raise ValueError('public API replacement count mismatch')
+                    continue
                 if run is None or run.text != update['before'] or run.char_pr_id_ref != update['char_pr']:
                     raise ValueError('public API target binding mismatch')
                 if update.get('create_plain_text'):

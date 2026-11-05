@@ -21,7 +21,7 @@ PICTURE_FORMATS = {'.png': 'png', '.jpg': 'jpg', '.jpeg': 'jpg', '.bmp': 'bmp', 
 MARKER = re.compile(r'^[ 　]*(?:[□■○●ㅇ◦▸▶▷·•◇◆※＊*\-]+[ 　]*)?')
 REASON_HINTS = {
     'unsupported_run_control_or_mixed_text':
-        '줄 안에 전각 공백·탭 같은 제어 글자가 있어 글자 단위로 바꿀 수 없습니다. '
+        '줄 안에 탭 같은 조판 부호가 있어 글자 단위로 바꿀 수 없습니다(전각 공백은 바꿀 수 있음). '
         '"flatten": true로 줄 전체를 다시 쓰면 되지만 그 줄의 글자 서식이 첫 서식 하나로 합쳐집니다.',
     'nested_cell_write_unvalidated': '표 안의 표(상자)라 이 경로로는 바꿀 수 없습니다. "flatten": true로 줄 전체를 다시 쓰세요.',
 }
