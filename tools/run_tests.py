@@ -13,6 +13,7 @@ commands=[
     [sys.executable,'-X','utf8','-B',str(SKILL/'scripts/candidate_runtime.py'),str(ROOT/'tests/test_fill_batches.py')],
     [sys.executable,'-X','utf8','-B',str(ROOT/'tests/test_sections.py')],
     [sys.executable,'-X','utf8','-B',str(SKILL/'tests/test_common_task_entry.py')],
+    [sys.executable,'-X','utf8','-B',str(SKILL/'scripts/candidate_runtime.py'),str(SKILL/'tests/test_source_swap.py')],
     [sys.executable,'-X','utf8','-B',str(SKILL/'scripts/candidate_runtime.py'),str(SKILL/'scripts/test_safe_replace.py')],
     [sys.executable,'-X','utf8','-B',str(SKILL.parent/'hwpx-windows-finalize/scripts/test_hancom_completion_gate.py')],
     [sys.executable,'-X','utf8','-B',str(SKILL.parent/'hwpx-windows-finalize/scripts/test_native_assembly.py')],

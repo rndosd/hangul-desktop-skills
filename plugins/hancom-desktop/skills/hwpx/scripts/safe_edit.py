@@ -24,6 +24,12 @@ from lxml import etree as ET
 
 SCHEMA = 'hwpx.selected-text-edit.v1'
 POLICY = 'preserve-matched-run-lengths-extra-in-last-run'
+# Per-edit alternative: keep the unchanged leading/trailing characters in their
+# runs and write the changed middle in one run, the one carrying most of that
+# middle (the paragraph's plain body style). Emphasis/superscript runs inside a
+# rewritten span are emptied rather than re-filled by character position.
+# "Most" is summed per character style, since plain text is often split.
+EDIT_STYLES = ('keep', 'base')
 IMPLEMENTATION_VERSION = '0.3.2'
 MAX_EDITS = 100
 
@@ -304,8 +310,10 @@ def inspect_many(source, queries):
     return result
 
 
-def make_plan(inspection, target_ids, replacement):
+def make_plan(inspection, target_ids, replacement, style='keep'):
     single_line(replacement)
+    if style not in EDIT_STYLES:
+        raise ValueError('style must be keep or base')
     if inspection.get('schema') != 'hwpx.text-targets.v1' or not target_ids or len(target_ids) != len(set(target_ids)):
         raise ValueError('invalid inspection or duplicate/empty selection')
     targets = {t['target_id']: t for t in inspection['targets']}
@@ -315,7 +323,8 @@ def make_plan(inspection, target_ids, replacement):
     if inspection['find'] == replacement:
         raise ValueError('replacement must change the selected text')
     return {'schema': SCHEMA, 'source_sha256': inspection['source_sha256'], 'style_policy': POLICY,
-            'edits': [{'target_id': token, 'find': inspection['find'], 'replace': replacement} for token in target_ids]}
+            'edits': [dict({'target_id': token, 'find': inspection['find'], 'replace': replacement},
+                           **({'style': style} if style != 'keep' else {})) for token in target_ids]}
 
 
 def combine_plans(inspections, changes):
@@ -333,14 +342,15 @@ def combine_plans(inspections, changes):
         raise ValueError('nonempty changes array required')
     edits, seen = [], set()
     for change in changes:
-        if not isinstance(change, dict) or set(change) != {'query', 'targets', 'replace'}:
-            raise ValueError('each change requires query, targets and replace')
+        if (not isinstance(change, dict) or not {'query', 'targets', 'replace'} <= set(change)
+                or set(change) - {'query', 'targets', 'replace', 'style'}):
+            raise ValueError('each change requires query, targets and replace (optional style)')
         index = change['query']
         if type(index) is not int or not 0 <= index < len(inspections):
             raise ValueError('query must be a valid zero-based inspection index')
         if not isinstance(change['targets'], list):
             raise ValueError('targets must be an explicit target_id array')
-        part = make_plan(inspections[index], change['targets'], change['replace'])
+        part = make_plan(inspections[index], change['targets'], change['replace'], change.get('style', 'keep'))
         for edit in part['edits']:
             if edit['target_id'] in seen:
                 raise ValueError('duplicate selected target across changes')
@@ -366,6 +376,8 @@ def compile_edits(source, plan, source_sha):
         find, replacement = single_line(edit.get('find'), search=True), single_line(edit.get('replace'))
         if find == replacement:
             raise ValueError('replacement must change the selected text')
+        if edit.get('style', 'keep') not in EDIT_STYLES:
+            raise ValueError('style must be keep or base')
     by_find = {find: {t['target_id']: t for t in targets}
                for find, targets in candidates_many(source, [e['find'] for e in edits], source_sha).items()}
     selected = []
@@ -380,20 +392,23 @@ def compile_edits(source, plan, source_sha):
         if any(interval[0] < b and a < interval[1] for a, b in spans[key]):
             raise ValueError('overlapping or duplicate selected edits')
         spans[key].append(interval)
-        selected.append((target, replacement))
+        selected.append((target, replacement, edit.get('style', 'keep')))
     run_patches = defaultdict(list)
     run_originals = {}
+    emphasis = emphasized_styles(source) if any(style == 'base' for _, _, style in selected) else {}
     changed_paragraphs = set()
-    for target, replacement in selected:
-        pieces = []
-        for run in target['_runs']:
-            a, b = max(target['start'], run['start']), min(target['end'], run['start'] + len(run['text']))
-            if a < b:
-                pieces.append((run, a-run['start'], b-run['start']))
-        remaining = replacement
-        for i, (run, a, b) in enumerate(pieces):
-            addition = remaining if i == len(pieces)-1 else remaining[:b-a]
-            remaining = remaining[len(addition):]
+    for target, replacement, style in selected:
+        if style == 'base':
+            patches = base_style_patches(target, replacement, emphasis)
+        else:
+            patches = []
+            pieces = run_pieces(target['_runs'], target['start'], target['end'])
+            remaining = replacement
+            for i, (run, a, b) in enumerate(pieces):
+                addition = remaining if i == len(pieces)-1 else remaining[:b-a]
+                remaining = remaining[len(addition):]
+                patches.append((run, a, b, addition))
+        for run, a, b, addition in patches:
             key = (target['part'], tuple(target['paragraph_path']), tuple(run['path']))
             run_originals[key] = run
             run_patches[key].append((a, b, addition))
@@ -407,7 +422,106 @@ def compile_edits(source, plan, source_sha):
         if new != original:
             updates.append({'part': key[0], 'paragraph_path': key[1], 'run_path': key[2],
                             'before': original, 'after': new, 'char_pr': run_originals[key]['char_pr']})
-    return selected, updates, changed_paragraphs
+    return [(t, r) for t, r, _ in selected], updates, changed_paragraphs
+
+
+def run_pieces(runs, start, end):
+    """(run, start, end) slices of the runs covering paragraph text [start, end)."""
+    pieces = []
+    for run in runs:
+        a, b = max(start, run['start']), min(end, run['start'] + len(run['text']))
+        if a < b:
+            pieces.append((run, a-run['start'], b-run['start']))
+    return pieces
+
+
+def emphasized_styles(source):
+    """charPr id -> (height, emphasized, script) from the document header."""
+    with zipfile.ZipFile(source) as package:
+        header = parse(package.read('Contents/header.xml'))
+    found = {}
+    for node in header.iter():
+        if local(node) != 'charPr':
+            continue
+        names = {local(child): child for child in node}
+        script = 'supscript' in names or 'subscript' in names
+        underline = names.get('underline')
+        emphasized = (script or 'bold' in names or 'italic' in names
+                      or (underline is not None and underline.get('type', 'NONE') != 'NONE'))
+        try:
+            height = int(node.get('height', '0'))
+        except ValueError:
+            height = 0
+        found[node.get('id')] = (height, emphasized, script)
+    return found
+
+
+def pick_base_style(pieces, emphasis):
+    """The run style to write a rewritten span in, or None for an empty span."""
+    if not pieces:
+        return None
+    totals = defaultdict(int)
+    for run, a, b in pieces:
+        totals[run['char_pr']] += b - a
+    order = [p[0]['char_pr'] for p in pieces]
+
+    def info(key):
+        return emphasis.get(key, (0, False, False))
+    # Body size first: the largest size among styles that carry a real share
+    # of the span (a small parenthetical is not the body), then plain over
+    # emphasis at that size. Super/subscript never becomes the base.
+    if any(not info(k)[2] for k in totals):
+        totals = {k: n for k, n in totals.items() if not info(k)[2]}
+    span = sum(totals.values())
+    heights = [info(k)[0] for k, n in totals.items() if n * 5 >= span]
+    if heights:
+        top = max(heights)
+        totals = {k: n for k, n in totals.items() if info(k)[0] == top} or totals
+    if any(not info(k)[1] for k in totals):
+        totals = {k: n for k, n in totals.items() if not info(k)[1]}
+    return max(totals, key=lambda k: (totals[k], -order.index(k)))
+
+
+def base_style_patches(target, replacement, emphasis=None):
+    """Patches for a 'base' edit: unchanged ends stay, the changed middle goes to one run."""
+    emphasis = emphasis or {}
+
+    def emphasized(key):
+        return emphasis.get(key, (0, False, False))[1]
+    old = target['_paragraph_text'][target['start']:target['end']]
+    limit = min(len(old), len(replacement))
+    prefix = 0
+    while prefix < limit and old[prefix] == replacement[prefix]:
+        prefix += 1
+    suffix = 0
+    while suffix < limit - prefix and old[-1-suffix] == replacement[-1-suffix]:
+        suffix += 1
+
+    def style_at(index):
+        return next((r['char_pr'] for r in target['_runs']
+                     if r['start'] <= index < r['start'] + len(r['text'])), None)
+    # A kept end must not carry the old emphasis next to the rewritten words.
+    while prefix and emphasized(style_at(target['start'] + prefix - 1)):
+        prefix -= 1
+    while suffix and emphasized(style_at(target['end'] - suffix)):
+        suffix -= 1
+    base_style = pick_base_style(run_pieces(target['_runs'], target['start'] + prefix, target['end'] - suffix), emphasis)
+    # Trailing kept characters in another style (a small closing bracket, say)
+    # would look stuck on; rewrite them with the body unless they are the base.
+    while suffix and base_style is not None and style_at(target['end'] - suffix) != base_style:
+        suffix -= 1
+    start, end = target['start'] + prefix, target['end'] - suffix
+    middle = replacement[prefix:len(replacement)-suffix]
+    pieces = run_pieces(target['_runs'], start, end)
+    if not pieces:
+        # Pure insertion: extend the run holding the preceding character.
+        at = start - 1 if start > target['start'] else start
+        run = next(r for r in target['_runs'] if r['start'] <= at < r['start'] + len(r['text']))
+        offset = start - run['start']
+        return [(run, offset, offset, middle)]
+    style = pick_base_style(pieces, emphasis)
+    base = next(i for i, (run, a, b) in enumerate(pieces) if run['char_pr'] == style)
+    return [(run, a, b, middle if i == base else '') for i, (run, a, b) in enumerate(pieces)]
 
 
 def snapshot(path, overrides=None, changed_paragraphs=None, *, attribute_overrides=None, xml_roots=None, added_plain_text=None):

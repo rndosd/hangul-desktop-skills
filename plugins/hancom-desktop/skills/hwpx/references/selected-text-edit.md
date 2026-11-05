@@ -82,7 +82,7 @@ run_diff와 모든 선택을 검토한 후 같은 원본/계획으로 apply한�
 추가 글자는 마지막 매칭 run에 넣는다. 짧아지거나 삭제되어도 run과 charPrIDRef를 지우지 않는다.
 매칭 밖 접두·접미 텍스트와 그 서식을 유지한다. 이 정책은 plan의
 `preserve-matched-run-lengths-extra-in-last-run`로 명시하며 다른 정책은 거부한다.
-새 글자의 서식을 의미로 추측하지 않는다. run 경계에 의미가 있으면 dry-run 분배를 확인한다.
+변경마다 `"style": "base"`를 주면 대신 앞뒤의 같은 글자는 원래 run에 두고 바뀐 가운데를 그 구간의 본문 서식 run 하나에 쓴다(본문 크기 우선, 강조·위첨자 제외, 다른 run은 비움). 줄을 통째로 새 글로 바꿀 때 쓴다([원본 내용만 바꾸기](source-template-reuse.md#원본-내용만-바꾸기)). 새 글자의 서식을 의미로 추측하지 않는다. run 경계에 의미가 있으면 dry-run 분배를 확인한다.
 
 비교는 모든 XML 노드·속성·텍스트·tail 및 Preview 외 바이너리를 확인한다.
 Preview와 **선택한 문단만**의 lineSegArray 캐시는 제외하고 영수증에 기록한다.

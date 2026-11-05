@@ -155,6 +155,10 @@ $planCatalog = Join-Path $taskSkillDir 'assets/document-templates/full-plans.jso
 
 블록을 조합하는 경우 각 블록의 서식 조정까지 끝낸 후 `compose`로 저장·PDF를 한 번 생성한다. 이미 조합한 문서의 피드백 수정에도 같은 `layout`을 쓸 수 있다. 서식이 맞고 내용만 고치는 요청에는 추가할 필요가 없다.
 
+## 원본 내용만 바꾸기
+
+`swap 원본 --list`로 모든 줄을 보고 `swap 원본 결과 --pairs pairs.json`으로 바꾼다. 짝 형식·규칙은 [원본 내용만 바꾸기](source-template-reuse.md#원본-내용만-바꾸기). 내부적으로 아래 `inspect → text-plan → text`와 공개 batch(줄 삭제)를 그대로 쓰며 대상 고르기만 대신한다. `text-plan`의 변경에도 `"style": "base"`를 넣어 같은 본문 서식 규칙을 쓸 수 있다.
+
 ## 단건 문구 치환
 
 ```powershell
