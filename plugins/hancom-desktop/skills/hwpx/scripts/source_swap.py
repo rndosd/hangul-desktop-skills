@@ -15,7 +15,9 @@ from pathlib import Path
 
 import safe_edit as se
 
-PAIR_KEYS = {'find', 'replace', 'delete', 'style', 'all', 'flatten'}
+PAIR_KEYS = {'find', 'replace', 'delete', 'style', 'all', 'flatten', 'line'}
+# Leading indentation and list mark of a line, kept when a whole line is rewritten.
+MARKER = re.compile(r'^[ 　]*(?:[□■○●ㅇ◦▸▶▷·•◇◆※＊*\-]+[ 　]*)?')
 REASON_HINTS = {
     'unsupported_run_control_or_mixed_text':
         '줄 안에 전각 공백·탭 같은 제어 글자가 있어 글자 단위로 바꿀 수 없습니다. '
@@ -88,8 +90,53 @@ def _check_pairs(pairs):
             se.single_line(pair['replace'])
         if pair.get('style', 'base') not in se.EDIT_STYLES:
             raise ValueError('style must be base or keep')
+        if pair.get('line') and (pair.get('all') or pair.get('delete')):
+            raise ValueError('line pairs rewrite one line; they take no all/delete')
         if (pair.get('delete') or pair.get('flatten')) and '"' in pair['find']:
             raise ValueError('delete/flatten find cannot contain a double quote; use a distinctive part without it')
+
+
+def _keep_marker(old, new):
+    """Keep the old line's indentation and list mark unless the new text brings its own."""
+    lead = MARKER.match(old).group()
+    if not lead or new.startswith(lead):
+        return new
+    body = new.lstrip(' 　')
+    mark = lead.strip(' 　')
+    indent = lead[:len(lead) - len(lead.lstrip(' 　'))]
+    if mark and body.startswith(mark):
+        return indent + body
+    return lead + body
+
+
+def _expand_lines(source, pairs, before):
+    """Turn line pairs, and flatten pairs on editable lines, into whole-line base edits.
+
+    A line is found by any unique part of it; the new text replaces the whole
+    line in its body style, so labels and marks keep their own style where the
+    words match. flatten stays only for lines the text engine cannot edit.
+    """
+    wanted = [(i, p) for i, p in enumerate(pairs) if p.get('line') or p.get('flatten')]
+    if not wanted:
+        return pairs, 0
+    by_find = se.candidates_many(source, [p['find'] for _, p in wanted], before)
+    out, converted = list(pairs), 0
+    for i, pair in wanted:
+        found = by_find[se.single_line(pair['find'], search=True)]
+        lines = {}
+        for target in found:
+            lines.setdefault((target['part'], tuple(target['paragraph_path'])), target)
+        target = next(iter(lines.values())) if len(lines) == 1 else None
+        if target is None or not target['supported']:
+            if pair.get('line'):
+                reason = 'not_found' if not lines else 'ambiguous' if target is None else target['reason']
+                out[i] = dict(pair, _error=reason, _targets=found)
+            continue
+        full = target['_paragraph_text']
+        rest = {k: v for k, v in pair.items() if k not in ('line', 'flatten', 'find', 'replace')}
+        out[i] = dict(rest, find=full, replace=_keep_marker(full, pair['replace']))
+        converted += bool(pair.get('flatten'))
+    return out, converted
 
 
 def _choose(pair, targets):
@@ -140,6 +187,7 @@ def swap(source, output, pairs, batch_runner):
         raise ValueError('new .hwpx output path required (existing parent, not the source)')
     _check_pairs(pairs)
     before = se.digest(source)
+    pairs, flatten_as_line = _expand_lines(source, pairs, before)
     unresolved, changes = [], []
     edits = [(i, p) for i, p in enumerate(pairs) if not p.get('delete') and not p.get('flatten')]
     later = [(i, p) for i, p in enumerate(pairs) if p.get('delete') or p.get('flatten')]
@@ -152,6 +200,9 @@ def swap(source, output, pairs, batch_runner):
             by_find = se.candidates_many(source, [p['find'] for _, p in edits], before)
             inspection, seen = [], {}
             for i, pair in edits:
+                if '_error' in pair:
+                    unresolved.append(_entry(i, pair, pair['_error'], pair['_targets']))
+                    continue
                 found = by_find[se.single_line(pair['find'], search=True)]
 
                 def overlaps(t):
@@ -202,7 +253,7 @@ def swap(source, output, pairs, batch_runner):
                                 touched_cells.add(node['path'].rsplit('/paragraph[', 1)[0])
                         else:
                             commands.append({'commandId': f'flatten{i}-{len(commands)}', 'op': 'set', 'path': node['path'],
-                                             'properties': {'text': pair['replace']}})
+                                             'properties': {'text': _keep_marker(node['summary'].get('text', ''), pair['replace'])}})
                             rewritten += 1
             if commands:
                 commands.sort(key=lambda c: _path_key(c['path']), reverse=True)
@@ -227,6 +278,7 @@ def swap(source, output, pairs, batch_runner):
     return {'status': ('PASS_STRUCTURE' if not unresolved else 'PARTIAL') if published else 'NOTHING_APPLIED',
             'output': str(output) if published else None, 'documentPublished': published,
             'replaced': applied, 'deleted': deleted, 'flattened': rewritten,
+            'flattenRequestsKeptStyle': flatten_as_line,
             'unresolved': unresolved, 'layoutFollowUp': follow_up,
             'pictures': pictures,
             'nextStep': ('Fix unresolved pairs and run swap again on the output; ' if unresolved else '')

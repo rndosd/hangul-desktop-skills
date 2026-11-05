@@ -14,6 +14,7 @@ import io
 import json
 import os
 import posixpath
+import re
 import tempfile
 import zipfile
 from collections import defaultdict
@@ -30,6 +31,7 @@ POLICY = 'preserve-matched-run-lengths-extra-in-last-run'
 # rewritten span are emptied rather than re-filled by character position.
 # "Most" is summed per character style, since plain text is often split.
 EDIT_STYLES = ('keep', 'base')
+LINE_LEAD = re.compile(r'^[ 　]*(?:[□■○●ㅇ◦▸▶▷·•◇◆※＊*\-]+[ 　]*)?')
 IMPLEMENTATION_VERSION = '0.3.2'
 MAX_EDITS = 100
 
@@ -500,8 +502,16 @@ def base_style_patches(target, replacement, emphasis=None):
     def style_at(index):
         return next((r['char_pr'] for r in target['_runs']
                      if r['start'] <= index < r['start'] + len(r['text'])), None)
-    # A kept end must not carry the old emphasis next to the rewritten words.
-    while prefix and emphasized(style_at(target['start'] + prefix - 1)):
+    # A kept end must not carry the old emphasis next to the rewritten words,
+    # except a whole leading label such as "(방향) " or "장소 : " right after
+    # the line's list mark: that emphasis belongs to the label, not the words.
+    lead = len(LINE_LEAD.match(target['_paragraph_text']).group())
+    label_from = target['start'] + prefix
+    while label_from > target['start'] and emphasized(style_at(label_from - 1)):
+        label_from -= 1
+    whole_label = (prefix and label_from <= max(lead, target['start'])
+                   and old[prefix - 1] in ' 　:)')
+    while prefix and not whole_label and emphasized(style_at(target['start'] + prefix - 1)):
         prefix -= 1
     while suffix and emphasized(style_at(target['end'] - suffix)):
         suffix -= 1

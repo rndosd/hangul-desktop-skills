@@ -113,6 +113,32 @@ class SourceSwapTests(unittest.TestCase):
         self.assertEqual(reasons, {'사람': 'ambiguous', '부서': 'inside_text_changed_by_earlier_pair'})
         self.assertEqual(result['replaced'], 1)
 
+    def test_line_pair_rewrites_whole_line_and_keeps_mark(self):
+        out = self.root/'line.hwpx'
+        result = source_swap.swap(self.source, out, [
+            {'find': '오늘 큰', 'replace': '새 기관은 내일 연수를 연다.', 'line': True},
+            {'find': '안내', 'replace': '담당 교육정보부', 'flatten': True},
+        ], batch)
+        self.assertEqual(result['status'], 'PASS_STRUCTURE', result)
+        self.assertEqual((result['replaced'], result['flattened'], result['flattenRequestsKeptStyle']), (2, 0, 1))
+        runs = runs_of(out, '□')
+        self.assertEqual(runs[0], ('□ ', self.plain))
+        self.assertEqual(''.join(t for t, _ in runs), '□ 새 기관은 내일 연수를 연다.')
+
+    def test_leading_label_keeps_its_emphasis(self):
+        out = self.root/'label.hwpx'
+        with HwpxDocument.open(self.source) as doc:
+            p = doc.add_paragraph('', include_run=False)
+            p.add_run(' ㅇ ')
+            p.add_run('(방향) ', bold=True)
+            p.add_run('옛 사업을 넓힌다')
+            doc.save_to_path(self.root/'labelled.hwpx')
+        source_swap.swap(self.root/'labelled.hwpx', out, [
+            {'find': '옛 사업', 'replace': '(방향) 새 연수를 늘린다', 'line': True}], batch)
+        runs = [r for r in runs_of(out, ' ㅇ') if r[0]]
+        self.assertEqual(runs[1], ('(방향) ', self.bold))
+        self.assertEqual(runs[2][0], '새 연수를 늘린다')
+
     def test_bad_pairs_are_rejected(self):
         with self.assertRaises(ValueError):
             source_swap.swap(self.source, self.root/'x.hwpx', [{'find': 'a'}], batch)
