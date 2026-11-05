@@ -199,6 +199,26 @@ class SourceSwapTests(unittest.TestCase):
         missing = source_swap.swap(pictured, self.root/'missing.hwpx', [{'picture': 9, 'delete': True}], batch)
         self.assertEqual(missing['unresolved'][0]['reason'], 'not_found')
 
+    def test_full_width_space_stays_and_pieces_around_it_change(self):
+        spaced = self.root/'fw.hwpx'
+        with HwpxDocument.new() as doc:
+            p = doc.add_paragraph('', include_run=False)
+            p.add_run('□ 일시 : ')
+            p.add_run('11. 4. 13:30\u3000(160분)', bold=True, expand_special_characters=True)
+            doc.save_to_path(spaced)
+        listed = source_swap.listing(spaced)['lines']
+        self.assertTrue(any('11. 4. 13:30\u3000(160분)' in line and '✗' not in line for line in listed), listed)
+        out = self.root/'fw-out.hwpx'
+        result = source_swap.swap(spaced, out, [
+            {'find': '일시 :', 'replace': '□ 일시 : 11. 18. 14:00\u3000(100분)', 'line': True}], batch)
+        self.assertEqual(result['status'], 'PASS_STRUCTURE', result)
+        import zipfile
+        xml = zipfile.ZipFile(out).read('Contents/section0.xml').decode('utf-8')
+        self.assertIn('11. 18. 14:00<hp:fwSpace/>(100분)', xml)
+        with self.assertRaisesRegex(ValueError, 'unsupported_fixed_space_count'):
+            source_swap.swap(spaced, self.root/'fw-bad.hwpx', [
+                {'find': '일시 :', 'replace': '□ 일시 : 11. 18. 14:00 (100분)', 'line': True}], batch)
+
     def test_bad_pairs_are_rejected(self):
         with self.assertRaises(ValueError):
             source_swap.swap(self.source, self.root/'x.hwpx', [{'find': 'a'}], batch)
