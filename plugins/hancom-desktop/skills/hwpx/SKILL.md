@@ -40,7 +40,7 @@ description: "한글 문서(.hwpx/OWPML)의 읽기·편집·작성·양식 채�
 |---|---|
 | 학교 공문·기안문·시행문과 붙임 계획서 | [업무 문서 기준](references/document-basics.md#문서-역할과-적용-순서)에서 문서 역할·공식 표기·기관 서식부터 확인한 뒤 아래 원본 활용 경로로 진행한다. |
 | 새 계획서·보고서(원본 없음) | 위 '새 계획서와 보고서 조립'의 네 단계 |
-| 사용자 원본으로 새 문서 | [원본 기반 작성](references/source-template-reuse.md). 반복해서 쓸 원본이면 [등록](references/complete-template-registration.md)(`register`) |
+| 사용자 원본으로 새 문서 | 새 문서가 원본과 생김새가 같으면(올해판·다른 기관판, 급할 때) [원본 내용만 바꾸기](references/source-template-reuse.md#원본-내용만-바꾸기)(`swap`). 구조가 다르면 [원본 기반 작성](references/source-template-reuse.md). 반복해서 쓸 원본이면 [등록](references/complete-template-registration.md)(`register`) |
 | 긴 원본에서 필요한 표·본문·쪽만 별도 문서로 사용 | 설치된 한글이 있으면 [공식 블록 저장](references/native-block-reuse.md)을 먼저 검토한다. 범위를 확인하고 새 파일에 저장한 뒤 기존 편집 도구로 수정한다. |
 | 편집이 끝난 여러 블록을 한 문서로 조합 | [공통 compose](references/simple-entry.md#준비된-블록-조합)로 붙이기·저장·재열기·PDF 출력을 한 native 작업에 묶고, 페이지 이미지는 같은 실행기의 `preview`로 받아 검토한다. |
 | 유일한 본문 문구 한 개 수정 | 공통 도구의 `replace source.hwpx result.hwpx --find '원문' --replace '새 문구'` |

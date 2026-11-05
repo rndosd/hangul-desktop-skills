@@ -26,7 +26,7 @@ def doctor():
     config=ROOT/'environment.json'
     if not config.is_file(): config=Path(os.environ.get('CODEX_HOME',str(Path.home()/'.codex')))/'skills/hwpx/environment.json'
     actual=activate();parser=actual.parent/'opc/xml_utils.py'
-    return dict(status='READY_LOCAL_TOOLS',skillRoot=str(ROOT),configuration=str(config),configurationExists=config.is_file(),python=sys.executable,hwpxModule=str(actual),parserSha256=sha(parser),runtime=identity(),commands=['doctor','schema table','inspect','inspect-body','text-plan','text','layout','replace','table','source','source-check','batch','tool','compose','assemble','register','fill','preview'],writePermission='UNTESTED',native='NOT_CHECKED',securityModule='NOT_CHECKED')
+    return dict(status='READY_LOCAL_TOOLS',skillRoot=str(ROOT),configuration=str(config),configurationExists=config.is_file(),python=sys.executable,hwpxModule=str(actual),parserSha256=sha(parser),runtime=identity(),commands=['doctor','schema table','swap','inspect','inspect-body','text-plan','text','layout','replace','table','source','source-check','batch','tool','compose','assemble','register','fill','preview'],writePermission='UNTESTED',native='NOT_CHECKED',securityModule='NOT_CHECKED')
 def schema(operation):
     return dict(schema=SCHEMA,operation='table',headers=['열 제목1','열 제목2'],reason='사용자 메모의 완료 업무 삭제와 새 업무 추가',operations=[dict(op='delete',key={'열 제목1':'삭제할 셀의 완전한 문구'}),dict(op='insert_after',key={'열 제목1':'기준 셀의 완전한 문구'},cells=['새 항목명: 설명까지 전체','다른 열 값'],heightHwpunit=2400)])
 def replace(source,output,old,new):
@@ -351,6 +351,7 @@ def main():
     s=sub.add_parser('text-plan');s.add_argument('--inspection',required=True);s.add_argument('--changes',required=True);s.add_argument('--output',required=True)
     s=sub.add_parser('text');s.add_argument('source');s.add_argument('output');s.add_argument('--plan',required=True);s.add_argument('--layout');s.add_argument('--dry-run',action='store_true')
     s=sub.add_parser('layout');s.add_argument('source');s.add_argument('output');s.add_argument('--request',required=True);s.add_argument('--dry-run',action='store_true')
+    s=sub.add_parser('swap');s.add_argument('source');s.add_argument('output',nargs='?');s.add_argument('--pairs');s.add_argument('--list',action='store_true')
     for cmd in ['table']:
         s=sub.add_parser(cmd)
         if cmd=='table':s.add_argument('source')
@@ -406,6 +407,15 @@ def main():
         elif a.command=='batch':result=batch(read(a.request),a.dry_run,read(a.layout) if a.layout else None)
         elif a.command=='inspect':result=inspect_text(a.source,read(a.queries),a.output)
         elif a.command=='inspect-body':result=inspect_body(a.source,a.output,a.find)
+        elif a.command=='swap':
+            activate()
+            import source_swap
+            if a.list:
+                need(not a.output and not a.pairs,'swap --list takes only the source')
+                result=source_swap.listing(a.source)
+            else:
+                need(bool(a.output and a.pairs),'swap needs source output --pairs pairs.json (or --list)')
+                result=source_swap.swap(a.source,a.output,read(a.pairs),batch)
         elif a.command=='text-plan':result=text_plan(read(a.inspection),read(a.changes),a.output)
         elif a.command=='text':result=text(a.source,a.output,read(a.plan),a.dry_run,read(a.layout) if a.layout else None)
         elif a.command=='layout':

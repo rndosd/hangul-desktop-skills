@@ -25,6 +25,7 @@ HANGUL = '가나다라마바사아자차카타파하'
 ITEM_KINDS = ('item', 'dash', 'dot', 'note', 'arrow', 'lead')
 # One placeholder, no numbering: the outline node {"t": kind, "text": ...} fills it.
 TEXT_KINDS = (*ITEM_KINDS, 'box', 'subhead')
+SUB_KINDS = ('dash', 'dot', 'note')  # lines that belong to the item or title above them
 PART_KINDS = ('cover', 'chapter_first', 'chapter', 'heading', 'task', 'point', 'table', 'spacer', 'summary', 'summary_chapter', 'block', *TEXT_KINDS)
 # The symbol each text part already draws; the same symbol typed at the start of the text is dropped.
 KIND_SYMBOLS = {'item': '◦○∘•', 'dash': '-–', 'dot': '‧·ㆍ', 'note': '※', 'arrow': '⇒→', 'subhead': '□', 'box': '◈', 'lead': '❍'}
@@ -531,10 +532,14 @@ def build_plan(manifest, outline, tables_dir=None, notes=None):
             following = drawn[index + 1] if index + 1 < len(drawn) else None
             return following is None or rank(following) is not None and rank(following) <= rank(drawn[index])
 
-        out, counters, tasks, points, level, previous = [], [0, 0, 0, 0], 0, 0, 0, None
+        out, counters, tasks, points, level, previous, lead = [], [0, 0, 0, 0], 0, 0, 0, None, None
         for position, node in enumerate(drawn, 1):
             where = f'{prefix}[{position}]'
             kind, after, previous = node['t'], previous, node['t']  # after: the kind drawn just before this node
+            if kind in SUB_KINDS:
+                after = lead  # a run of -, ‧ and ※ lines sits under the node that opened it (a "-" under ○)
+            else:
+                lead = kind
             if breaks[position - 1] and kind != 'chapter':  # a chapter breaks after its spacer, below
                 out.append(dict(op='pageBreak'))
             if kind == 'chapter':
