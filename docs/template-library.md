@@ -36,4 +36,4 @@ AI가 원본을 분석하고 준비본·입력 연결·개인 목록을 만들�
 
 ## 설치 버전
 
-기본형 3종은 0.2.0-beta.1부터 포함되며, 최신 [0.4.1-beta.1 릴리스](https://github.com/rndosd/hangul-desktop-skills/releases/tag/v0.4.1-beta.1)를 사용하세요. [설치 안내](getting-started.md)의 환경 설정과 보안 모듈 선택을 먼저 마칩니다. 사용자 안내의 최신 설명은 이 GitHub 문서를 기준으로 확인하세요.
+기본형 3종은 0.2.0-beta.1부터 포함되며, 최신 [0.4.1-beta.2 릴리스](https://github.com/rndosd/hangul-desktop-skills/releases/tag/v0.4.1-beta.2)를 사용하세요. [설치 안내](getting-started.md)의 환경 설정과 보안 모듈 선택을 먼저 마칩니다. 사용자 안내의 최신 설명은 이 GitHub 문서를 기준으로 확인하세요.

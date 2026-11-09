@@ -18,8 +18,8 @@ Python 3.12와 의존성은 설치기가 필요한 경우 전용 환경에 준�
 
 ## 2. ZIP 내려받고 PowerShell 열기
 
-1. [베타 릴리스](https://github.com/rndosd/hangul-desktop-skills/releases/tag/v0.4.1-beta.1)를 엽니다.
-2. **Assets**에서 `hangul-desktop-skills-0.4.1-beta.1.zip`을 내려받습니다. 설치용으로는 이 첨부 파일을 선택하세요.
+1. [베타 릴리스](https://github.com/rndosd/hangul-desktop-skills/releases/tag/v0.4.1-beta.2)를 엽니다.
+2. **Assets**에서 `hangul-desktop-skills-0.4.1-beta.2.zip`을 내려받습니다. 설치용으로는 이 첨부 파일을 선택하세요.
 3. 파일 탐색기에서 ZIP을 **모두 압축 풀기**로 풉니다. Windows PowerShell 5.1의 경로 길이 제한을 피하도록 압축 해제 위치와 사용자 지정 CODEX_HOME은 짧게 잡습니다. ZIP 내부에서 바로 실행하지 않습니다.
 4. 압축을 푼 폴더 안에서 **Install.ps1이 보이는 폴더**까지 들어갑니다. 버전에 따라 바깥 폴더가 한 겹 더 있을 수 있습니다.
 5. 그 폴더의 탐색기 주소 표시줄에 `powershell`을 입력하고 Enter를 누릅니다. 일반 Windows PowerShell 창이 열립니다.
