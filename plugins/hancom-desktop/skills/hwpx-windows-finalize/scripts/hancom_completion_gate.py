@@ -73,6 +73,23 @@ def verify_ref(item):
     require(ref(item['path']) == item, f'file_changed:{item["path"]}')
 
 
+def paragraph_text(paragraph):
+    """Read text in one paragraph, without text owned by nested paragraphs."""
+    inline_text = {'lineBreak': '\n', 'tab': '\t', 'nbSpace': '\u00a0', 'fwSpace': '\u3000'}
+
+    def visit(node):
+        name = node.tag.rsplit('}', 1)[-1]
+        if node is not paragraph and name == 'p':
+            return ''
+        if name == 't':
+            return (node.text or '') + ''.join(visit(child) + (child.tail or '') for child in node)
+        if name in inline_text:
+            return inline_text[name]
+        return ''.join(visit(child) for child in node)
+
+    return visit(paragraph)
+
+
 def read_package(path):
     """Read all XML nodes and binary hashes. Do not silently omit layout nodes."""
     with ZipFile(path) as z:
@@ -125,9 +142,9 @@ def read_package(path):
                 kind = node.tag.rsplit('}', 1)[-1]
                 if kind == 'ctrl':
                     controls[name].append(control_tree(node))
-                # Hangul may add an empty run on save; only visible text is content to preserve.
-                if kind == 't' and node.text:
-                    texts.append(node.text)
+                # Hangul can merge or split runs without changing the paragraph's text.
+                if kind == 'p':
+                    texts.append(paragraph_text(node))
                 if kind in ('p', 'tbl', 'pic'):
                     counts[kind] += 1
     # Per part, the document-order list of (element, payload hash) uses. Positions are not keys:
