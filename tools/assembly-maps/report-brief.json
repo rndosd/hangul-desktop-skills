@@ -94,11 +94,12 @@
     "keepWrap": true,
     "columns": [
      "구분",
-     "필요성 인식",
-     "경험률",
-     "의무교육 제외 경험률",
+     "값 1",
+     "값 2",
+     "값 3",
      "주요 특징"
     ],
+    "headerRequired": true,
     "unitRow": 1
    }
   },

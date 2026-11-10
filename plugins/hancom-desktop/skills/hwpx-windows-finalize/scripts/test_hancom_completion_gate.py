@@ -166,6 +166,20 @@ class CompletionGateTest(unittest.TestCase):
         save(self.run/'receipt.json',receipt)
         self.assert_gate('COM_not_successful')
 
+    def test_run_merge_preserves_exact_paragraph_text(self):
+        hwpx(self.source, text='one </t><t>two')
+        hwpx(self.final, text='one two')
+        self.assertTrue(g.compare(self.source, self.final)['invariants']['texts'])
+        hwpx(self.final, text='onetwo')
+        self.assertFalse(g.compare(self.source, self.final)['invariants']['texts'])
+
+    def test_inline_break_and_tab_are_part_of_paragraph_content(self):
+        hwpx(self.source, text='one<tab/>two<lineBreak/>three')
+        hwpx(self.final, text='one<tab/>two</t><t><lineBreak/>three')
+        self.assertTrue(g.compare(self.source, self.final)['invariants']['texts'])
+        hwpx(self.final, text='onetwo<lineBreak/>three')
+        self.assertFalse(g.compare(self.source, self.final)['invariants']['texts'])
+
     def test_spine_order_changes_are_not_filename_sorted(self):
         def make(path,order):
             with ZipFile(path,'w') as z:

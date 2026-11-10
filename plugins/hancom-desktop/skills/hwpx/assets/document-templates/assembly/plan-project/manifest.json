@@ -182,7 +182,13 @@
      "내용",
      "배점"
     ],
-    "role": "grid"
+    "role": "grid",
+    "columns": [
+     "구분",
+     "내용",
+     "짧은 값"
+    ],
+    "headerRequired": true
    },
    "file": "parts/three-column.hwpx",
    "sha256": "e1528eb6a2155970629ac07be9f0c604117ff11e754c2c5d6d2902d54d1edd1e"

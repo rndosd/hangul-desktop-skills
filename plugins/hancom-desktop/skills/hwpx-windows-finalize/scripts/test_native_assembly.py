@@ -427,6 +427,27 @@ class CommonVocabularyTest(unittest.TestCase):
         self.assertEqual(texts['[학교·작성 부서]'], '가상학교 · 2027. 3. · 교무부')
         self.assertEqual([n['role'] for n in notes], ['subtitle', 'date', 'department'])
 
+    def test_a_header_naming_the_source_subject_must_be_replaced(self):
+        rows = {'t': 'table', 'part': 'table1', 'rows': [['3학년', '1', '2', '3', '높음']]}
+        with self.assertRaisesRegex(ValueError, '필요성인식.*"header"에 이 문서의 제목 5칸'):
+            self.plan('report-brief', {'title': '독서교육 결과'}, [{'t': 'subhead', 'text': '결과'}, rows])
+        self.plan('report-brief', {'title': '독서교육 결과'},
+                  [{'t': 'subhead', 'text': '결과'}, {**rows, 'header': ['학년', '참여', '대출', '완독', '특징']}])
+        tables = {t['part']: t for t in a.describe(a.load_template(CATALOG, 'report-brief'))['tables']}
+        self.assertTrue(tables['table1']['headerRequired'])
+        self.assertNotIn('headerRequired', tables['table2'])
+        with self.assertRaisesRegex(ValueError, '배점'):
+            self.plan('plan-project', {'title': '가상', 'date': '2027.'},
+                      [{'t': 'chapter', 'text': '일정'}, {'t': 'table', 'role': 'grid', 'rows': [['준비', '계획 수립', '3월']]}])
+
+    def test_describe_says_which_cover_values_are_carried_and_which_go_in_the_body(self):
+        cover = a.describe(a.load_template(CATALOG, 'event-plan'))['cover']
+        self.assertEqual((cover['carried'], cover['inBody']), ({}, ['date', 'organization', 'department']))
+        with self.assertRaisesRegex(ValueError, '본문에 넣으세요'):
+            self.plan('event-plan', {'title': '설명회', 'date': '2027. 2.'}, [{'t': 'item', 'text': '(일시) 2월'}])
+        cover = a.describe(a.load_template(CATALOG, 'plan-school'))['cover']
+        self.assertEqual((cover['carried'], cover['inBody']), ({'subtitle': 'title', 'date': 'organization', 'department': 'organization'}, []))
+
     def test_describe_lists_roles_substitutes_tables_and_cover(self):
         info = a.describe(a.load_template(CATALOG, 'plan-education'))
         self.assertIn('lead', info['roles'])
