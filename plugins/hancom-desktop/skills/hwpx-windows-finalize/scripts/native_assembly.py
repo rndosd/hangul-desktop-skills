@@ -415,14 +415,17 @@ def describe(manifest):
         tables=[dict(part=name, role=p['table'].get('role', 'grid'), roleLabel=TABLE_ROLES.get(p['table'].get('role', 'grid')),
                      cells=p['table']['unitCells'], columns=p['table'].get('columns') or p['table']['header'], header=p['table']['header'],
                      repeat=p['table']['repeat'], **({'footerCells': p['table']['footerCells']} if p['table'].get('footerRows') else {}),
-                     **({'rowLabels': p['table']['rowLabels']} if p['table'].get('rowLabels') else {}))
+                     **({'rowLabels': p['table']['rowLabels']} if p['table'].get('rowLabels') else {}),
+                     **({'headerRequired': True} if p['table'].get('headerRequired') else {}))
                 for name, p in table_parts(parts).items()],
         # parts kept as the source has it: called by name ({"t": "block", "part": name}), their wording goes in unchanged
         blocks=[dict(part=name, texts=p['texts'][:8], numberedLines=p.get('numberedLines', []))
                 for name, p in parts.items() if p['kind'] == 'block'],
         cover=dict(fields=list(fields), required=[k for k in ('title', 'date') if k in fields],
                    **({'limits': cover_part['fieldLimits']} if cover_part.get('fieldLimits') else {}),
-                   carried={k: COVER_CARRY[k][0] for k in COVER_FIELDS if k not in fields and k in COVER_CARRY}),
+                   carried={k: COVER_CARRY[k][0] for k in COVER_FIELDS if k not in fields and COVER_CARRY.get(k, ('',))[0] in fields},
+                   # no place of their own and none to be carried to: the outline is refused, they go in the body
+                   inBody=[k for k in COVER_FIELDS if k not in fields and COVER_CARRY.get(k, ('',))[0] not in fields]),
         summary=any(p['kind'] == 'summary' for p in parts.values()),
         textBeforeFirstChapter=bool(rules.get('textBeforeFirstChapter')))
 
@@ -610,6 +613,10 @@ def build_plan(manifest, outline, tables_dir=None, notes=None):
                                       note=f'{node["role"]} 표가 없어 칸 수가 같은 {table_name} 표({used})로 넣었습니다.'))
                 part = parts[table_name]
                 spec, rows, header = part['table'], node['rows'], node.get('header')
+                # a header that names the source's own subject (a survey's measures) must not print under another document's rows
+                need(header is not None or not spec.get('headerRequired'),
+                     f'{where}: {table_name} 표의 제목 행은 원본 문서의 낱말({", ".join(spec["header"])})이라 그대로 쓸 수 없습니다. '
+                     f'"header"에 이 문서의 제목 {spec["headerCells"]}칸을 적으세요.')
                 if header is not None:
                     need(isinstance(header, list) and len(header) == spec['headerCells'], f'{where}: header 칸 수가 {spec["headerCells"]}이 아닙니다.')
                     for c, cell in enumerate(header, 1):

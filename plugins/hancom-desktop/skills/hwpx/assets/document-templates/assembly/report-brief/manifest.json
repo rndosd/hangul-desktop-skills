@@ -102,11 +102,12 @@
     "role": "grid",
     "columns": [
      "구분",
-     "필요성 인식",
-     "경험률",
-     "의무교육 제외 경험률",
+     "값 1",
+     "값 2",
+     "값 3",
      "주요 특징"
-    ]
+    ],
+    "headerRequired": true
    },
    "file": "parts/table1.hwpx",
    "sha256": "f9e8767611b4c1d49e592602b958b30e9f649b476bcd057f84c599e9d4c966f4"

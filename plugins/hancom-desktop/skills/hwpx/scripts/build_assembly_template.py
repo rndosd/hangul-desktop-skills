@@ -32,7 +32,8 @@ map's "rules" override the default page numbering, section and spacer rules ("te
 lets an outline open with bars and text). Other part options: "tableAsChar" saves a floating table from a
 copy where it sits in the line, "keepFaces" keeps a cover's display faces, "dropPictures" removes its pictures (a logo), "dropHeaderFooter" its header and footer, "context": "after-<kind>" marks a
 spacing variant used right after an outline node of that kind, table "role" (schedule, grid, steps, targets,
-indicators) and "columns" (names of the unit cells) let an outline pick a table by role, table "fixedTexts" cells (step arrows) keep
+indicators) and "columns" (names of the unit cells) let an outline pick a table by role, table "headerRequired" makes an outline give
+its own header (the source's header names that document's subject), table "fixedTexts" cells (step arrows) keep
 their text and take no value, and table "holderLineSpacing" sets the holding line's spacing. Table "footerRows" keeps the source's last rows (a total or remarks
 row) once after the repeated units; its "footerLabels" cells (계) keep their text, the rest take outline values.
 A "block" part keeps a source range as it is (an irregular table, a paragraph with footnotes) and lists its texts,
@@ -363,7 +364,8 @@ def normalize_table(section, header_xml, spec):
                 **({'rowLabels': row_labels} if row_labels else {}),
                 role=spec.get('role', 'grid'), **({'columns': spec['columns']} if spec.get('columns') else {}),
                 **({'firstColumnPrefix': spec['firstColumnPrefix']} if spec.get('firstColumnPrefix') else {}),
-                **({'prefixColumn': spec['prefixColumn']} if spec.get('prefixColumn') else {}))
+                **({'prefixColumn': spec['prefixColumn']} if spec.get('prefixColumn') else {}),
+                **({'headerRequired': True} if spec.get('headerRequired') else {}))
 
 
 def blank_png():

@@ -42,7 +42,7 @@ $taskLauncher = Join-Path $taskSkillDir 'scripts/Invoke-HangulTask.ps1'
 
 ## 준비된 완성형 계획서 채우기
 
-계획서 작성은 [완성형 3종](template-selection.md#준비된-완성형-계획서) 중 적합한 하나를 고른 뒤 같은 ID의 [조립](#개요로-조립)을 쓴다. fill은 조립이 실패했을 때의 예비다. `SKILL_DIR`는 실제 hwpx 스킬 폴더이며 실행기는 이미 선택한 환경을 재사용한다.
+계획서·보고서 작성은 [조립 양식 6종](template-selection.md#조립-양식-고르기) 중 하나를 골라 [조립](#개요로-조립)한다. fill은 [완성형 준비본이 있는 3종](template-selection.md#준비된-완성형-계획서)(`plan-school`·`plan-education`·`plan-project`)에서 조립이 실패했을 때의 예비다. `SKILL_DIR`는 실제 hwpx 스킬 폴더이며 실행기는 이미 선택한 환경을 재사용한다.
 
 **구역 늘리기·빼기.** 양식 설명(`fill --template`)의 `sections`는 통째로 반복하거나 뺄 수 있는 구역이다(예: 활동 영역 ① 제목·목적·기간·대상·방법·내용). 내용의 영역 수만큼 `{"sections": {"activities": [영역1, 영역2, 영역3]}}`처럼 구역 입력을 영역마다 하나씩 준다. 복사된 구역의 원 숫자는 ①→②→③으로 이어지고, `heading`을 받는 구역은 제목 문구도 바꿀 수 있다. 빈 목록은 구역을 지우며(최소 개수가 0일 때), 구역 입력을 구역 밖 값과 중복해 주면 거부한다. **내용이 양식 칸보다 많으면 버리지 않는다.** 구역으로 늘리거나, 맞는 양식을 고르거나, 구조 편집으로 보완하고, 그래도 넣지 못한 내용은 사용자에게 알린다. 종합사업형은 과제가 요약·성과표와 연결돼 있어 구역 반복을 제공하지 않는다.
 
@@ -83,7 +83,7 @@ $planCatalog = Join-Path $taskSkillDir 'assets/document-templates/full-plans.jso
 - `heading` level 2는 1 아래, 3은 2 아래에만 둔다. "목적: …"처럼 이름표가 붙는 줄은 `item` 문구에 그대로 쓴다.
 - 문구는 줄바꿈·탭 없이 한 문단씩 넣는다. 빈 문구와 `[항목]` 같은 자리표시 문구는 거부한다.
 - 어느 노드든 `"pageBreakBefore": true`면 새 쪽에서 시작한다. 그 밖의 쪽 나눔은 한글이 정한다(분량을 늘리려고 쓰지 않는다).
-- 표지 항목은 `title`·`subtitle`·`date`·`organization`·`department`. 양식에 자리가 없는 항목은 버리지 않고 다른 자리에 붙는다(`substitutions`에 남는다). 필수는 `--describe`의 `cover.required`.
+- 표지 항목은 `title`·`subtitle`·`date`·`organization`·`department`. 양식에 자리가 없는 항목은 `--describe`의 `cover.carried`에 적힌 자리에 붙는다(`substitutions`에 남는다). `cover.inBody`에 나온 항목은 붙일 자리도 없어 표지에 주면 거부하므로 본문 `item`으로 쓴다. 필수는 `cover.required`.
 
 ### 공통 어휘
 
@@ -105,7 +105,7 @@ $planCatalog = Join-Path $taskSkillDir 'assets/document-templates/full-plans.jso
 
 - `"role"`로 고른다: `schedule`(일정·프로그램), `grid`(구분·내용), `steps`(가로 단계 흐름), `targets`(대상별 현황), `indicators`(과제별 성과지표). 같은 역할이 없으면 칸 수가 같은 반복 표가 대신하고, 없으면 표 목록을 알려 주며 거부한다. 한 양식에 같은 역할 표가 여럿이면 `"part"`로 고른다.
 - `rows`의 한 항목이 반복 묶음 하나(1~100개)이며, 칸은 `--describe`의 `columns` 순서로 `cells`개를 적는다. 칸 하나에 여러 문단은 `["가", "나"]`, 빈 칸은 `""`. 첫 칸이 기간인 표에 날짜를 둘째 칸에 넣으면 거부한다.
-- 제목 행은 선택 `"header"`로 바꾼다. 합계 줄이 있는 표(`footerCells`)는 `"footer"`에 값 칸만, 줄 이름이 정해진 고정 표(`rowLabels`)는 `"values":{"줄 이름":[값 칸]}`로 적는다.
+- 제목 행은 선택 `"header"`로 바꾼다. `--describe`에 `headerRequired`가 있는 표는 제목 행이 원본 문서의 낱말이라 `"header"`를 반드시 적는다(안 적으면 거부). 합계 줄이 있는 표(`footerCells`)는 `"footer"`에 값 칸만, 줄 이름이 정해진 고정 표(`rowLabels`)는 `"values":{"줄 이름":[값 칸]}`로 적는다.
 
 ### 양식별 차이
 
@@ -114,9 +114,9 @@ $planCatalog = Join-Path $taskSkillDir 'assets/document-templates/full-plans.jso
 | `plan-official` 공문서형 | 그라데이션 띠 표지 쪽 | 검은 네모 Ⅰ, 상자 번호 1. | `schedule`(기간·○업무·비고), `grid` | |
 | `plan-school` 학교형 | 표지 없음, 첫 쪽 제목 띠 | 번호 탭 1·2·3 | `steps`(4단계, 묶음 하나) | 장 앞에 □·❍로 근거·목적을 쓸 수 있다. 쪽 번호 없음 |
 | `plan-education` 교육사업형 | 표지 쪽 | 번호 탭 | `targets`(6칸) | 장 앞에 □·❍ 가능 |
-| `plan-project` 사업형 | 표지 쪽 | Ⅰ 띠, 번호 탭 1. | `grid`(3칸), `indicators` | 선택 `"summary":{"title":…,"nodes":[…]}`가 표지 다음 요약 쪽이 된다 |
-| `report-brief` 결과요약형 | 제목 띠(라벨 `subtitle` 4자 이내: 결과·보고 + `title`) | 없음(□가 맨 위) | `table1`(5칸 결과표), `table2`(구분·핵심 내용) | 1~2쪽, 쪽 번호 없음 |
-| `event-plan` 행사계획형 | 제목 띠(라벨 4자 이내: 안내·계획 + 제목) | 없음(□가 맨 위) | `schedule`(시간·내용·비고) | 일시·장소·참석자는 "(일시/장소) …" `item` |
+| `plan-project` 사업형 | 표지 쪽 | Ⅰ 띠, 번호 탭 1. | `grid`(3칸, `header` 필수), `indicators` | 선택 `"summary":{"title":…,"nodes":[…]}`가 표지 다음 요약 쪽이 된다 |
+| `report-brief` 결과요약형 | 제목 띠(라벨 `subtitle` 4자 이내: 결과·보고 + `title`) | 없음(□가 맨 위) | `table1`(5칸 결과표, `header` 필수), `table2`(구분·핵심 내용) | 1~2쪽, 쪽 번호 없음. 날짜·기관은 본문에 |
+| `event-plan` 행사계획형 | 제목 띠(라벨 4자 이내: 안내·계획 + 제목) | 없음(□가 맨 위) | `schedule`(시간·내용·비고) | 일시·장소·참석자·날짜·기관은 "(일시/장소) …" `item`. 부품이 □와 ○뿐이라 `dash`·`dot`·`note`도 ○로 그려진다. 세부는 한 ○ 문장에 담거나 표에 넣는다 |
 
 ### 결과 확인
 
@@ -126,7 +126,7 @@ $planCatalog = Join-Path $taskSkillDir 'assets/document-templates/full-plans.jso
 
 ## 준비된 양식 채우기
 
-현재 기본 목록은 `full-plans.json`의 완성형 계획서 3종이다. 위 fill 호출을 사용한다. 개인 양식은 해당 업무 폴더의 `--catalog`를 명시한다. 과거 블록 ID·합본은 기본 선택에서 제외한다.
+fill의 기본 목록은 `full-plans.json`의 완성형 준비본 3종이다(조립 양식 6종 중 `plan-school`·`plan-education`·`plan-project`). 위 fill 호출을 사용한다. 개인 양식은 해당 업무 폴더의 `--catalog`를 명시한다. 과거 블록 ID·합본은 기본 선택에서 제외한다.
 
 ## 내용 수정과 표 서식을 함께 적용
 
@@ -198,7 +198,7 @@ key는 해당 제목 열의 완전한 기존 셀 값이다. 순번을 추정하�
 
 반복해서 채울 위치가 확정되면 기존 편집 도구의 요청 파일과 원본 해시를 같은 업무 기록에 연결한다. 다음 실행은 새 값을 넣고 현재 revision으로 해당 도구의 inspect/analyze 검사를 거친다. 분석 캐시와 이전 성공은 새 결과의 출력 검증을 대신하지 않는다. 단순 일회성 치환에는 이 준비를 강제하지 않는다.
 
-구형 `.hwp`는 먼저 기존 변환 경로로 HWPX 사본을 만든다. 새 문서도 위의 양식 선택·채움·조합 흐름을 사용한다. [신규 생성 기능은 보류 기록](template-selection.md#신규-생성-기능--보류)으로 남기며 과거 `new`와 `schema new` 명령은 복구하지 않는다.
+구형 `.hwp`는 먼저 기존 변환 경로로 HWPX 사본을 만든다. 새 문서도 위의 양식 선택·채움·조합 흐름을 사용한다. 신규 생성 기능은 보류했으며 과거 `new`와 `schema new` 명령은 복구하지 않는다.
 
 ## 복합 편집을 선택된 런타임에서 실행
 
